@@ -1,0 +1,12 @@
+TODO
+* complete full path functions
+  - implement libbfio_path_get_full_path_wide
+  - POSIX: add support for absolute paths with x/../y
+* update include header
+* update man page
+* add tests
+* add msvscpp, borlandc5 and codegear files
+
+20120403
+* Worked on stand-alone version
+
