@@ -1,5 +1,5 @@
 /*
- * The internal definitions
+ * Error functions
  *
  * Copyright (c) 2008-2012, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -19,37 +19,57 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( LIBCPATH_INTERNAL_DEFINITIONS_H )
-#define LIBCPATH_INTERNAL_DEFINITIONS_H
+#if !defined( _LIBCPATH_INTERNAL_ERROR_H )
+#define _LIBCPATH_INTERNAL_ERROR_H
 
 #include <common.h>
 #include <types.h>
 
-/* Define HAVE_LOCAL_LIBCPATH for local use of libcpath
- */
+#include <stdio.h>
+
 #if !defined( HAVE_LOCAL_LIBCPATH )
-#include <libcpath/definitions.h>
+#include <libcpath/error.h>
+#endif
 
-/* The definitions in <libcpath/definitions.h> are copied here
- * for local use of libcpath
- */
-#else
+#include "libcpath_extern.h"
 
-#define LIBCPATH_VERSION			20120406
+#if defined( __cplusplus )
+extern "C" {
+#endif
 
-/* The libcstring version string
- */
-#define LIBCPATH_VERSION_STRING			"20120406"
+#if !defined( HAVE_LOCAL_LIBCPATH )
 
-#if defined( WINAPI )
-#define LIBCPATH_PATH_SEPARATOR			'\\'
+LIBCPATH_EXTERN \
+void libcpath_error_free(
+      libcpath_error_t **error );
 
-#else
-#define LIBCPATH_PATH_SEPARATOR			'/'
+LIBCPATH_EXTERN \
+int libcpath_error_fprint(
+     libcpath_error_t *error,
+     FILE *stream );
 
-#endif /* defined( WINAPI ) */
+LIBCPATH_EXTERN \
+int libcpath_error_sprint(
+     libcpath_error_t *error,
+     char *string,
+     size_t size );
+
+LIBCPATH_EXTERN \
+int libcpath_error_backtrace_fprint(
+     libcpath_error_t *error,
+     FILE *stream );
+
+LIBCPATH_EXTERN \
+int libcpath_error_backtrace_sprint(
+     libcpath_error_t *error,
+     char *string,
+     size_t size );
 
 #endif /* !defined( HAVE_LOCAL_LIBCPATH ) */
+
+#if defined( __cplusplus )
+}
+#endif
 
 #endif
 

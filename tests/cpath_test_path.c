@@ -1,5 +1,5 @@
 /*
- * Basic File IO (CPATH) library path testing program
+ * Cross-platform C path functions library path testing program
  *
  * Copyright (c) 2008-2012, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -30,24 +30,6 @@
 #include "cpath_test_libcerror.h"
 #include "cpath_test_libcpath.h"
 #include "cpath_test_libcstring.h"
-
-LIBCPATH_EXTERN \
-int libcpath_path_get_full_path(
-     const char *path,
-     size_t path_length,
-     char **full_path,
-     size_t *full_path_size,
-     libcerror_error_t **error );
-
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-LIBCPATH_EXTERN \
-int libcpath_path_get_full_path_wide(
-     const wchar_t *path,
-     size_t path_length,
-     wchar_t **full_path,
-     size_t *full_path_size,
-     libcerror_error_t **error );
-#endif
 
 /* The main program
  */

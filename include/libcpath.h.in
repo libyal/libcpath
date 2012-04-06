@@ -44,6 +44,50 @@ const char *libcpath_get_version(
              void );
 
 /* -------------------------------------------------------------------------
+ * Error functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees the error including elements
+ */
+LIBCPATH_EXTERN \
+void libcpath_error_free(
+      libcpath_error_t **error );
+
+/* Prints a descriptive string of the error to the stream
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_error_fprint(
+     libcpath_error_t *error,
+     FILE *stream );
+
+/* Prints a descriptive string of the error to the string
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_error_sprint(
+     libcpath_error_t *error,
+     char *string, 
+     size_t size );
+
+/* Prints a backtrace of the error to the stream
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_error_backtrace_fprint(
+     libcpath_error_t *error,
+     FILE *stream );
+
+/* Prints a backtrace of the error to the string
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_error_backtrace_sprint(
+     libcpath_error_t *error,
+     char *string,
+     size_t size );
+
+/* -------------------------------------------------------------------------
  * Path functions
  * ------------------------------------------------------------------------- */
 
@@ -53,7 +97,7 @@ const char *libcpath_get_version(
 LIBCPATH_EXTERN \
 int libcpath_path_change_directory(
      const char *directory_name,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Retrieves the current working directory
  * Returns 1 if successful or -1 on error
@@ -62,7 +106,7 @@ LIBCPATH_EXTERN \
 int libcpath_path_get_current_working_directory(
      char **current_working_directory,
      size_t *current_working_directory_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Determines the full path of the path specified
  * Returns 1 if succesful or -1 on error
@@ -73,7 +117,7 @@ int libcpath_path_get_full_path(
      size_t path_length,
      char **full_path,
      size_t *full_path_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Combines the directory name and filename into a path
  * Returns 1 if successful or -1 on error
@@ -86,7 +130,7 @@ int libcpath_path_join(
      size_t directory_name_length,
      const char *filename,
      size_t filename_length,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Makes the directory
  * Returns 1 if successful or -1 on error
@@ -94,7 +138,7 @@ int libcpath_path_join(
 LIBCPATH_EXTERN \
 int libcpath_path_make_directory(
      const char *directory_name,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Sanitizes the path
  * Returns 1 if successful or -1 on error
@@ -103,7 +147,7 @@ LIBCPATH_EXTERN \
 int libcpath_path_sanitize(
      char *path,
      size_t *path_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Sanitizes the filename
  * Returns 1 if successful or -1 on error
@@ -112,7 +156,7 @@ LIBCPATH_EXTERN \
 int libcpath_path_sanitize_filename(
      char *filename,
      size_t *filename_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
@@ -122,7 +166,7 @@ int libcpath_path_sanitize_filename(
 LIBCPATH_EXTERN \
 int libcpath_path_change_directory_wide(
      const wchar_t *directory_name,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Retrieves the current working directory
  * Returns 1 if successful or -1 on error
@@ -131,7 +175,7 @@ LIBCPATH_EXTERN \
 int libcpath_path_get_current_working_directory_wide(
      wchar_t **current_working_directory,
      size_t *current_working_directory_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Determines the full path of the path specified
  * Returns 1 if succesful or -1 on error
@@ -142,7 +186,7 @@ int libcpath_path_get_full_path_wide(
      size_t path_length,
      wchar_t **full_path,
      size_t *full_path_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Combines the directory name and filename into a path
  * Returns 1 if successful or -1 on error
@@ -155,7 +199,7 @@ int libcpath_path_join_wide(
      size_t directory_name_length,
      const wchar_t *filename,
      size_t filename_length,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Makes the directory
  * Returns 1 if successful or -1 on error
@@ -163,7 +207,7 @@ int libcpath_path_join_wide(
 LIBCPATH_EXTERN \
 int libcpath_path_make_directory_wide(
      const wchar_t *directory_name,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Sanitizes the path
  * Returns 1 if successful or -1 on error
@@ -172,7 +216,7 @@ LIBCPATH_EXTERN \
 int libcpath_path_sanitize_wide(
      wchar_t *path,
      size_t *path_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 /* Sanitizes the filename
  * Returns 1 if successful or -1 on error
@@ -181,7 +225,7 @@ LIBCPATH_EXTERN \
 int libcpath_path_sanitize_filename_wide(
      wchar_t *filename,
      size_t *filename_size,
-     libcerror_error_t **error );
+     libcpath_error_t **error );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 

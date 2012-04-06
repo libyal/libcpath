@@ -11,6 +11,7 @@ lib_LTLIBRARIES = libcpath.la
 libcpath_la_SOURCES = \
 	libcpath.c \
 	libcpath_definitions.h \
+	libcpath_error.c libcpath_error.h \
 	libcpath_extern.h \
 	libcpath_narrow_split_string.c libcpath_narrow_split_string.h \
 	libcpath_narrow_string.c libcpath_narrow_string.h \

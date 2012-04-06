@@ -144,28 +144,28 @@ typedef __int32	intptr_t;
 extern "C" {
 #endif
 
-#if ! 0 || ! HAVE_SIZE32_T
-#define HAVE_SIZE32_T
+#if ( !defined( HAVE_SIZE32_T ) && ! 0 ) || HAVE_SIZE32_T == 0
+#define HAVE_SIZE32_T	1
 typedef uint32_t size32_t;
 #endif
 
-#if ! 0 || ! HAVE_SSIZE32_T
-#define HAVE_SSIZE32_T
+#if ( !defined( HAVE_SSIZE32_T ) && ! 0 ) || HAVE_SSIZE32_T == 0
+#define HAVE_SSIZE32_T	1
 typedef int32_t ssize32_t;
 #endif
 
-#if ! 0 || ! HAVE_SIZE64_T
-#define HAVE_SIZE64_T
+#if ( !defined( HAVE_SIZE64_T ) && ! 0 ) || HAVE_SIZE64_T == 0
+#define HAVE_SIZE64_T	1
 typedef uint64_t size64_t;
 #endif
 
-#if ! 0 || ! HAVE_SSIZE64_T
-#define HAVE_SSIZE64_T
+#if ( !defined( HAVE_SSIZE64_T ) && ! 0 ) || HAVE_SSIZE64_T == 0
+#define HAVE_SSIZE64_T	1
 typedef int64_t ssize64_t;
 #endif
 
-#if ! 0 || ! HAVE_OFF64_T
-#define HAVE_OFF64_T
+#if ( !defined( HAVE_OFF64_T ) && ! 0 ) || HAVE_OFF64_T == 0
+#define HAVE_OFF64_T	1
 typedef int64_t off64_t;
 #endif
 

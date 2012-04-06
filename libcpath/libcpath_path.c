@@ -260,7 +260,7 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
-	if( GetCurrentDirectory(
+	if( GetCurrentDirectoryA(
 	     safe_current_working_directory_size,
 	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
 	{
@@ -474,7 +474,6 @@ int libcpath_path_get_full_path(
 	int last_used_path_segment_index                               = -1;
 	int path_number_of_segments                                    = 0;
 	int path_segment_index                                         = 0;
-	DWORD error_code                                               = 0;
 
 	if( path == NULL )
 	{
@@ -684,7 +683,8 @@ int libcpath_path_get_full_path(
 			change_volume_name[ volume_name_length ] = 0;
 
 			if( libcpath_path_change_directory(
-			     change_volume_name ) != 1 )
+			     change_volume_name,
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
@@ -717,7 +717,8 @@ int libcpath_path_get_full_path(
 		if( current_working_directory != NULL )
 		{
 			if( libcpath_path_change_directory(
-			     current_working_directory ) != 1 )
+			     current_working_directory,
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
@@ -2259,7 +2260,7 @@ int libcpath_path_join(
 
 		goto on_error;
 	}
-	if( libcstring_system_string_copy(
+	if( libcstring_narrow_string_copy(
 	     *path,
 	     directory_name,
 	     directory_name_length ) == NULL )
@@ -2277,7 +2278,7 @@ int libcpath_path_join(
 
 	( *path )[ path_index++ ] = (char) LIBCPATH_PATH_SEPARATOR;
 
-	if( libcstring_system_string_copy(
+	if( libcstring_narrow_string_copy(
 	     &( ( *path )[ path_index ] ),
 	     filename,
 	     filename_length ) == NULL )
@@ -2957,7 +2958,7 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
-	if( GetCurrentDirectory(
+	if( GetCurrentDirectoryW(
 	     safe_current_working_directory_size,
 	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
 	{
@@ -3304,7 +3305,6 @@ int libcpath_path_get_full_path_wide(
 	int last_used_path_segment_index                             = -1;
 	int path_number_of_segments                                  = 0;
 	int path_segment_index                                       = 0;
-	DWORD error_code                                             = 0;
 
 	if( path == NULL )
 	{
@@ -3514,7 +3514,8 @@ int libcpath_path_get_full_path_wide(
 			change_volume_name[ volume_name_length ] = 0;
 
 			if( libcpath_path_change_directory_wide(
-			     change_volume_name ) != 1 )
+			     change_volume_name,
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
@@ -3547,7 +3548,8 @@ int libcpath_path_get_full_path_wide(
 		if( current_working_directory != NULL )
 		{
 			if( libcpath_path_change_directory_wide(
-			     current_working_directory ) != 1 )
+			     current_working_directory,
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
@@ -5091,7 +5093,7 @@ int libcpath_path_join_wide(
 
 		goto on_error;
 	}
-	if( libcstring_system_string_copy(
+	if( libcstring_wide_string_copy(
 	     *path,
 	     directory_name,
 	     directory_name_length ) == NULL )
@@ -5109,7 +5111,7 @@ int libcpath_path_join_wide(
 
 	( *path )[ path_index++ ] = (wchar_t) LIBCPATH_PATH_SEPARATOR;
 
-	if( libcstring_system_string_copy(
+	if( libcstring_wide_string_copy(
 	     &( ( *path )[ path_index ] ),
 	     filename,
 	     filename_length ) == NULL )
@@ -5166,7 +5168,7 @@ int libcpath_path_make_directory_wide(
 
 		return( -1 );
 	}
-	if( CreateDirectory(
+	if( CreateDirectoryW(
 	     directory_name,
 	     NULL ) == 0 )
 	{
