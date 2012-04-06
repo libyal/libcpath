@@ -1,0 +1,61 @@
+#!/usr/bin/make -f
+# debian/rules that uses debhelper >= 7.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+
+%:
+	dh  $@
+
+install_libcpath:
+	# Set up libcpath package directories and files
+	mkdir -p debian/libcpath/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.so.*.*.* debian/libcpath/usr/lib
+
+install_libcpath_dev:
+	# Set up libcpath-dev package directories and files
+	mkdir -p debian/libcpath-dev/usr/include
+	mkdir -p debian/libcpath-dev/usr/include/libcpath
+	mkdir -p debian/libcpath-dev/usr/lib
+	mkdir -p debian/libcpath-dev/usr/lib/pkgconfig
+	mkdir -p debian/libcpath-dev/usr/share/man/man3
+	install -p -m755 debian/tmp/usr/include/*.h debian/libcpath-dev/usr/include
+	install -p -m755 debian/tmp/usr/include/libcpath/*.h debian/libcpath-dev/usr/include/libcpath
+	install -p -m755 debian/tmp/usr/lib/*.la debian/libcpath-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.a debian/libcpath-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.so debian/libcpath-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/pkgconfig/* debian/libcpath-dev/usr/lib/pkgconfig
+	install -p -m755 debian/tmp/usr/share/man/man3/* debian/libcpath-dev/usr/share/man/man3
+
+override_dh_installinit: install_libcpath install_libcpath_dev
+
+override_dh_installmenu:
+
+override_dh_installmime:
+
+override_dh_installmodules:
+
+override_dh_installlogcheck:
+
+override_dh_installlogrotate:
+
+override_dh_installpam:
+
+override_dh_installppp:
+
+override_dh_installudev:
+
+override_dh_installwm:
+
+override_dh_installxfonts:
+
+override_dh_gconf:
+
+override_dh_icons:
+
+override_dh_perl:
+

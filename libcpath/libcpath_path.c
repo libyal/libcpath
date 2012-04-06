@@ -173,6 +173,7 @@ int libcpath_path_change_directory(
 #if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
 
 /* Retrieves the current working directory
+ * This function uses the WINAPI function for Windows XP or later
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_current_working_directory(
@@ -2869,6 +2870,7 @@ on_error:
 #if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
 
 /* Retrieves the current working directory
+ * This function uses the WINAPI function for Windows XP or later
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_current_working_directory_wide(

@@ -43,6 +43,148 @@ LIBCPATH_EXTERN \
 const char *libcpath_get_version(
              void );
 
+/* -------------------------------------------------------------------------
+ * Path functions
+ * ------------------------------------------------------------------------- */
+
+/* Changes the directory
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_change_directory(
+     const char *directory_name,
+     libcerror_error_t **error );
+
+/* Retrieves the current working directory
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_current_working_directory(
+     char **current_working_directory,
+     size_t *current_working_directory_size,
+     libcerror_error_t **error );
+
+/* Determines the full path of the path specified
+ * Returns 1 if succesful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_full_path(
+     const char *path,
+     size_t path_length,
+     char **full_path,
+     size_t *full_path_size,
+     libcerror_error_t **error );
+
+/* Combines the directory name and filename into a path
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_join(
+     char **path,
+     size_t *path_size,
+     const char *directory_name,
+     size_t directory_name_length,
+     const char *filename,
+     size_t filename_length,
+     libcerror_error_t **error );
+
+/* Makes the directory
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_make_directory(
+     const char *directory_name,
+     libcerror_error_t **error );
+
+/* Sanitizes the path
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_sanitize(
+     char *path,
+     size_t *path_size,
+     libcerror_error_t **error );
+
+/* Sanitizes the filename
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_sanitize_filename(
+     char *filename,
+     size_t *filename_size,
+     libcerror_error_t **error );
+
+#if defined( HAVE_WIDE_CHARACTER_TYPE )
+
+/* Changes the directory
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_change_directory_wide(
+     const wchar_t *directory_name,
+     libcerror_error_t **error );
+
+/* Retrieves the current working directory
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_current_working_directory_wide(
+     wchar_t **current_working_directory,
+     size_t *current_working_directory_size,
+     libcerror_error_t **error );
+
+/* Determines the full path of the path specified
+ * Returns 1 if succesful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_full_path_wide(
+     const wchar_t *path,
+     size_t path_length,
+     wchar_t **full_path,
+     size_t *full_path_size,
+     libcerror_error_t **error );
+
+/* Combines the directory name and filename into a path
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_join_wide(
+     wchar_t **path,
+     size_t *path_size,
+     const wchar_t *directory_name,
+     size_t directory_name_length,
+     const wchar_t *filename,
+     size_t filename_length,
+     libcerror_error_t **error );
+
+/* Makes the directory
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_make_directory_wide(
+     const wchar_t *directory_name,
+     libcerror_error_t **error );
+
+/* Sanitizes the path
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_sanitize_wide(
+     wchar_t *path,
+     size_t *path_size,
+     libcerror_error_t **error );
+
+/* Sanitizes the filename
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_sanitize_filename_wide(
+     wchar_t *filename,
+     size_t *filename_size,
+     libcerror_error_t **error );
+
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
+
 #if defined( __cplusplus )
 }
 #endif
