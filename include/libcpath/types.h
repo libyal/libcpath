@@ -177,7 +177,7 @@ typedef int64_t off64_t;
 #elif defined( WINAPI )
 #include <wchar.h>
 
-#elif 0 || defined( HAVE_WCHAR_H )
+#elif 1 || defined( HAVE_WCHAR_H )
 
 /* __USE_UNIX98 is required to add swprintf definition
  */

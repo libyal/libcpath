@@ -37,6 +37,7 @@
 
 #include "libcpath_definitions.h"
 #include "libcpath_libcerror.h"
+#include "libcpath_libclocale.h"
 #include "libcpath_libcstring.h"
 #include "libcpath_libuna.h"
 #include "libcpath_narrow_split_string.h"
@@ -2706,7 +2707,7 @@ int libcpath_path_change_directory_wide(
 	directory_name_length = libcstring_wide_string_length(
 	                         directory_name );
 
-	if( libcstring_narrow_system_string_codepage == 0 )
+	if( libclocale_codepage == 0 )
 	{
 #if SIZEOF_WCHAR_T == 4
 		result = libuna_utf8_string_size_from_utf32(
@@ -2730,14 +2731,14 @@ int libcpath_path_change_directory_wide(
 		result = libuna_byte_stream_size_from_utf32(
 		          (libuna_utf32_character_t *) directory_name,
 		          directory_name_length + 1,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          &narrow_directory_name_size,
 		          error );
 #elif SIZEOF_WCHAR_T == 2
 		result = libuna_byte_stream_size_from_utf16(
 		          (libuna_utf16_character_t *) directory_name,
 		          directory_name_length + 1,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          &narrow_directory_name_size,
 		          error );
 #else
@@ -2781,7 +2782,7 @@ int libcpath_path_change_directory_wide(
 
 		goto on_error;
 	}
-	if( libcstring_narrow_system_string_codepage == 0 )
+	if( libclocale_codepage == 0 )
 	{
 #if SIZEOF_WCHAR_T == 4
 		result = libuna_utf8_string_copy_from_utf32(
@@ -2807,7 +2808,7 @@ int libcpath_path_change_directory_wide(
 		result = libuna_byte_stream_copy_from_utf32(
 		          (uint8_t *) narrow_directory_name,
 		          narrow_directory_name_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          (libuna_utf32_character_t *) directory_name,
 		          directory_name_length + 1,
 		          error );
@@ -2815,7 +2816,7 @@ int libcpath_path_change_directory_wide(
 		result = libuna_byte_stream_copy_from_utf16(
 		          (uint8_t *) narrow_directory_name,
 		          narrow_directory_name_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          (libuna_utf16_character_t *) directory_name,
 		          directory_name_length + 1,
 		          error );
@@ -3084,7 +3085,7 @@ int libcpath_path_get_current_working_directory_wide(
 	/* Convert the current working directory to a wide string
 	 * if the platform has no wide character open function
 	 */
-	if( libcstring_narrow_system_string_codepage == 0 )
+	if( libclocale_codepage == 0 )
 	{
 #if SIZEOF_WCHAR_T == 4
 		result = libuna_utf32_string_size_from_utf8(
@@ -3108,14 +3109,14 @@ int libcpath_path_get_current_working_directory_wide(
 		result = libuna_utf32_string_size_from_byte_stream(
 		          (uint8_t *) narrow_current_working_directory,
 		          narrow_current_working_directory_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          current_working_directory_size,
 		          error );
 #elif SIZEOF_WCHAR_T == 2
 		result = libuna_utf16_string_size_from_byte_stream(
 		          (uint8_t *) narrow_current_working_directory,
 		          narrow_current_working_directory_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          current_working_directory_size,
 		          error );
 #else
@@ -3165,7 +3166,7 @@ int libcpath_path_get_current_working_directory_wide(
 		goto on_error;
 	}
 #else
-	if( libcstring_narrow_system_string_codepage == 0 )
+	if( libclocale_codepage == 0 )
 	{
 #if SIZEOF_WCHAR_T == 4
 		result = libuna_utf32_string_copy_from_utf8(
@@ -3193,7 +3194,7 @@ int libcpath_path_get_current_working_directory_wide(
 		          *current_working_directory_size,
 		          (uint8_t *) narrow_current_working_directory,
 		          narrow_current_working_directory_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          error );
 #elif SIZEOF_WCHAR_T == 2
 		result = libuna_utf16_string_copy_from_byte_stream(
@@ -3201,7 +3202,7 @@ int libcpath_path_get_current_working_directory_wide(
 		          *current_working_directory_size,
 		          (uint8_t *) narrow_current_working_directory,
 		          narrow_current_working_directory_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          error );
 #else
 #error Unsupported size of wchar_t
@@ -5241,7 +5242,7 @@ int libcpath_path_make_directory_wide(
 	directory_name_length = libcstring_wide_string_length(
 	                         directory_name );
 
-	if( libcstring_narrow_system_string_codepage == 0 )
+	if( libclocale_codepage == 0 )
 	{
 #if SIZEOF_WCHAR_T == 4
 		result = libuna_utf8_string_size_from_utf32(
@@ -5265,14 +5266,14 @@ int libcpath_path_make_directory_wide(
 		result = libuna_byte_stream_size_from_utf32(
 		          (libuna_utf32_character_t *) directory_name,
 		          directory_name_length + 1,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          &narrow_directory_name_size,
 		          error );
 #elif SIZEOF_WCHAR_T == 2
 		result = libuna_byte_stream_size_from_utf16(
 		          (libuna_utf16_character_t *) directory_name,
 		          directory_name_length + 1,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          &narrow_directory_name_size,
 		          error );
 #else
@@ -5316,7 +5317,7 @@ int libcpath_path_make_directory_wide(
 
 		goto on_error;
 	}
-	if( libcstring_narrow_system_string_codepage == 0 )
+	if( libclocale_codepage == 0 )
 	{
 #if SIZEOF_WCHAR_T == 4
 		result = libuna_utf8_string_copy_from_utf32(
@@ -5342,7 +5343,7 @@ int libcpath_path_make_directory_wide(
 		result = libuna_byte_stream_copy_from_utf32(
 		          (uint8_t *) narrow_directory_name,
 		          narrow_directory_name_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          (libuna_utf32_character_t *) directory_name,
 		          directory_name_length + 1,
 		          error );
@@ -5350,7 +5351,7 @@ int libcpath_path_make_directory_wide(
 		result = libuna_byte_stream_copy_from_utf16(
 		          (uint8_t *) narrow_directory_name,
 		          narrow_directory_name_size,
-		          libcstring_narrow_system_string_codepage,
+		          libclocale_codepage,
 		          (libuna_utf16_character_t *) directory_name,
 		          directory_name_length + 1,
 		          error );

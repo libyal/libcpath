@@ -3,6 +3,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/common \
 	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
+	@LIBCLOCALE_CPPFLAGS@ \
 	@LIBUNA_CPPFLAGS@ \
 	@MEMWATCH_CPPFLAGS@
 
@@ -17,6 +18,7 @@ libcpath_la_SOURCES = \
 	libcpath_narrow_string.c libcpath_narrow_string.h \
 	libcpath_path.c libcpath_path.h \
 	libcpath_libcerror.h \
+	libcpath_libclocale.h \
 	libcpath_libcstring.h \
 	libcpath_libuna.h \
 	libcpath_support.c libcpath_support.h \
@@ -28,6 +30,7 @@ libcpath_la_SOURCES = \
 libcpath_la_LIBADD  = \
 	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
 	@LIBUNA_LIBADD@
 
 libcpath_la_LDFLAGS = -no-undefined -version-info 1:0:0

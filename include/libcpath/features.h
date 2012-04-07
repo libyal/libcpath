@@ -24,7 +24,7 @@
 
 /* The libcpath type support features
  */
-#if defined( WINAPI ) || 0
+#if defined( WINAPI ) || 1
 #define LIBCPATH_HAVE_WIDE_CHARACTER_TYPE	1
 #endif
 
