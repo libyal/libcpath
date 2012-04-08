@@ -42,10 +42,10 @@
 #define LIBCPATH_VERSION_STRING			"20120408"
 
 #if defined( WINAPI )
-#define LIBCPATH_SEPARATOR			'\\'
+#define LIBCPATH_PATH_SEPARATOR			'\\'
 
 #else
-#define LIBCPATH_SEPARATOR			'/'
+#define LIBCPATH_PATH_SEPARATOR			'/'
 
 #endif /* defined( WINAPI ) */
 
