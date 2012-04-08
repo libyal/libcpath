@@ -25,13 +25,15 @@
 #include <common.h>
 #include <types.h>
 
+#include "libcpath_extern.h"
 #include "libcpath_libcerror.h"
-#include "libcpath_narrow_split_string.h"
+#include "libcpath_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
+LIBCPATH_EXTERN \
 int libcpath_narrow_string_split(
      const char *string,
      size_t string_size,

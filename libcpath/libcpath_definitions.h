@@ -35,17 +35,17 @@
  */
 #else
 
-#define LIBCPATH_VERSION			20120407
+#define LIBCPATH_VERSION			20120408
 
 /* The libcstring version string
  */
-#define LIBCPATH_VERSION_STRING			"20120407"
+#define LIBCPATH_VERSION_STRING			"20120408"
 
 #if defined( WINAPI )
-#define LIBCPATH_PATH_SEPARATOR			'\\'
+#define LIBCPATH_SEPARATOR			'\\'
 
 #else
-#define LIBCPATH_PATH_SEPARATOR			'/'
+#define LIBCPATH_SEPARATOR			'/'
 
 #endif /* defined( WINAPI ) */
 

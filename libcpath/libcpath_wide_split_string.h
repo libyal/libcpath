@@ -19,13 +19,15 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBCPATH_WIDE_SPLIT_STRING_H )
-#define _LIBCPATH_WIDE_SPLIT_STRING_H
+#if !defined( _LIBCPATH_INTERNAL_WIDE_SPLIT_STRING_H )
+#define _LIBCPATH_INTERNAL_WIDE_SPLIT_STRING_H
 
 #include <common.h>
 #include <types.h>
 
+#include "libcpath_extern.h"
 #include "libcpath_libcerror.h"
+#include "libcpath_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -33,9 +35,9 @@ extern "C" {
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-typedef struct libcpath_wide_split_string libcpath_wide_split_string_t;
+typedef struct libcpath_internal_wide_split_string libcpath_internal_wide_split_string_t;
 
-struct libcpath_wide_split_string
+struct libcpath_internal_wide_split_string
 {
 	/* The number of string segments
 	 */

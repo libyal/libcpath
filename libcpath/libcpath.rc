@@ -22,12 +22,12 @@ BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "FileDescription",		"Library to support cross-platform C error functions\0"
-      VALUE "FileVersion",		"20120407" "\0"
+      VALUE "FileVersion",		"20120408" "\0"
       VALUE "InternalName",		"libcpath.dll\0"
       VALUE "LegalCopyright",		"(c) 2008-2012 Joachim Metz <jbmetz@users.sourceforge.net>\0"
       VALUE "OriginalFilename",		"libcpath.dll\0"
       VALUE "ProductName",		"libcpath\0"
-      VALUE "ProductVersion",		"20120407" "\0"
+      VALUE "ProductVersion",		"20120408" "\0"
       VALUE "Comments",			"For more information visit http://libctype.sourceforge.net\0"
     END
   END

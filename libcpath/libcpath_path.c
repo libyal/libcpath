@@ -47,20 +47,20 @@
 #include "libcpath_wide_string.h"
 
 #if defined( WINAPI )
-enum LIBCPATH_PATH_TYPES
+enum LIBCPATH_TYPES
 {
-	LIBCPATH_PATH_TYPE_ABSOLUTE,
-	LIBCPATH_PATH_TYPE_DEVICE,
-	LIBCPATH_PATH_TYPE_EXTENDED_LENGTH,
-	LIBCPATH_PATH_TYPE_RELATIVE,
-	LIBCPATH_PATH_TYPE_UNC
+	LIBCPATH_TYPE_ABSOLUTE,
+	LIBCPATH_TYPE_DEVICE,
+	LIBCPATH_TYPE_EXTENDED_LENGTH,
+	LIBCPATH_TYPE_RELATIVE,
+	LIBCPATH_TYPE_UNC
 };
 
 #else
-enum LIBCPATH_PATH_TYPES
+enum LIBCPATH_TYPES
 {
-	LIBCPATH_PATH_TYPE_ABSOLUTE,
-	LIBCPATH_PATH_TYPE_RELATIVE
+	LIBCPATH_TYPE_ABSOLUTE,
+	LIBCPATH_TYPE_RELATIVE
 };
 
 #endif
@@ -468,7 +468,7 @@ int libcpath_path_get_full_path(
 	size_t path_string_segment_size                                = 0;
 	size_t share_name_index                                        = 0;
 	size_t volume_name_length                                      = 0;
-	uint8_t path_type                                              = LIBCPATH_PATH_TYPE_RELATIVE;
+	uint8_t path_type                                              = LIBCPATH_TYPE_RELATIVE;
 	int current_directory_number_of_segments                       = 0;
 	int current_directory_segment_index                            = 0;
 	int error_abort                                                = 0;
@@ -559,7 +559,7 @@ int libcpath_path_get_full_path(
 			if( ( path_length >= 3 )
 			 && ( path[ 2 ] == '\\' ) )
 			{
-				path_type                  = LIBCPATH_PATH_TYPE_ABSOLUTE;
+				path_type                  = LIBCPATH_TYPE_ABSOLUTE;
 				path_directory_name_index += 1;
 			}
 		}
@@ -580,11 +580,11 @@ int libcpath_path_get_full_path(
 			{
 				if( path[ 2 ] == '.' )
 				{
-					path_type = LIBCPATH_PATH_TYPE_DEVICE;
+					path_type = LIBCPATH_TYPE_DEVICE;
 				}
 				else
 				{
-					path_type = LIBCPATH_PATH_TYPE_EXTENDED_LENGTH;
+					path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
 				}
 			}
 			else
@@ -621,7 +621,7 @@ int libcpath_path_get_full_path(
 						break;
 					}
 				}
-				path_type          = LIBCPATH_PATH_TYPE_UNC;
+				path_type          = LIBCPATH_TYPE_UNC;
 				volume_name        = &( path[ 2 ] );
 				volume_name_length = path_directory_name_index - 2;
 			}
@@ -630,9 +630,9 @@ int libcpath_path_get_full_path(
 	/* If the path is a device path, an extended-length path or an UNC
 	 * do not bother to lookup the current directory
 	 */
-	if( ( path_type != LIBCPATH_PATH_TYPE_DEVICE )
-	 && ( path_type != LIBCPATH_PATH_TYPE_EXTENDED_LENGTH )
-	 && ( path_type != LIBCPATH_PATH_TYPE_UNC ) )
+	if( ( path_type != LIBCPATH_TYPE_DEVICE )
+	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH )
+	 && ( path_type != LIBCPATH_TYPE_UNC ) )
 	{
 		/* If the path contains a volume name switch to that
 		 * volume to determine the current directory
@@ -891,7 +891,7 @@ int libcpath_path_get_full_path(
 	 * add the size of the current directory
 	 * a directory separator, if necessary
 	 */
-	if( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	if( path_type == LIBCPATH_TYPE_RELATIVE )
 	{
 		*full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
 
@@ -1201,7 +1201,7 @@ int libcpath_path_get_full_path(
 
 		goto on_error;
 	}
-	if( path_type == LIBCPATH_PATH_TYPE_DEVICE )
+	if( path_type == LIBCPATH_TYPE_DEVICE )
 	{
 		full_path_prefix        = "\\\\.\\";
 		full_path_prefix_length = 4;
@@ -1272,7 +1272,7 @@ int libcpath_path_get_full_path(
 	/* If the path is relative
 	 * add the current directory elements
 	 */
-	if( ( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
 	 && ( current_directory_split_string != NULL ) )
 	{
 		for( current_directory_segment_index = 0;
@@ -1499,7 +1499,7 @@ int libcpath_path_get_full_path(
 	size_t full_path_index                                         = 0;
 	size_t last_used_path_string_segment_size                      = 0;
 	size_t path_string_segment_size                                = 0;
-	uint8_t path_type                                              = LIBCPATH_PATH_TYPE_RELATIVE;
+	uint8_t path_type                                              = LIBCPATH_TYPE_RELATIVE;
 	int current_directory_number_of_segments                       = 0;
 	int current_directory_segment_index                            = 0;
 	int last_used_path_segment_index                               = -1;
@@ -1574,7 +1574,7 @@ int libcpath_path_get_full_path(
 	}
 	if( path[ 0 ] == '/' )
 	{
-		path_type = LIBCPATH_PATH_TYPE_ABSOLUTE;
+		path_type = LIBCPATH_TYPE_ABSOLUTE;
 	}
 	else
 	{
@@ -1634,7 +1634,7 @@ int libcpath_path_get_full_path(
 	/* If the path is absolute
 	 * a directory separator
 	 */
-	if( path_type == LIBCPATH_PATH_TYPE_ABSOLUTE )
+	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
 		*full_path_size = 1;
 	}
@@ -1642,7 +1642,7 @@ int libcpath_path_get_full_path(
 	 * add the size of the current directory
 	 * a directory separator, if necessary
 	 */
-	else if( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	else if( path_type == LIBCPATH_TYPE_RELATIVE )
 	{
 		*full_path_size = current_directory_size - 1;
 
@@ -1952,7 +1952,7 @@ int libcpath_path_get_full_path(
 
 		goto on_error;
 	}
-	if( path_type == LIBCPATH_PATH_TYPE_ABSOLUTE )
+	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
 		( *full_path )[ full_path_index ] = '/';
 
@@ -1961,7 +1961,7 @@ int libcpath_path_get_full_path(
 	/* If the path is relative
 	 * add the current directory elements
 	 */
-	if( ( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
 	 && ( current_directory_split_string != NULL ) )
 	{
 		for( current_directory_segment_index = 0;
@@ -2243,7 +2243,7 @@ int libcpath_path_join(
 	}
 	*path_size = directory_name_length + filename_length + 1;
 
-	if( directory_name[ directory_name_length ] != (char) LIBCPATH_PATH_SEPARATOR )
+	if( directory_name[ directory_name_length ] != (char) LIBCPATH_SEPARATOR )
 	{
 		*path_size += 1;
 	}
@@ -2277,7 +2277,7 @@ int libcpath_path_join(
 	}
 	path_index = directory_name_length;
 
-	( *path )[ path_index++ ] = (char) LIBCPATH_PATH_SEPARATOR;
+	( *path )[ path_index++ ] = (char) LIBCPATH_SEPARATOR;
 
 	if( libcstring_narrow_string_copy(
 	     &( ( *path )[ path_index ] ),
@@ -3299,7 +3299,7 @@ int libcpath_path_get_full_path_wide(
 	size_t path_string_segment_size                              = 0;
 	size_t share_name_index                                      = 0;
 	size_t volume_name_length                                    = 0;
-	uint8_t path_type                                            = LIBCPATH_PATH_TYPE_RELATIVE;
+	uint8_t path_type                                            = LIBCPATH_TYPE_RELATIVE;
 	int current_directory_number_of_segments                     = 0;
 	int current_directory_segment_index                          = 0;
 	int error_abort                                              = 0;
@@ -3390,7 +3390,7 @@ int libcpath_path_get_full_path_wide(
 			if( ( path_length >= 3 )
 			 && ( path[ 2 ] == (wchar_t) '\\' ) )
 			{
-				path_type                  = LIBCPATH_PATH_TYPE_ABSOLUTE;
+				path_type                  = LIBCPATH_TYPE_ABSOLUTE;
 				path_directory_name_index += 1;
 			}
 		}
@@ -3411,11 +3411,11 @@ int libcpath_path_get_full_path_wide(
 			{
 				if( path[ 2 ] == (wchar_t) '.' )
 				{
-					path_type = LIBCPATH_PATH_TYPE_DEVICE;
+					path_type = LIBCPATH_TYPE_DEVICE;
 				}
 				else
 				{
-					path_type = LIBCPATH_PATH_TYPE_EXTENDED_LENGTH;
+					path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
 				}
 			}
 			else
@@ -3452,7 +3452,7 @@ int libcpath_path_get_full_path_wide(
 						break;
 					}
 				}
-				path_type          = LIBCPATH_PATH_TYPE_UNC;
+				path_type          = LIBCPATH_TYPE_UNC;
 				volume_name        = &( path[ 2 ] );
 				volume_name_length = path_directory_name_index - 2;
 			}
@@ -3461,9 +3461,9 @@ int libcpath_path_get_full_path_wide(
 	/* If the path is a device path, an extended-length path or an UNC
 	 * do not bother to lookup the current directory
 	 */
-	if( ( path_type != LIBCPATH_PATH_TYPE_DEVICE )
-	 && ( path_type != LIBCPATH_PATH_TYPE_EXTENDED_LENGTH )
-	 && ( path_type != LIBCPATH_PATH_TYPE_UNC ) )
+	if( ( path_type != LIBCPATH_TYPE_DEVICE )
+	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH )
+	 && ( path_type != LIBCPATH_TYPE_UNC ) )
 	{
 		/* If the path contains a volume name switch to that
 		 * volume to determine the current directory
@@ -3724,7 +3724,7 @@ int libcpath_path_get_full_path_wide(
 	 * add the size of the current directory
 	 * a directory separator, if necessary
 	 */
-	if( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	if( path_type == LIBCPATH_TYPE_RELATIVE )
 	{
 		*full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
 
@@ -4034,7 +4034,7 @@ int libcpath_path_get_full_path_wide(
 
 		goto on_error;
 	}
-	if( path_type == LIBCPATH_PATH_TYPE_DEVICE )
+	if( path_type == LIBCPATH_TYPE_DEVICE )
 	{
 		full_path_prefix        = L"\\\\.\\";
 		full_path_prefix_length = 4;
@@ -4105,7 +4105,7 @@ int libcpath_path_get_full_path_wide(
 	/* If the path is relative
 	 * add the current directory elements
 	 */
-	if( ( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
 	 && ( current_directory_split_string != NULL ) )
 	{
 		for( current_directory_segment_index = 0;
@@ -4332,7 +4332,7 @@ int libcpath_path_get_full_path_wide(
 	size_t full_path_index                                       = 0;
 	size_t last_used_path_string_segment_size                    = 0;
 	size_t path_string_segment_size                              = 0;
-	uint8_t path_type                                            = LIBCPATH_PATH_TYPE_RELATIVE;
+	uint8_t path_type                                            = LIBCPATH_TYPE_RELATIVE;
 	int current_directory_number_of_segments                     = 0;
 	int current_directory_segment_index                          = 0;
 	int last_used_path_segment_index                             = -1;
@@ -4407,7 +4407,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( path[ 0 ] == (wchar_t) '/' )
 	{
-		path_type = LIBCPATH_PATH_TYPE_ABSOLUTE;
+		path_type = LIBCPATH_TYPE_ABSOLUTE;
 	}
 	else
 	{
@@ -4467,7 +4467,7 @@ int libcpath_path_get_full_path_wide(
 	/* If the path is absolute
 	 * a directory separator
 	 */
-	if( path_type == LIBCPATH_PATH_TYPE_ABSOLUTE )
+	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
 		*full_path_size = 1;
 	}
@@ -4475,7 +4475,7 @@ int libcpath_path_get_full_path_wide(
 	 * add the size of the current directory
 	 * a directory separator, if necessary
 	 */
-	else if( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	else if( path_type == LIBCPATH_TYPE_RELATIVE )
 	{
 		*full_path_size = current_directory_size - 1;
 
@@ -4785,7 +4785,7 @@ int libcpath_path_get_full_path_wide(
 
 		goto on_error;
 	}
-	if( path_type == LIBCPATH_PATH_TYPE_ABSOLUTE )
+	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
 		( *full_path )[ full_path_index ] = (wchar_t) '/';
 
@@ -4794,7 +4794,7 @@ int libcpath_path_get_full_path_wide(
 	/* If the path is relative
 	 * add the current directory elements
 	 */
-	if( ( path_type == LIBCPATH_PATH_TYPE_RELATIVE )
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
 	 && ( current_directory_split_string != NULL ) )
 	{
 		for( current_directory_segment_index = 0;
@@ -5076,7 +5076,7 @@ int libcpath_path_join_wide(
 	}
 	*path_size = directory_name_length + filename_length + 1;
 
-	if( directory_name[ directory_name_length ] != (wchar_t) LIBCPATH_PATH_SEPARATOR )
+	if( directory_name[ directory_name_length ] != (wchar_t) LIBCPATH_SEPARATOR )
 	{
 		*path_size += 1;
 	}
@@ -5110,7 +5110,7 @@ int libcpath_path_join_wide(
 	}
 	path_index = directory_name_length;
 
-	( *path )[ path_index++ ] = (wchar_t) LIBCPATH_PATH_SEPARATOR;
+	( *path )[ path_index++ ] = (wchar_t) LIBCPATH_SEPARATOR;
 
 	if( libcstring_wide_string_copy(
 	     &( ( *path )[ path_index ] ),

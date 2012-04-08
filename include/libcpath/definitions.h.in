@@ -31,10 +31,10 @@
 #define LIBCPATH_VERSION_STRING			"@VERSION@"
 
 #if defined( WINAPI )
-#define LIBCPATH_PATH_SEPARATOR			'\\'
+#define LIBCPATH_SEPARATOR			'\\'
 
 #else
-#define LIBCPATH_PATH_SEPARATOR			'/'
+#define LIBCPATH_SEPARATOR			'/'
 
 #endif /* defined( WINAPI ) */
 

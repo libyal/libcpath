@@ -19,21 +19,23 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBCPATH_NARROW_SPLIT_STRING_H )
-#define _LIBCPATH_NARROW_SPLIT_STRING_H
+#if !defined( _LIBCPATH_INTERNAL_NARROW_SPLIT_STRING_H )
+#define _LIBCPATH_INTERNAL_NARROW_SPLIT_STRING_H
 
 #include <common.h>
 #include <types.h>
 
+#include "libcpath_extern.h"
 #include "libcpath_libcerror.h"
+#include "libcpath_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libcpath_narrow_split_string libcpath_narrow_split_string_t;
+typedef struct libcpath_internal_narrow_split_string libcpath_internal_narrow_split_string_t;
 
-struct libcpath_narrow_split_string
+struct libcpath_internal_narrow_split_string
 {
 	/* The number of string segments
 	 */
@@ -63,21 +65,25 @@ int libcpath_narrow_split_string_initialize(
      int number_of_segments,
      libcerror_error_t **error );
 
+LIBCPATH_EXTERN \
 int libcpath_narrow_split_string_free(
      libcpath_narrow_split_string_t **split_string,
      libcerror_error_t **error );
 
+LIBCPATH_EXTERN \
 int libcpath_narrow_split_string_get_string(
      libcpath_narrow_split_string_t *split_string,
      char **string,
      size_t *string_size,
      libcerror_error_t **error );
 
+LIBCPATH_EXTERN \
 int libcpath_narrow_split_string_get_number_of_segments(
      libcpath_narrow_split_string_t *split_string,
      int *number_of_segments,
      libcerror_error_t **error );
 
+LIBCPATH_EXTERN \
 int libcpath_narrow_split_string_get_segment_by_index(
      libcpath_narrow_split_string_t *split_string,
      int segment_index,
@@ -85,6 +91,7 @@ int libcpath_narrow_split_string_get_segment_by_index(
      size_t *string_segment_size,
      libcerror_error_t **error );
 
+LIBCPATH_EXTERN \
 int libcpath_narrow_split_string_set_segment_by_index(
      libcpath_narrow_split_string_t *split_string,
      int segment_index,

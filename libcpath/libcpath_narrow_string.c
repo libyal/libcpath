@@ -25,6 +25,7 @@
 #include "libcpath_libcerror.h"
 #include "libcpath_narrow_split_string.h"
 #include "libcpath_narrow_string.h"
+#include "libcpath_types.h"
 
 /* Splits a narrow character string
  * Returns 1 if successful or -1 on error
@@ -273,11 +274,11 @@ int libcpath_narrow_string_split(
 		{
 			break;
 		}
-		if( segment_end == ( *split_string )->string )
+		if( segment_end == ( (libcpath_internal_narrow_split_string_t *) *split_string )->string )
 		{
 			segment_start++;
 		}
-		if( segment_end != ( *split_string )->string )
+		if( segment_end != ( (libcpath_internal_narrow_split_string_t *) *split_string )->string )
 		{
 			segment_start = segment_end + 1;
 		}

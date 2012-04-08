@@ -25,6 +25,7 @@
 #include "libcpath_libcerror.h"
 #include "libcpath_wide_split_string.h"
 #include "libcpath_wide_string.h"
+#include "libcpath_types.h"
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
@@ -275,11 +276,11 @@ int libcpath_wide_string_split(
 		{
 			break;
 		}
-		if( segment_end == ( *split_string )->string )
+		if( segment_end == ( (libcpath_internal_wide_split_string_t *) *split_string )->string )
 		{
 			segment_start++;
 		}
-		if( segment_end != ( *split_string )->string )
+		if( segment_end != ( (libcpath_internal_wide_split_string_t *) *split_string )->string )
 		{
 			segment_start = segment_end + 1;
 		}

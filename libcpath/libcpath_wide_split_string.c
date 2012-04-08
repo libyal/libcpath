@@ -26,6 +26,7 @@
 #include "libcpath_libcerror.h"
 #include "libcpath_libcstring.h"
 #include "libcpath_wide_split_string.h"
+#include "libcpath_types.h"
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
@@ -39,7 +40,8 @@ int libcpath_wide_split_string_initialize(
      int number_of_segments,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_wide_split_string_initialize";
+	libcpath_internal_wide_split_string_t *internal_split_string = NULL;
+	static char *function                                        = "libcpath_wide_split_string_initialize";
 
 	if( split_string == NULL )
 	{
@@ -52,17 +54,6 @@ int libcpath_wide_split_string_initialize(
 
 		return( 1 );
 	}
-	if( number_of_segments < 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_LESS_THAN_ZERO,
-		 "%s: invalid number of segments less than zero.",
-		 function );
-
-		return( -1 );
-	}
 	if( *split_string != NULL )
 	{
 		libcerror_error_set(
@@ -74,10 +65,21 @@ int libcpath_wide_split_string_initialize(
 
 		return( -1 );
 	}
-	*split_string = memory_allocate_structure(
-	                 libcpath_wide_split_string_t );
+	if( number_of_segments < 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_LESS_THAN_ZERO,
+		 "%s: invalid number of segments less than zero.",
+		 function );
 
-	if( *split_string == NULL )
+		return( -1 );
+	}
+	internal_split_string = memory_allocate_structure(
+			         libcpath_internal_wide_split_string_t );
+
+	if( internal_split_string == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -89,9 +91,9 @@ int libcpath_wide_split_string_initialize(
 		goto on_error;
 	}
 	if( memory_set(
-	     *split_string,
+	     internal_split_string,
 	     0,
-	     sizeof( libcpath_wide_split_string_t ) ) == NULL )
+	     sizeof( libcpath_internal_wide_split_string_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -101,19 +103,17 @@ int libcpath_wide_split_string_initialize(
 		 function );
 
 		memory_free(
-		 *split_string );
-
-		*split_string = NULL;
+		 internal_split_string );
 
 		return( -1 );
 	}
 	if( ( string != NULL )
 	 && ( string_size > 0 ) )
 	{
-		( *split_string )->string = libcstring_wide_string_allocate(
-		                             string_size );
+		internal_split_string->string = libcstring_wide_string_allocate(
+		                                 string_size );
 
-		if( ( *split_string )->string == NULL )
+		if( internal_split_string->string == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -125,7 +125,7 @@ int libcpath_wide_split_string_initialize(
 			goto on_error;
 		}
 		if( memory_copy(
-		     ( *split_string )->string,
+		     internal_split_string->string,
 		     string,
 		     sizeof( wchar_t ) * ( string_size - 1 ) ) == NULL )
 		{
@@ -138,15 +138,15 @@ int libcpath_wide_split_string_initialize(
 
 			goto on_error;
 		}
-		( *split_string )->string[ string_size - 1 ] = 0;
-		( *split_string )->string_size               = string_size;
+		internal_split_string->string[ string_size - 1 ] = 0;
+		internal_split_string->string_size               = string_size;
 	}
 	if( number_of_segments > 0 )
 	{
-		( *split_string )->segments = (wchar_t **) memory_allocate(
-		                                            sizeof( wchar_t * ) * number_of_segments );
+		internal_split_string->segments = (wchar_t **) memory_allocate(
+		                                                sizeof( wchar_t * ) * number_of_segments );
 
-		if( ( *split_string )->segments == NULL )
+		if( internal_split_string->segments == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -158,7 +158,7 @@ int libcpath_wide_split_string_initialize(
 			goto on_error;
 		}
 		if( memory_set(
-		     ( *split_string )->segments,
+		     internal_split_string->segments,
 		     0,
 		     sizeof( wchar_t * ) * number_of_segments ) == NULL )
 		{
@@ -171,10 +171,10 @@ int libcpath_wide_split_string_initialize(
 
 			goto on_error;
 		}
-		( *split_string )->segment_sizes = (size_t *) memory_allocate(
-		                                               sizeof( size_t ) * number_of_segments );
+		internal_split_string->segment_sizes = (size_t *) memory_allocate(
+		                                                   sizeof( size_t ) * number_of_segments );
 
-		if( ( *split_string )->segment_sizes == NULL )
+		if( internal_split_string->segment_sizes == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -186,7 +186,7 @@ int libcpath_wide_split_string_initialize(
 			goto on_error;
 		}
 		if( memory_set(
-		     ( *split_string )->segment_sizes,
+		     internal_split_string->segment_sizes,
 		     0,
 		     sizeof( size_t ) * number_of_segments ) == NULL )
 		{
@@ -200,30 +200,32 @@ int libcpath_wide_split_string_initialize(
 			goto on_error;
 		}
 	}
-	( *split_string )->number_of_segments = number_of_segments;
+	internal_split_string->number_of_segments = number_of_segments;
+
+	*split_string = (libcpath_wide_split_string_t *) internal_split_string;
 
 	return( 1 );
 
 on_error:
-	if( *split_string != NULL )
+	if( internal_split_string != NULL )
 	{
-		if( ( *split_string )->segment_sizes != NULL )
+		if( internal_split_string->segment_sizes != NULL )
 		{
 			memory_free(
-			 ( *split_string )->segment_sizes );
+			 internal_split_string->segment_sizes );
 		}
-		if( ( *split_string )->segments != NULL )
+		if( internal_split_string->segments != NULL )
 		{
 			memory_free(
-			 ( *split_string )->segments );
+			 internal_split_string->segments );
 		}
-		if( ( *split_string )->string != NULL )
+		if( internal_split_string->string != NULL )
 		{
 			memory_free(
-			 ( *split_string )->string );
+			 internal_split_string->string );
 		}
 		memory_free(
-		 *split_string );
+		 internal_split_string );
 	}
 	return( -1 );
 }
@@ -235,7 +237,8 @@ int libcpath_wide_split_string_free(
      libcpath_wide_split_string_t **split_string,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_wide_split_string_free";
+	libcpath_internal_wide_split_string_t *internal_split_string = NULL;
+	static char *function                                        = "libcpath_wide_split_string_free";
 
 	if( split_string == NULL )
 	{
@@ -250,25 +253,26 @@ int libcpath_wide_split_string_free(
 	}
 	if( *split_string != NULL )
 	{
-		if( ( *split_string )->string != NULL )
+		internal_split_string = (libcpath_internal_wide_split_string_t *) *split_string;
+		*split_string         = NULL;
+
+		if( internal_split_string->string != NULL )
 		{
 			memory_free(
-			 ( *split_string )->string );
+			 internal_split_string->string );
 		}
-		if( ( *split_string )->segments != NULL )
+		if( internal_split_string->segments != NULL )
 		{
 			memory_free(
-			 ( *split_string )->segments );
+			 internal_split_string->segments );
 		}
-		if( ( *split_string )->segment_sizes != NULL )
+		if( internal_split_string->segment_sizes != NULL )
 		{
 			memory_free(
-			 ( *split_string )->segment_sizes );
+			 internal_split_string->segment_sizes );
 		}
 		memory_free(
-		 *split_string );
-
-		*split_string = NULL;
+		 internal_split_string );
 	}
 	return( 1 );
 }
@@ -282,7 +286,8 @@ int libcpath_wide_split_string_get_string(
      size_t *string_size,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_wide_split_string_get_string";
+	libcpath_internal_wide_split_string_t *internal_split_string = NULL;
+	static char *function                                        = "libcpath_wide_split_string_get_string";
 
 	if( split_string == NULL )
 	{
@@ -295,6 +300,8 @@ int libcpath_wide_split_string_get_string(
 
 		return( 1 );
 	}
+	internal_split_string = (libcpath_internal_wide_split_string_t *) split_string;
+
 	if( string == NULL )
 	{
 		libcerror_error_set(
@@ -317,8 +324,8 @@ int libcpath_wide_split_string_get_string(
 
 		return( 1 );
 	}
-	*string      = split_string->string;
-	*string_size = split_string->string_size;
+	*string      = internal_split_string->string;
+	*string_size = internal_split_string->string_size;
 
 	return( 1 );
 }
@@ -331,7 +338,8 @@ int libcpath_wide_split_string_get_number_of_segments(
      int *number_of_segments,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_wide_split_string_get_number_of_segments";
+	libcpath_internal_wide_split_string_t *internal_split_string = NULL;
+	static char *function                                        = "libcpath_wide_split_string_get_number_of_segments";
 
 	if( split_string == NULL )
 	{
@@ -344,6 +352,8 @@ int libcpath_wide_split_string_get_number_of_segments(
 
 		return( 1 );
 	}
+	internal_split_string = (libcpath_internal_wide_split_string_t *) split_string;
+
 	if( number_of_segments == NULL )
 	{
 		libcerror_error_set(
@@ -355,7 +365,7 @@ int libcpath_wide_split_string_get_number_of_segments(
 
 		return( 1 );
 	}
-	*number_of_segments = split_string->number_of_segments;
+	*number_of_segments = internal_split_string->number_of_segments;
 
 	return( 1 );
 }
@@ -370,7 +380,8 @@ int libcpath_wide_split_string_get_segment_by_index(
      size_t *string_segment_size,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_wide_split_string_get_segment_by_index";
+	libcpath_internal_wide_split_string_t *internal_split_string = NULL;
+	static char *function                                        = "libcpath_wide_split_string_get_segment_by_index";
 
 	if( split_string == NULL )
 	{
@@ -383,8 +394,10 @@ int libcpath_wide_split_string_get_segment_by_index(
 
 		return( 1 );
 	}
+	internal_split_string = (libcpath_internal_wide_split_string_t *) split_string;
+
 	if( ( segment_index < 0 )
-	 || ( segment_index >= split_string->number_of_segments ) )
+	 || ( segment_index >= internal_split_string->number_of_segments ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -417,8 +430,8 @@ int libcpath_wide_split_string_get_segment_by_index(
 
 		return( 1 );
 	}
-	*string_segment      = split_string->segments[ segment_index ];
-	*string_segment_size = split_string->segment_sizes[ segment_index ];
+	*string_segment      = internal_split_string->segments[ segment_index ];
+	*string_segment_size = internal_split_string->segment_sizes[ segment_index ];
 
 	return( 1 );
 }
@@ -433,8 +446,9 @@ int libcpath_wide_split_string_set_segment_by_index(
      size_t string_segment_size,
      libcerror_error_t **error )
 {
-	static char *function        = "libcpath_wide_split_string_set_segment_by_index";
-	size_t string_segment_offset = 0;
+	libcpath_internal_wide_split_string_t *internal_split_string = NULL;
+	static char *function                                        = "libcpath_wide_split_string_set_segment_by_index";
+	size_t string_segment_offset                                 = 0;
 
 	if( split_string == NULL )
 	{
@@ -447,8 +461,10 @@ int libcpath_wide_split_string_set_segment_by_index(
 
 		return( 1 );
 	}
+	internal_split_string = (libcpath_internal_wide_split_string_t *) split_string;
+
 	if( ( segment_index < 0 )
-	 || ( segment_index >= split_string->number_of_segments ) )
+	 || ( segment_index >= internal_split_string->number_of_segments ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -486,7 +502,7 @@ int libcpath_wide_split_string_set_segment_by_index(
 	}
 	else
 	{
-		if( string_segment < split_string->string )
+		if( string_segment < internal_split_string->string )
 		{
 			libcerror_error_set(
 			 error,
@@ -497,9 +513,9 @@ int libcpath_wide_split_string_set_segment_by_index(
 
 			return( -1 );
 		}
-		string_segment_offset = (size_t) ( string_segment - split_string->string );
+		string_segment_offset = (size_t) ( string_segment - internal_split_string->string );
 
-		if( string_segment_offset > split_string->string_size )
+		if( string_segment_offset > internal_split_string->string_size )
 		{
 			libcerror_error_set(
 			 error,
@@ -512,7 +528,7 @@ int libcpath_wide_split_string_set_segment_by_index(
 		}
 		string_segment_offset += string_segment_size;
 
-		if( string_segment_offset > split_string->string_size )
+		if( string_segment_offset > internal_split_string->string_size )
 		{
 			libcerror_error_set(
 			 error,
@@ -524,8 +540,8 @@ int libcpath_wide_split_string_set_segment_by_index(
 			return( -1 );
 		}
 	}
-	split_string->segments[ segment_index ]      = string_segment;
-	split_string->segment_sizes[ segment_index ] = string_segment_size;
+	internal_split_string->segments[ segment_index ]      = string_segment;
+	internal_split_string->segment_sizes[ segment_index ] = string_segment_size;
 
 	return( 1 );
 }

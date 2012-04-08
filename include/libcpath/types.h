@@ -195,6 +195,11 @@ typedef int64_t off64_t;
 
 #endif
 
+/* The following type definitions hide internal data structures
+ */
+typedef intptr_t libcpath_narrow_split_string_t;
+typedef intptr_t libcpath_wide_split_string_t;
+
 #ifdef __cplusplus
 }
 #endif

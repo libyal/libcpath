@@ -25,8 +25,9 @@
 #include <common.h>
 #include <types.h>
 
+#include "libcpath_extern.h"
 #include "libcpath_libcerror.h"
-#include "libcpath_wide_split_string.h"
+#include "libcpath_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -34,6 +35,7 @@ extern "C" {
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
+LIBCPATH_EXTERN \
 int libcpath_wide_string_split(
      const wchar_t *string,
      size_t string_size,

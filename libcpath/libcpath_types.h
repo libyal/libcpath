@@ -25,5 +25,25 @@
 #include <common.h>
 #include <types.h>
 
+/* Define HAVE_LOCAL_LIBCPATH for local use of libcpath
+ * The definitions in <libcpath/types.h> are copied here
+ * for local use of libcpath
+ */
+#if defined( HAVE_LOCAL_LIBCPATH )
+
+/* The following type definitions hide internal data structures
+ */
+#if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
+typedef struct libcpath_narrow_split_string {}	libcpath_narrow_split_string_t;
+typedef struct libcpath_wide_split_string {}	libcpath_wide_split_string_t;
+
+#else
+typedef intptr_t libcpath_narrow_split_string_t;
+typedef intptr_t libcpath_wide_split_string_t;
+
+#endif
+
+#endif
+
 #endif
 
