@@ -8,6 +8,9 @@ TODO
 * add tests
 * add msvscpp, borlandc5 and codegear files
 
+20120425
+* fixes for pkg-config detection of libraries
+
 20120409
 * updated dependencies
 
