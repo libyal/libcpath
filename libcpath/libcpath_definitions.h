@@ -1,7 +1,7 @@
 /*
  * The internal definitions
  *
- * Copyright (c) 2008-2012, Joachim Metz <jbmetz@users.sourceforge.net>
+ * Copyright (c) 2008-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -35,11 +35,11 @@
  */
 #else
 
-#define LIBCPATH_VERSION			20120425
+#define LIBCPATH_VERSION			20120507
 
 /* The libcstring version string
  */
-#define LIBCPATH_VERSION_STRING			"20120425"
+#define LIBCPATH_VERSION_STRING			"20120507"
 
 #if defined( WINAPI )
 #define LIBCPATH_SEPARATOR			'\\'
