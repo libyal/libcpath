@@ -1,4 +1,8 @@
 TODO
+* improve sanitize path/filename
+  - update m4 script
+  - update man page
+  - add tests
 * add libcpath_codepage.h and codepage functions
 * complete full path functions
   - implement libbfio_path_get_full_path_wide
@@ -7,6 +11,12 @@ TODO
 * update man page
 * add tests
 * add msvscpp, borlandc5 and codegear files
+
+20120630
+* fix for missing PATH_MAX in older versions of OSX
+
+20120601
+* worked on sanitize path and filename functions
 
 20120507
 * email and project site change

@@ -31,6 +31,11 @@
 #include <sys/stat.h>
 #endif
 
+#ifdef HAVE_SYS_SYSLIMITS_H
+/* Some version of MacOS-X require this header for PATH_MAX */
+#include <sys/syslimits.h>
+#endif
+
 #if defined( HAVE_UNISTD_H )
 #include <unistd.h>
 #endif
@@ -2422,15 +2427,17 @@ int libcpath_path_make_directory(
 #error Missing make directory function
 #endif
 
-/* Sanitizes the path
+/* Retrieves a sanitized version of the path
  * Returns 1 if successful or -1 on error
  */
-int libcpath_path_sanitize(
-     char *path,
-     size_t *path_size,
+int libcpath_path_get_sanitized_path(
+     const char *path,
+     size_t path_size,
+     char **sanitized_path,
+     size_t *sanitized_path_size,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_path_sanitize";
+	static char *function = "libcpath_path_get_sanitized_path";
 	size_t path_index     = 0;
 
 	if( path == NULL )
@@ -2444,18 +2451,7 @@ int libcpath_path_sanitize(
 
 		return( -1 );
 	}
-	if( path_size == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path size.",
-		 function );
-
-		return( -1 );
-	}
-	if( *path_size > (size_t) SSIZE_MAX )
+	if( path_size > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
 		 error,
@@ -2466,12 +2462,75 @@ int libcpath_path_sanitize(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) || defined( __CYGWIN__ )
-	if( *path_size > 32767 )
+	if( sanitized_path == NULL )
 	{
-		path[ 32766 ] = 0;
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
+		 function );
 
-		*path_size = 32767;
+		return( -1 );
+	}
+	if( sanitized_path_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path size.",
+		 function );
+
+		return( -1 );
+	}
+	*sanitized_path_size = 0;
+
+	for( path_index = 0;
+	     path_index < path_size;
+	     path_index++ )
+	{
+/* TODO \ cannot be used on WINAPI ? */
+
+		/* Replace control codes by \x##
+		 */
+		if( ( ( path[ path_index ] >= 0x00 )
+		  &&  ( path[ path_index ] <= 0x1f ) )
+		 || ( path[ path_index ] == 0x7e ) )
+		{
+			*sanitized_path_size += 4;
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == '/' )
+#else
+		else if( path[ path_index ] == '\\' )
+#endif
+		{
+			path[ path_index ] = '_';
+		}
+		else if( ( path[ path_index ] == '!' )
+		      || ( path[ path_index ] == '$' )
+		      || ( path[ path_index ] == '%' )
+		      || ( path[ path_index ] == '&' )
+		      || ( path[ path_index ] == '*' )
+		      || ( path[ path_index ] == '+' )
+		      || ( path[ path_index ] == ':' )
+		      || ( path[ path_index ] == ';' )
+		      || ( path[ path_index ] == '<' )
+		      || ( path[ path_index ] == '>' )
+		      || ( path[ path_index ] == '?' )
+		      || ( path[ path_index ] == '@' )
+		      || ( path[ path_index ] == '|' )
+		      || ( path[ path_index ] == '~' )
+		      || ( path[ path_index ] == 0x7e ) )
+		{
+			path[ path_index ] = '_';
+		}
+	}
+#if defined( WINAPI ) || defined( __CYGWIN__ )
+	if( path_size > 32767 )
+	{
+		*sanitized_path_size = 32767;
 	}
 #endif
 	for( path_index = 0;
@@ -2514,6 +2573,9 @@ int libcpath_path_sanitize(
 			path[ path_index ] = '_';
 		}
 	}
+/* TODO */
+	santized_path[ sanitized_path_size - 1 ] = 0;
+
 	return( 1 );
 }
 

@@ -1,6 +1,6 @@
 dnl Functions for libcpath
 dnl
-dnl Version: 20120403
+dnl Version: 20120630
 
 dnl Function to detect if mkdir is available
 dnl Also checks how to use mkdir
@@ -75,7 +75,7 @@ AC_DEFUN([AX_LIBCPATH_CHECK_FUNC_MKDIR],
 dnl Function to detect if libcpath dependencies are available
 AC_DEFUN([AX_LIBCPATH_CHECK_LOCAL],
  [dnl Headers included in libcpath/libcpath_path.h
- AC_CHECK_HEADERS([errno.h sys/stat.h])
+ AC_CHECK_HEADERS([errno.h sys/stat.h sys/syslimits.h])
 
  dnl Path functions used in libcpath/libcpath_path.h
  AC_CHECK_FUNCS([chdir getcwd])
