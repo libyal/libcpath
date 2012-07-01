@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libcpath],
- [20120630],
+ [20120701],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -63,6 +63,9 @@ AX_LIBCERROR_CHECK_ENABLE
 dnl Check for enabling libclocale for cross-platform C locale functions
 AX_LIBCLOCALE_CHECK_ENABLE
 
+dnl Check for enabling libcsplit for cross-platform C split string functions
+AX_LIBCSPLIT_CHECK_ENABLE
+
 dnl Check for enabling libuna for Unicode string support
 AX_LIBUNA_CHECK_ENABLE
 
@@ -90,7 +93,7 @@ AM_CONDITIONAL(
 
 dnl Check if requires and build requires should be set in spec file
 AS_IF(
- [test "x$ac_cv_libcstring" = xyes || test "x$ac_cv_libcerror" = xyes || test "x$ac_cv_libclocale" = xyes || test "x$ac_cv_libuna" = xyes],
+ [test "x$ac_cv_libcstring" = xyes || test "x$ac_cv_libcerror" = xyes || test "x$ac_cv_libclocale" = xyes || test "x$ac_cv_libcsplit" = xyes || test "x$ac_cv_libuna" = xyes],
  [AC_SUBST(
   [libcpath_spec_requires],
   [Requires:])
@@ -111,6 +114,7 @@ AC_CONFIG_FILES([common/Makefile])
 AC_CONFIG_FILES([libcstring/Makefile])
 AC_CONFIG_FILES([libcerror/Makefile])
 AC_CONFIG_FILES([libclocale/Makefile])
+AC_CONFIG_FILES([libcsplit/Makefile])
 AC_CONFIG_FILES([libuna/Makefile])
 AC_CONFIG_FILES([libcpath/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
@@ -141,6 +145,7 @@ Building:
    libcstring support:          $ac_cv_libcstring
    libcerror support:           $ac_cv_libcerror
    libclocale support:          $ac_cv_libclocale
+   libcsplit support:           $ac_cv_libcsplit
    libuna support:              $ac_cv_libuna
 
 Features:

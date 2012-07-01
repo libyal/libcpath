@@ -1,5 +1,5 @@
 /*
- * Wide character string functions
+ * The internal libcsplit header
  *
  * Copyright (c) 2008-2012, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,34 +19,33 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBCPATH_WIDE_STRING_H )
-#define _LIBCPATH_WIDE_STRING_H
+#if !defined( _LIBCPATH_LIBCSPLIT_H )
+#define _LIBCPATH_LIBCSPLIT_H
 
 #include <common.h>
-#include <types.h>
 
-#include "libcpath_extern.h"
-#include "libcpath_libcerror.h"
-#include "libcpath_types.h"
+/* Define HAVE_LOCAL_LIBCSPLIT for local use of libcsplit
+ */
+#if defined( HAVE_LOCAL_LIBCSPLIT )
 
-#if defined( __cplusplus )
-extern "C" {
+#include <libcsplit_definitions.h>
+#include <libcsplit_narrow_split_string.h>
+#include <libcsplit_narrow_string.h>
+#include <libcsplit_types.h>
+#include <libcsplit_wide_split_string.h>
+#include <libcsplit_wide_string.h>
+
+#else
+
+/* If libtool DLL support is enabled set LIBCSPLIT_DLL_IMPORT
+ * before including libcsplit.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBCSPLIT_DLL_IMPORT
 #endif
 
-#if defined( HAVE_WIDE_CHARACTER_TYPE )
+#include <libcsplit.h>
 
-LIBCPATH_EXTERN \
-int libcpath_wide_string_split(
-     const wchar_t *string,
-     size_t string_size,
-     wchar_t delimiter,
-     libcpath_wide_split_string_t **split_string,
-     libcerror_error_t **error );
-
-#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
-
-#if defined( __cplusplus )
-}
 #endif
 
 #endif

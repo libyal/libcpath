@@ -1,4 +1,5 @@
 TODO
+* move split functions to libcsplit ?
 * improve sanitize path/filename
   - update m4 script
   - update man page

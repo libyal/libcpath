@@ -31,6 +31,11 @@
 #include <sys/stat.h>
 #endif
 
+#ifdef HAVE_SYS_SYSLIMITS_H
+/* Some version of MacOS-X require this header for PATH_MAX */
+#include <sys/syslimits.h>
+#endif
+
 #if defined( HAVE_UNISTD_H )
 #include <unistd.h>
 #endif
@@ -38,10 +43,13 @@
 #include "libcpath_definitions.h"
 #include "libcpath_libcerror.h"
 #include "libcpath_libclocale.h"
-#include "libcpath_libcsplit.h"
 #include "libcpath_libcstring.h"
 #include "libcpath_libuna.h"
+#include "libcpath_narrow_split_string.h"
+#include "libcpath_narrow_string.h"
 #include "libcpath_path.h"
+#include "libcpath_wide_split_string.h"
+#include "libcpath_wide_string.h"
 
 #if defined( WINAPI )
 enum LIBCPATH_TYPES
@@ -443,35 +451,35 @@ int libcpath_path_get_full_path(
      size_t *full_path_size,
      libcerror_error_t **error )
 {
-	libcsplit_narrow_split_string_t *current_directory_split_string = NULL;
-	libcsplit_narrow_split_string_t *path_split_string              = NULL;
-	char *change_volume_name                                        = NULL;
-	char *current_working_directory                                 = NULL;
-	char *current_directory                                         = NULL;
-	char *current_directory_string_segment                          = NULL;
-	char *full_path_prefix                                          = NULL;
-	char *last_used_path_string_segment                             = NULL;
-	char *path_string_segment                                       = NULL;
-	const char *volume_name                                         = NULL;
-	static char *function                                           = "libcpath_path_get_full_path";
-	size_t current_directory_name_index                             = 0;
-	size_t current_directory_size                                   = 0;
-	size_t current_directory_string_segment_size                    = 0;
-	size_t current_working_directory_size                           = 0;
-	size_t full_path_index                                          = 0;
-	size_t full_path_prefix_length                                  = 0;
-	size_t last_used_path_string_segment_size                       = 0;
-	size_t path_directory_name_index                                = 0;
-	size_t path_string_segment_size                                 = 0;
-	size_t share_name_index                                         = 0;
-	size_t volume_name_length                                       = 0;
-	uint8_t path_type                                               = LIBCPATH_TYPE_RELATIVE;
-	int current_directory_number_of_segments                        = 0;
-	int current_directory_segment_index                             = 0;
-	int error_abort                                                 = 0;
-	int last_used_path_segment_index                                = -1;
-	int path_number_of_segments                                     = 0;
-	int path_segment_index                                          = 0;
+	libcpath_narrow_split_string_t *current_directory_split_string = NULL;
+	libcpath_narrow_split_string_t *path_split_string              = NULL;
+	char *change_volume_name                                       = NULL;
+	char *current_working_directory                                = NULL;
+	char *current_directory                                        = NULL;
+	char *current_directory_string_segment                         = NULL;
+	char *full_path_prefix                                         = NULL;
+	char *last_used_path_string_segment                            = NULL;
+	char *path_string_segment                                      = NULL;
+	const char *volume_name                                        = NULL;
+	static char *function                                          = "libcpath_path_get_full_path";
+	size_t current_directory_name_index                            = 0;
+	size_t current_directory_size                                  = 0;
+	size_t current_directory_string_segment_size                   = 0;
+	size_t current_working_directory_size                          = 0;
+	size_t full_path_index                                         = 0;
+	size_t full_path_prefix_length                                 = 0;
+	size_t last_used_path_string_segment_size                      = 0;
+	size_t path_directory_name_index                               = 0;
+	size_t path_string_segment_size                                = 0;
+	size_t share_name_index                                        = 0;
+	size_t volume_name_length                                      = 0;
+	uint8_t path_type                                              = LIBCPATH_TYPE_RELATIVE;
+	int current_directory_number_of_segments                       = 0;
+	int current_directory_segment_index                            = 0;
+	int error_abort                                                = 0;
+	int last_used_path_segment_index                               = -1;
+	int path_number_of_segments                                    = 0;
+	int path_segment_index                                         = 0;
 
 	if( path == NULL )
 	{
@@ -830,7 +838,7 @@ int libcpath_path_get_full_path(
 	}
 	if( current_directory != NULL )
 	{
-		if( libcsplit_narrow_string_split(
+		if( libcpath_narrow_string_split(
 		     &( current_directory[ current_directory_name_index ] ),
 		     libcstring_narrow_string_length(
 		      &( current_directory[ current_directory_name_index ] ) ) + 1,
@@ -848,7 +856,7 @@ int libcpath_path_get_full_path(
 			goto on_error;
 		}
 	}
-	if( libcsplit_narrow_string_split(
+	if( libcpath_narrow_string_split(
 	     &( path[ path_directory_name_index ] ),
 	     path_length - path_directory_name_index + 1,
 	     '\\',
@@ -900,7 +908,7 @@ int libcpath_path_get_full_path(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_narrow_split_string_get_number_of_segments(
+		if( libcpath_narrow_split_string_get_number_of_segments(
 		     current_directory_split_string,
 		     &current_directory_number_of_segments,
 		     error ) != 1 )
@@ -916,7 +924,7 @@ int libcpath_path_get_full_path(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_narrow_split_string_get_number_of_segments(
+	if( libcpath_narrow_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
@@ -934,7 +942,7 @@ int libcpath_path_get_full_path(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
+		if( libcpath_narrow_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -972,7 +980,7 @@ int libcpath_path_get_full_path(
 			if( ( current_directory_split_string != NULL )
 			 && ( last_used_path_segment_index == -1 ) )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
+				if( libcpath_narrow_split_string_get_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     &current_directory_string_segment,
@@ -1006,7 +1014,7 @@ int libcpath_path_get_full_path(
 				 */
 				*full_path_size -= current_directory_string_segment_size;
 
-				if( libcsplit_narrow_split_string_set_segment_by_index(
+				if( libcpath_narrow_split_string_set_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     NULL,
@@ -1027,7 +1035,7 @@ int libcpath_path_get_full_path(
 			}
 			else if( last_used_path_segment_index >= 0 )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
+				if( libcpath_narrow_split_string_get_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     &last_used_path_string_segment,
@@ -1061,7 +1069,7 @@ int libcpath_path_get_full_path(
 				 */
 				*full_path_size -= last_used_path_string_segment_size;
 
-				if( libcsplit_narrow_split_string_set_segment_by_index(
+				if( libcpath_narrow_split_string_set_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     NULL,
@@ -1084,7 +1092,7 @@ int libcpath_path_get_full_path(
 				{
 					last_used_path_segment_index--;
 
-					if( libcsplit_narrow_split_string_get_segment_by_index(
+					if( libcpath_narrow_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
 					     &last_used_path_string_segment,
@@ -1107,7 +1115,7 @@ int libcpath_path_get_full_path(
 					}
 				}
 			}
-			if( libcsplit_narrow_split_string_set_segment_by_index(
+			if( libcpath_narrow_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -1130,7 +1138,7 @@ int libcpath_path_get_full_path(
 		else if( ( path_string_segment_size == 2 )
 		      && ( path_string_segment[ 0 ] == '.' ) )
 		{
-			if( libsplith_narrow_split_string_set_segment_by_index(
+			if( libcpath_narrow_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -1152,7 +1160,7 @@ int libcpath_path_get_full_path(
 		 */
 		else if( path_string_segment_size <= 1 )
 		{
-			if( libcsplit_narrow_split_string_set_segment_by_index(
+			if( libcpath_narrow_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -1276,7 +1284,7 @@ int libcpath_path_get_full_path(
 		     current_directory_segment_index < current_directory_number_of_segments;
 		     current_directory_segment_index++ )
 		{
-			if( libcsplit_narrow_split_string_get_segment_by_index(
+			if( libcpath_narrow_split_string_get_segment_by_index(
 			     current_directory_split_string,
 			     current_directory_segment_index,
 			     &current_directory_string_segment,
@@ -1334,7 +1342,7 @@ int libcpath_path_get_full_path(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
+		if( libcpath_narrow_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -1389,7 +1397,7 @@ int libcpath_path_get_full_path(
 	}
 	( *full_path )[ full_path_index - 1 ] = 0;
 
-	if( libcsplit_narrow_split_string_free(
+	if( libcpath_narrow_split_string_free(
 	     &path_split_string,
 	     error ) != 1 )
 	{
@@ -1404,7 +1412,7 @@ int libcpath_path_get_full_path(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_narrow_split_string_free(
+		if( libcpath_narrow_split_string_free(
 		     &current_directory_split_string,
 		     error ) != 1 )
 		{
@@ -1437,13 +1445,13 @@ on_error:
 
 	if( path_split_string != NULL )
 	{
-		libcsplit_narrow_split_string_free(
+		libcpath_narrow_split_string_free(
 		 &path_split_string,
 		 NULL );
 	}
 	if( current_directory_split_string != NULL )
 	{
-		libcsplit_narrow_split_string_free(
+		libcpath_narrow_split_string_free(
 		 &current_directory_split_string,
 		 NULL );
 	}
@@ -1484,24 +1492,24 @@ int libcpath_path_get_full_path(
      size_t *full_path_size,
      libcerror_error_t **error )
 {
-	libcsplit_narrow_split_string_t *current_directory_split_string = NULL;
-	libcsplit_narrow_split_string_t *path_split_string              = NULL;
-	char *current_directory                                         = NULL;
-	char *current_directory_string_segment                          = NULL;
-	char *last_used_path_string_segment                             = NULL;
-	char *path_string_segment                                       = NULL;
-	static char *function                                           = "libcpath_path_get_full_path";
-	size_t current_directory_size                                   = 0;
-	size_t current_directory_string_segment_size                    = 0;
-	size_t full_path_index                                          = 0;
-	size_t last_used_path_string_segment_size                       = 0;
-	size_t path_string_segment_size                                 = 0;
-	uint8_t path_type                                               = LIBCPATH_TYPE_RELATIVE;
-	int current_directory_number_of_segments                        = 0;
-	int current_directory_segment_index                             = 0;
-	int last_used_path_segment_index                                = -1;
-	int path_number_of_segments                                     = 0;
-	int path_segment_index                                          = 0;
+	libcpath_narrow_split_string_t *current_directory_split_string = NULL;
+	libcpath_narrow_split_string_t *path_split_string              = NULL;
+	char *current_directory                                        = NULL;
+	char *current_directory_string_segment                         = NULL;
+	char *last_used_path_string_segment                            = NULL;
+	char *path_string_segment                                      = NULL;
+	static char *function                                          = "libcpath_path_get_full_path";
+	size_t current_directory_size                                  = 0;
+	size_t current_directory_string_segment_size                   = 0;
+	size_t full_path_index                                         = 0;
+	size_t last_used_path_string_segment_size                      = 0;
+	size_t path_string_segment_size                                = 0;
+	uint8_t path_type                                              = LIBCPATH_TYPE_RELATIVE;
+	int current_directory_number_of_segments                       = 0;
+	int current_directory_segment_index                            = 0;
+	int last_used_path_segment_index                               = -1;
+	int path_number_of_segments                                    = 0;
+	int path_segment_index                                         = 0;
 
 	if( path == NULL )
 	{
@@ -1592,7 +1600,7 @@ int libcpath_path_get_full_path(
 	}
 	if( current_directory != NULL )
 	{
-		if( libcsplit_narrow_string_split(
+		if( libcpath_narrow_string_split(
 		     current_directory,
 		     libcstring_narrow_string_length(
 		      current_directory ) + 1,
@@ -1610,7 +1618,7 @@ int libcpath_path_get_full_path(
 			goto on_error;
 		}
 	}
-	if( libcsplit_narrow_string_split(
+	if( libcpath_narrow_string_split(
 	     path,
 	     path_length + 1,
 	     '/',
@@ -1651,7 +1659,7 @@ int libcpath_path_get_full_path(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_narrow_split_string_get_number_of_segments(
+		if( libcpath_narrow_split_string_get_number_of_segments(
 		     current_directory_split_string,
 		     &current_directory_number_of_segments,
 		     error ) != 1 )
@@ -1667,7 +1675,7 @@ int libcpath_path_get_full_path(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_narrow_split_string_get_number_of_segments(
+	if( libcpath_narrow_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
@@ -1685,7 +1693,7 @@ int libcpath_path_get_full_path(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
+		if( libcpath_narrow_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -1723,7 +1731,7 @@ int libcpath_path_get_full_path(
 			if( ( current_directory_split_string != NULL )
 			 && ( last_used_path_segment_index == -1 ) )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
+				if( libcpath_narrow_split_string_get_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     &current_directory_string_segment,
@@ -1757,7 +1765,7 @@ int libcpath_path_get_full_path(
 				 */
 				*full_path_size -= current_directory_string_segment_size;
 
-				if( libcsplit_narrow_split_string_set_segment_by_index(
+				if( libcpath_narrow_split_string_set_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     NULL,
@@ -1778,7 +1786,7 @@ int libcpath_path_get_full_path(
 			}
 			else if( last_used_path_segment_index >= 0 )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
+				if( libcpath_narrow_split_string_get_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     &last_used_path_string_segment,
@@ -1812,7 +1820,7 @@ int libcpath_path_get_full_path(
 				 */
 				*full_path_size -= last_used_path_string_segment_size;
 
-				if( libcsplit_narrow_split_string_set_segment_by_index(
+				if( libcpath_narrow_split_string_set_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     NULL,
@@ -1835,7 +1843,7 @@ int libcpath_path_get_full_path(
 				{
 					last_used_path_segment_index--;
 
-					if( libcsplit_narrow_split_string_get_segment_by_index(
+					if( libcpath_narrow_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
 					     &last_used_path_string_segment,
@@ -1858,7 +1866,7 @@ int libcpath_path_get_full_path(
 					}
 				}
 			}
-			if( libcsplit_narrow_split_string_set_segment_by_index(
+			if( libcpath_narrow_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -1881,7 +1889,7 @@ int libcpath_path_get_full_path(
 		else if( ( path_string_segment_size == 2 )
 		      && ( path_string_segment[ 0 ] == '.' ) )
 		{
-			if( libcsplit_narrow_split_string_set_segment_by_index(
+			if( libcpath_narrow_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -1903,7 +1911,7 @@ int libcpath_path_get_full_path(
 		 */
 		else if( path_string_segment_size <= 1 )
 		{
-			if( libcsplit_narrow_split_string_set_segment_by_index(
+			if( libcpath_narrow_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -1965,7 +1973,7 @@ int libcpath_path_get_full_path(
 		     current_directory_segment_index < current_directory_number_of_segments;
 		     current_directory_segment_index++ )
 		{
-			if( libcsplit_narrow_split_string_get_segment_by_index(
+			if( libcpath_narrow_split_string_get_segment_by_index(
 			     current_directory_split_string,
 			     current_directory_segment_index,
 			     &current_directory_string_segment,
@@ -2023,7 +2031,7 @@ int libcpath_path_get_full_path(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
+		if( libcpath_narrow_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -2078,7 +2086,7 @@ int libcpath_path_get_full_path(
 	}
 	( *full_path )[ full_path_index - 1 ] = 0;
 
-	if( libcsplit_narrow_split_string_free(
+	if( libcpath_narrow_split_string_free(
 	     &path_split_string,
 	     error ) != 1 )
 	{
@@ -2093,7 +2101,7 @@ int libcpath_path_get_full_path(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_narrow_split_string_free(
+		if( libcpath_narrow_split_string_free(
 		     &current_directory_split_string,
 		     error ) != 1 )
 		{
@@ -2126,13 +2134,13 @@ on_error:
 
 	if( path_split_string != NULL )
 	{
-		libcsplit_narrow_split_string_free(
+		libcpath_narrow_split_string_free(
 		 &path_split_string,
 		 NULL );
 	}
 	if( current_directory_split_string != NULL )
 	{
-		libcsplit_narrow_split_string_free(
+		libcpath_narrow_split_string_free(
 		 &current_directory_split_string,
 		 NULL );
 	}
@@ -2419,15 +2427,17 @@ int libcpath_path_make_directory(
 #error Missing make directory function
 #endif
 
-/* Sanitizes the path
+/* Retrieves a sanitized version of the path
  * Returns 1 if successful or -1 on error
  */
-int libcpath_path_sanitize(
-     char *path,
-     size_t *path_size,
+int libcpath_path_get_sanitized_path(
+     const char *path,
+     size_t path_size,
+     char **sanitized_path,
+     size_t *sanitized_path_size,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_path_sanitize";
+	static char *function = "libcpath_path_get_sanitized_path";
 	size_t path_index     = 0;
 
 	if( path == NULL )
@@ -2441,18 +2451,7 @@ int libcpath_path_sanitize(
 
 		return( -1 );
 	}
-	if( path_size == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path size.",
-		 function );
-
-		return( -1 );
-	}
-	if( *path_size > (size_t) SSIZE_MAX )
+	if( path_size > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
 		 error,
@@ -2463,12 +2462,75 @@ int libcpath_path_sanitize(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) || defined( __CYGWIN__ )
-	if( *path_size > 32767 )
+	if( sanitized_path == NULL )
 	{
-		path[ 32766 ] = 0;
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
+		 function );
 
-		*path_size = 32767;
+		return( -1 );
+	}
+	if( sanitized_path_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path size.",
+		 function );
+
+		return( -1 );
+	}
+	*sanitized_path_size = 0;
+
+	for( path_index = 0;
+	     path_index < path_size;
+	     path_index++ )
+	{
+/* TODO \ cannot be used on WINAPI ? */
+
+		/* Replace control codes by \x##
+		 */
+		if( ( ( path[ path_index ] >= 0x00 )
+		  &&  ( path[ path_index ] <= 0x1f ) )
+		 || ( path[ path_index ] == 0x7e ) )
+		{
+			*sanitized_path_size += 4;
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == '/' )
+#else
+		else if( path[ path_index ] == '\\' )
+#endif
+		{
+			path[ path_index ] = '_';
+		}
+		else if( ( path[ path_index ] == '!' )
+		      || ( path[ path_index ] == '$' )
+		      || ( path[ path_index ] == '%' )
+		      || ( path[ path_index ] == '&' )
+		      || ( path[ path_index ] == '*' )
+		      || ( path[ path_index ] == '+' )
+		      || ( path[ path_index ] == ':' )
+		      || ( path[ path_index ] == ';' )
+		      || ( path[ path_index ] == '<' )
+		      || ( path[ path_index ] == '>' )
+		      || ( path[ path_index ] == '?' )
+		      || ( path[ path_index ] == '@' )
+		      || ( path[ path_index ] == '|' )
+		      || ( path[ path_index ] == '~' )
+		      || ( path[ path_index ] == 0x7e ) )
+		{
+			path[ path_index ] = '_';
+		}
+	}
+#if defined( WINAPI ) || defined( __CYGWIN__ )
+	if( path_size > 32767 )
+	{
+		*sanitized_path_size = 32767;
 	}
 #endif
 	for( path_index = 0;
@@ -2511,6 +2573,9 @@ int libcpath_path_sanitize(
 			path[ path_index ] = '_';
 		}
 	}
+/* TODO */
+	santized_path[ sanitized_path_size - 1 ] = 0;
+
 	return( 1 );
 }
 
@@ -3274,35 +3339,35 @@ int libcpath_path_get_full_path_wide(
      size_t *full_path_size,
      libcerror_error_t **error )
 {
-	libcsplit_wide_split_string_t *current_directory_split_string = NULL;
-	libcsplit_wide_split_string_t *path_split_string              = NULL;
-	wchar_t *change_volume_name                                   = NULL;
-	wchar_t *current_working_directory                            = NULL;
-	wchar_t *current_directory                                    = NULL;
-	wchar_t *current_directory_string_segment                     = NULL;
-	wchar_t *full_path_prefix                                     = NULL;
-	wchar_t *last_used_path_string_segment                        = NULL;
-	wchar_t *path_string_segment                                  = NULL;
-	const wchar_t *volume_name                                    = NULL;
-	static char *function                                         = "libcpath_path_get_full_path_wide";
-	size_t current_directory_name_index                           = 0;
-	size_t current_directory_size                                 = 0;
-	size_t current_directory_string_segment_size                  = 0;
-	size_t current_working_directory_size                         = 0;
-	size_t full_path_index                                        = 0;
-	size_t full_path_prefix_length                                = 0;
-	size_t last_used_path_string_segment_size                     = 0;
-	size_t path_directory_name_index                              = 0;
-	size_t path_string_segment_size                               = 0;
-	size_t share_name_index                                       = 0;
-	size_t volume_name_length                                     = 0;
-	uint8_t path_type                                             = LIBCPATH_TYPE_RELATIVE;
-	int current_directory_number_of_segments                      = 0;
-	int current_directory_segment_index                           = 0;
-	int error_abort                                               = 0;
-	int last_used_path_segment_index                              = -1;
-	int path_number_of_segments                                   = 0;
-	int path_segment_index                                        = 0;
+	libcpath_wide_split_string_t *current_directory_split_string = NULL;
+	libcpath_wide_split_string_t *path_split_string              = NULL;
+	wchar_t *change_volume_name                                  = NULL;
+	wchar_t *current_working_directory                           = NULL;
+	wchar_t *current_directory                                   = NULL;
+	wchar_t *current_directory_string_segment                    = NULL;
+	wchar_t *full_path_prefix                                    = NULL;
+	wchar_t *last_used_path_string_segment                       = NULL;
+	wchar_t *path_string_segment                                 = NULL;
+	const wchar_t *volume_name                                   = NULL;
+	static char *function                                        = "libcpath_path_get_full_path_wide";
+	size_t current_directory_name_index                          = 0;
+	size_t current_directory_size                                = 0;
+	size_t current_directory_string_segment_size                 = 0;
+	size_t current_working_directory_size                        = 0;
+	size_t full_path_index                                       = 0;
+	size_t full_path_prefix_length                               = 0;
+	size_t last_used_path_string_segment_size                    = 0;
+	size_t path_directory_name_index                             = 0;
+	size_t path_string_segment_size                              = 0;
+	size_t share_name_index                                      = 0;
+	size_t volume_name_length                                    = 0;
+	uint8_t path_type                                            = LIBCPATH_TYPE_RELATIVE;
+	int current_directory_number_of_segments                     = 0;
+	int current_directory_segment_index                          = 0;
+	int error_abort                                              = 0;
+	int last_used_path_segment_index                             = -1;
+	int path_number_of_segments                                  = 0;
+	int path_segment_index                                       = 0;
 
 	if( path == NULL )
 	{
@@ -3661,7 +3726,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( current_directory != NULL )
 	{
-		if( libcsplit_wide_string_split(
+		if( libcpath_wide_string_split(
 		     &( current_directory[ current_directory_name_index ] ),
 		     libcstring_wide_string_length(
 		      &( current_directory[ current_directory_name_index ] ) ) + 1,
@@ -3679,7 +3744,7 @@ int libcpath_path_get_full_path_wide(
 			goto on_error;
 		}
 	}
-	if( libcsplit_wide_string_split(
+	if( libcpath_wide_string_split(
 	     &( path[ path_directory_name_index ] ),
 	     path_length - path_directory_name_index + 1,
 	     (wchar_t) '\\',
@@ -3733,7 +3798,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_wide_split_string_get_number_of_segments(
+		if( libcpath_wide_split_string_get_number_of_segments(
 		     current_directory_split_string,
 		     &current_directory_number_of_segments,
 		     error ) != 1 )
@@ -3749,7 +3814,7 @@ int libcpath_path_get_full_path_wide(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_wide_split_string_get_number_of_segments(
+	if( libcpath_wide_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
@@ -3767,7 +3832,7 @@ int libcpath_path_get_full_path_wide(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
+		if( libcpath_wide_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -3805,7 +3870,7 @@ int libcpath_path_get_full_path_wide(
 			if( ( current_directory_split_string != NULL )
 			 && ( last_used_path_segment_index == -1 ) )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
+				if( libcpath_wide_split_string_get_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     &current_directory_string_segment,
@@ -3839,7 +3904,7 @@ int libcpath_path_get_full_path_wide(
 				 */
 				*full_path_size -= current_directory_string_segment_size;
 
-				if( libcsplit_wide_split_string_set_segment_by_index(
+				if( libcpath_wide_split_string_set_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     NULL,
@@ -3860,7 +3925,7 @@ int libcpath_path_get_full_path_wide(
 			}
 			else if( last_used_path_segment_index >= 0 )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
+				if( libcpath_wide_split_string_get_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     &last_used_path_string_segment,
@@ -3894,7 +3959,7 @@ int libcpath_path_get_full_path_wide(
 				 */
 				*full_path_size -= last_used_path_string_segment_size;
 
-				if( libcsplit_wide_split_string_set_segment_by_index(
+				if( libcpath_wide_split_string_set_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     NULL,
@@ -3917,7 +3982,7 @@ int libcpath_path_get_full_path_wide(
 				{
 					last_used_path_segment_index--;
 
-					if( libcsplit_wide_split_string_get_segment_by_index(
+					if( libcpath_wide_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
 					     &last_used_path_string_segment,
@@ -3940,7 +4005,7 @@ int libcpath_path_get_full_path_wide(
 					}
 				}
 			}
-			if( libcsplit_wide_split_string_set_segment_by_index(
+			if( libcpath_wide_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -3963,7 +4028,7 @@ int libcpath_path_get_full_path_wide(
 		else if( ( path_string_segment_size == 2 )
 		      && ( path_string_segment[ 0 ] == (wchar_t) '.' ) )
 		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
+			if( libcpath_wide_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -3985,7 +4050,7 @@ int libcpath_path_get_full_path_wide(
 		 */
 		else if( path_string_segment_size <= 1 )
 		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
+			if( libcpath_wide_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -4109,7 +4174,7 @@ int libcpath_path_get_full_path_wide(
 		     current_directory_segment_index < current_directory_number_of_segments;
 		     current_directory_segment_index++ )
 		{
-			if( libcsplit_wide_split_string_get_segment_by_index(
+			if( libcpath_wide_split_string_get_segment_by_index(
 			     current_directory_split_string,
 			     current_directory_segment_index,
 			     &current_directory_string_segment,
@@ -4167,7 +4232,7 @@ int libcpath_path_get_full_path_wide(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
+		if( libcpath_wide_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -4222,7 +4287,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	( *full_path )[ full_path_index - 1 ] = 0;
 
-	if( libcsplit_wide_split_string_free(
+	if( libcpath_wide_split_string_free(
 	     &path_split_string,
 	     error ) != 1 )
 	{
@@ -4237,7 +4302,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_wide_split_string_free(
+		if( libcpath_wide_split_string_free(
 		     &current_directory_split_string,
 		     error ) != 1 )
 		{
@@ -4270,13 +4335,13 @@ on_error:
 
 	if( path_split_string != NULL )
 	{
-		libcsplit_wide_split_string_free(
+		libcpath_wide_split_string_free(
 		 &path_split_string,
 		 NULL );
 	}
 	if( current_directory_split_string != NULL )
 	{
-		libcsplit_wide_split_string_free(
+		libcpath_wide_split_string_free(
 		 &current_directory_split_string,
 		 NULL );
 	}
@@ -4317,24 +4382,24 @@ int libcpath_path_get_full_path_wide(
      size_t *full_path_size,
      libcerror_error_t **error )
 {
-	libcsplit_wide_split_string_t *current_directory_split_string = NULL;
-	libcsplit_wide_split_string_t *path_split_string              = NULL;
-	wchar_t *current_directory                                    = NULL;
-	wchar_t *current_directory_string_segment                     = NULL;
-	wchar_t *last_used_path_string_segment                        = NULL;
-	wchar_t *path_string_segment                                  = NULL;
-	static char *function                                         = "libcpath_path_get_full_path_wide";
-	size_t current_directory_size                                 = 0;
-	size_t current_directory_string_segment_size                  = 0;
-	size_t full_path_index                                        = 0;
-	size_t last_used_path_string_segment_size                     = 0;
-	size_t path_string_segment_size                               = 0;
-	uint8_t path_type                                             = LIBCPATH_TYPE_RELATIVE;
-	int current_directory_number_of_segments                      = 0;
-	int current_directory_segment_index                           = 0;
-	int last_used_path_segment_index                              = -1;
-	int path_number_of_segments                                   = 0;
-	int path_segment_index                                        = 0;
+	libcpath_wide_split_string_t *current_directory_split_string = NULL;
+	libcpath_wide_split_string_t *path_split_string              = NULL;
+	wchar_t *current_directory                                   = NULL;
+	wchar_t *current_directory_string_segment                    = NULL;
+	wchar_t *last_used_path_string_segment                       = NULL;
+	wchar_t *path_string_segment                                 = NULL;
+	static char *function                                        = "libcpath_path_get_full_path_wide";
+	size_t current_directory_size                                = 0;
+	size_t current_directory_string_segment_size                 = 0;
+	size_t full_path_index                                       = 0;
+	size_t last_used_path_string_segment_size                    = 0;
+	size_t path_string_segment_size                              = 0;
+	uint8_t path_type                                            = LIBCPATH_TYPE_RELATIVE;
+	int current_directory_number_of_segments                     = 0;
+	int current_directory_segment_index                          = 0;
+	int last_used_path_segment_index                             = -1;
+	int path_number_of_segments                                  = 0;
+	int path_segment_index                                       = 0;
 
 	if( path == NULL )
 	{
@@ -4425,7 +4490,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( current_directory != NULL )
 	{
-		if( libcsplit_wide_string_split(
+		if( libcpath_wide_string_split(
 		     current_directory,
 		     libcstring_wide_string_length(
 		      current_directory ) + 1,
@@ -4443,7 +4508,7 @@ int libcpath_path_get_full_path_wide(
 			goto on_error;
 		}
 	}
-	if( libcsplit_wide_string_split(
+	if( libcpath_wide_string_split(
 	     path,
 	     path_length + 1,
 	     (wchar_t) '/',
@@ -4484,7 +4549,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_wide_split_string_get_number_of_segments(
+		if( libcpath_wide_split_string_get_number_of_segments(
 		     current_directory_split_string,
 		     &current_directory_number_of_segments,
 		     error ) != 1 )
@@ -4500,7 +4565,7 @@ int libcpath_path_get_full_path_wide(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_wide_split_string_get_number_of_segments(
+	if( libcpath_wide_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
@@ -4518,7 +4583,7 @@ int libcpath_path_get_full_path_wide(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
+		if( libcpath_wide_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -4556,7 +4621,7 @@ int libcpath_path_get_full_path_wide(
 			if( ( current_directory_split_string != NULL )
 			 && ( last_used_path_segment_index == -1 ) )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
+				if( libcpath_wide_split_string_get_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     &current_directory_string_segment,
@@ -4590,7 +4655,7 @@ int libcpath_path_get_full_path_wide(
 				 */
 				*full_path_size -= current_directory_string_segment_size;
 
-				if( libcsplit_wide_split_string_set_segment_by_index(
+				if( libcpath_wide_split_string_set_segment_by_index(
 				     current_directory_split_string,
 				     current_directory_segment_index,
 				     NULL,
@@ -4611,7 +4676,7 @@ int libcpath_path_get_full_path_wide(
 			}
 			else if( last_used_path_segment_index >= 0 )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
+				if( libcpath_wide_split_string_get_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     &last_used_path_string_segment,
@@ -4645,7 +4710,7 @@ int libcpath_path_get_full_path_wide(
 				 */
 				*full_path_size -= last_used_path_string_segment_size;
 
-				if( libcsplit_wide_split_string_set_segment_by_index(
+				if( libcpath_wide_split_string_set_segment_by_index(
 				     path_split_string,
 				     last_used_path_segment_index,
 				     NULL,
@@ -4668,7 +4733,7 @@ int libcpath_path_get_full_path_wide(
 				{
 					last_used_path_segment_index--;
 
-					if( libcsplit_wide_split_string_get_segment_by_index(
+					if( libcpath_wide_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
 					     &last_used_path_string_segment,
@@ -4691,7 +4756,7 @@ int libcpath_path_get_full_path_wide(
 					}
 				}
 			}
-			if( libcsplit_wide_split_string_set_segment_by_index(
+			if( libcpath_wide_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -4714,7 +4779,7 @@ int libcpath_path_get_full_path_wide(
 		else if( ( path_string_segment_size == 2 )
 		      && ( path_string_segment[ 0 ] == (wchar_t) '.' ) )
 		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
+			if( libcpath_wide_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -4736,7 +4801,7 @@ int libcpath_path_get_full_path_wide(
 		 */
 		else if( path_string_segment_size <= 1 )
 		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
+			if( libcpath_wide_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
@@ -4798,7 +4863,7 @@ int libcpath_path_get_full_path_wide(
 		     current_directory_segment_index < current_directory_number_of_segments;
 		     current_directory_segment_index++ )
 		{
-			if( libcsplit_wide_split_string_get_segment_by_index(
+			if( libcpath_wide_split_string_get_segment_by_index(
 			     current_directory_split_string,
 			     current_directory_segment_index,
 			     &current_directory_string_segment,
@@ -4856,7 +4921,7 @@ int libcpath_path_get_full_path_wide(
 	     path_segment_index < path_number_of_segments;
 	     path_segment_index++ )
 	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
+		if( libcpath_wide_split_string_get_segment_by_index(
 		     path_split_string,
 		     path_segment_index,
 		     &path_string_segment,
@@ -4911,7 +4976,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	( *full_path )[ full_path_index - 1 ] = 0;
 
-	if( libcsplit_wide_split_string_free(
+	if( libcpath_wide_split_string_free(
 	     &path_split_string,
 	     error ) != 1 )
 	{
@@ -4926,7 +4991,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( current_directory_split_string != NULL )
 	{
-		if( libcsplit_wide_split_string_free(
+		if( libcpath_wide_split_string_free(
 		     &current_directory_split_string,
 		     error ) != 1 )
 		{
@@ -4959,13 +5024,13 @@ on_error:
 
 	if( path_split_string != NULL )
 	{
-		libcsplit_wide_split_string_free(
+		libcpath_wide_split_string_free(
 		 &path_split_string,
 		 NULL );
 	}
 	if( current_directory_split_string != NULL )
 	{
-		libcsplit_wide_split_string_free(
+		libcpath_wide_split_string_free(
 		 &current_directory_split_string,
 		 NULL );
 	}
