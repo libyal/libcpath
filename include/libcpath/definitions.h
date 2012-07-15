@@ -24,11 +24,11 @@
 
 #include <libcpath/types.h>
 
-#define LIBCPATH_VERSION			20120701
+#define LIBCPATH_VERSION			20120715
 
 /* The libcpath version string
  */
-#define LIBCPATH_VERSION_STRING			"20120701"
+#define LIBCPATH_VERSION_STRING			"20120715"
 
 #if defined( WINAPI )
 #define LIBCPATH_SEPARATOR			'\\'

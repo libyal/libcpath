@@ -1130,7 +1130,7 @@ int libcpath_path_get_full_path(
 		else if( ( path_string_segment_size == 2 )
 		      && ( path_string_segment[ 0 ] == '.' ) )
 		{
-			if( libsplith_narrow_split_string_set_segment_by_index(
+			if( libcsplit_narrow_split_string_set_segment_by_index(
 			     path_split_string,
 			     path_segment_index,
 			     NULL,
