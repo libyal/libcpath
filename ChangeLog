@@ -13,6 +13,9 @@ TODO
 * add tests
 * add msvscpp, borlandc5 and codegear files
 
+20120904
+* updated dependencies
+
 20120630
 * fix for missing PATH_MAX in older versions of OSX
 
