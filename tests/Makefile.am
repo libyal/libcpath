@@ -2,8 +2,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
 	@LIBCSTRING_CPPFLAGS@ \
-	@LIBCERROR_CPPFLAGS@ \
-	@MEMWATCH_CPPFLAGS@
+	@LIBCERROR_CPPFLAGS@
 
 TESTS = \
 	test_path.sh
@@ -24,9 +23,8 @@ cpath_test_path_SOURCES = \
 	cpath_test_path.c
 
 cpath_test_path_LDADD = \
-	@LIBCSTRING_LIBADD@ \
 	../libcpath/libcpath.la \
-        @MEMWATCH_LIBADD@
+	@LIBCSTRING_LIBADD@
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

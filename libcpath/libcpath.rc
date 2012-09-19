@@ -22,12 +22,12 @@ BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "FileDescription",		"Library to support cross-platform C path functions\0"
-      VALUE "FileVersion",		"20120904" "\0"
+      VALUE "FileVersion",		"20120919" "\0"
       VALUE "InternalName",		"libcpath.dll\0"
       VALUE "LegalCopyright",		"(c) 2008-2012 Joachim Metz <joachim.metz@gmail.com>\0"
       VALUE "OriginalFilename",		"libcpath.dll\0"
       VALUE "ProductName",		"libcpath\0"
-      VALUE "ProductVersion",		"20120904" "\0"
+      VALUE "ProductVersion",		"20120919" "\0"
       VALUE "Comments",			"For more information visit http://code.google.com/p/libclibs/\0"
     END
   END
