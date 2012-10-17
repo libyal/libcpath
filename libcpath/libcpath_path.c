@@ -258,6 +258,20 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
+	if( memory_set(
+	     *current_working_directory,
+	     0,
+	     sizeof( char ) * *current_working_directory_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear current working directory.",
+		 function );
+
+		goto on_error;
+	}
 	if( GetCurrentDirectoryA(
 	     safe_current_working_directory_size,
 	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
@@ -277,7 +291,7 @@ int libcpath_path_get_current_working_directory(
 	return( 1 );
 
 on_error:
-	if( current_working_directory != NULL )
+	if( *current_working_directory != NULL )
 	{
 		memory_free(
 		 *current_working_directory );
@@ -342,12 +356,9 @@ int libcpath_path_get_current_working_directory(
 	}
 #if defined( WINAPI )
 	*current_working_directory_size = (size_t) _MAX_PATH;
-
 #else
 	*current_working_directory_size = (size_t) PATH_MAX;
-
 #endif
-
 	*current_working_directory = libcstring_narrow_string_allocate(
 	                              *current_working_directory_size );
 
@@ -358,6 +369,20 @@ int libcpath_path_get_current_working_directory(
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create current working directory.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     *current_working_directory,
+	     0,
+	     sizeof( char ) * *current_working_directory_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear current working directory.",
 		 function );
 
 		goto on_error;
@@ -396,7 +421,7 @@ int libcpath_path_get_current_working_directory(
 	return( 1 );
 
 on_error:
-	if( current_working_directory != NULL )
+	if( *current_working_directory != NULL )
 	{
 		memory_free(
 		 *current_working_directory );
@@ -743,6 +768,17 @@ int libcpath_path_get_full_path(
 		 */
 		if( current_directory_size >= 3 )
 		{
+			if( current_directory == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing current directory.",
+				 function );
+
+				goto on_error;
+			}
 			/* Check if the path starts with a volume letter
 			 */
 			if( ( current_directory[ 1 ] == ':' )
@@ -1641,6 +1677,17 @@ int libcpath_path_get_full_path(
 	 */
 	else if( path_type == LIBCPATH_TYPE_RELATIVE )
 	{
+		if( current_directory == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing current directory.",
+			 function );
+
+			goto on_error;
+		}
 		*full_path_size = current_directory_size - 1;
 
 		if( ( current_directory_size >= 2 )
@@ -2956,6 +3003,20 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
+	if( memory_set(
+	     *current_working_directory,
+	     0,
+	     sizeof( wchar_t ) * *current_working_directory_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear current working directory.",
+		 function );
+
+		goto on_error;
+	}
 	if( GetCurrentDirectoryW(
 	     safe_current_working_directory_size,
 	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
@@ -2975,7 +3036,7 @@ int libcpath_path_get_current_working_directory_wide(
 	return( 1 );
 
 on_error:
-	if( current_working_directory != NULL )
+	if( *current_working_directory != NULL )
 	{
 		memory_free(
 		 *current_working_directory );
@@ -3046,7 +3107,6 @@ int libcpath_path_get_current_working_directory_wide(
 	}
 #if defined( WINAPI )
 	*current_working_directory_size = (size_t) _MAX_PATH;
-
 #else
 	narrow_current_working_directory = libcstring_narrow_string_allocate(
 	                                    PATH_MAX );
@@ -3132,7 +3192,6 @@ int libcpath_path_get_current_working_directory_wide(
 		return( -1 );
 	}
 #endif
-
 	*current_working_directory = libcstring_wide_string_allocate(
 	                              *current_working_directory_size );
 
@@ -3143,6 +3202,20 @@ int libcpath_path_get_current_working_directory_wide(
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create current working directory.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     *current_working_directory,
+	     0,
+	     sizeof( wchar_t ) * *current_working_directory_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear current working directory.",
 		 function );
 
 		goto on_error;
@@ -3227,7 +3300,7 @@ on_error:
 		 narrow_current_working_directory );
 	}
 #endif
-	if( current_working_directory != NULL )
+	if( *current_working_directory != NULL )
 	{
 		memory_free(
 		 *current_working_directory );
@@ -3574,6 +3647,17 @@ int libcpath_path_get_full_path_wide(
 		 */
 		if( current_directory_size >= 3 )
 		{
+			if( current_directory == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing current directory.",
+				 function );
+
+				goto on_error;
+			}
 			/* Check if the path starts with a volume letter
 			 */
 			if( ( current_directory[ 1 ] == (wchar_t) ':' )
@@ -4474,6 +4558,17 @@ int libcpath_path_get_full_path_wide(
 	 */
 	else if( path_type == LIBCPATH_TYPE_RELATIVE )
 	{
+		if( current_directory == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing current directory.",
+			 function );
+
+			goto on_error;
+		}
 		*full_path_size = current_directory_size - 1;
 
 		if( ( current_directory_size >= 2 )

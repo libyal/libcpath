@@ -13,6 +13,9 @@ TODO
 * add tests
 * add msvscpp, borlandc5 and codegear files
 
+20121018
+* bug fix in error handling of current working directory
+
 20120919
 * updated dependencies
 
