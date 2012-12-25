@@ -11,7 +11,11 @@ TODO
 * update include header
 * update man page
 * add tests
-* add msvscpp, borlandc5 and codegear files
+* add borlandc5 and codegear files
+
+20121225
+* added .gitignore
+* added msvscpp files
 
 20121018
 * bug fix in error handling of current working directory

@@ -78,18 +78,22 @@ Makefile.in
 /po/remove-potcdate.sed
 /po/remove-potcdate.sin
 # Project specific files
-/libcnotify.pc
-/libcnotify.spec
+/libcpath.pc
+/libcpath.spec
 /common/config.h
 /common/stamp-h1
 /common/types.h
 /dpkg/changelog
 /dpkg/copyright
-/include/libcnotify.h
-/include/libcnotify/definitions.h
-/include/libcnotify/features.h
-/include/libcnotify/types.h
-/libcnotify/libcnotify.rc
-/libcnotify/libcnotify_definitions.h
+/include/libcpath.h
+/include/libcpath/definitions.h
+/include/libcpath/features.h
+/include/libcpath/types.h
+/libcpath/libcpath.rc
+/libcpath/libcpath.h
 # Local library dependencies specific files
 /libcerror
+/libclocale
+/libcsplit
+/libcstring
+/libuna

@@ -11,7 +11,8 @@ SUBDIRS = \
 	libcpath \
 	po \
 	manuals \
-	tests
+	tests \
+	msvscpp
 
 DPKG_FILES = \
 	dpkg/changelog \
