@@ -47,7 +47,7 @@ const char *libcpath_get_version(
  * Error functions
  * ------------------------------------------------------------------------- */
 
-/* Frees the error including elements
+/* Frees an error
  */
 LIBCPATH_EXTERN \
 void libcpath_error_free(
@@ -67,7 +67,7 @@ int libcpath_error_fprint(
 LIBCPATH_EXTERN \
 int libcpath_error_sprint(
      libcpath_error_t *error,
-     char *string, 
+     char *string,
      size_t size );
 
 /* Prints a backtrace of the error to the stream

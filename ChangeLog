@@ -11,7 +11,13 @@ TODO
 * update include header
 * update man page
 * add tests
-* add borlandc5 and codegear files
+
+20130404
+* textual changes
+* updated dependencies
+
+20130327
+* small updates
 
 20130113
 * updated msvscpp files

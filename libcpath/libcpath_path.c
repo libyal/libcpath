@@ -459,6 +459,11 @@ on_error:
  * This function does not support paths like (although Windows does):
  * C:\..\directory\file.txt
  *
+ * TODO handle:
+ * Volume device path:		\\.\C:
+ * Volume file system path:	\\.\C:\
+ * non-starting \\
+ *
  * Returns 1 if succesful or -1 on error
  */
 int libcpath_path_get_full_path(
