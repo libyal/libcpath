@@ -11,6 +11,12 @@ TODO
 * update include header
 * update man page
 * add tests
+  - wide character path functions
+  - windows functions
+
+20130509
+* removed CRT functions
+* updated dependencies
 
 20130413
 * updated dependencies

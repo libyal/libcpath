@@ -23,11 +23,11 @@
 #include <memory.h>
 #include <types.h>
 
-#if defined( HAVE_ERRNO_H ) || defined( WINAPI )
+#if defined( HAVE_ERRNO_H )
 #include <errno.h>
 #endif
 
-#if defined( HAVE_SYS_STAT_H ) || defined( WINAPI )
+#if defined( HAVE_SYS_STAT_H )
 #include <sys/stat.h>
 #endif
 
@@ -62,7 +62,7 @@ enum LIBCPATH_TYPES
 
 #endif
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
+#if defined( WINAPI ) && ( WINVER >= 0x0501 )
 
 /* Changes the directory
  * This function uses the WINAPI function for Windows XP or later
@@ -104,12 +104,12 @@ int libcpath_path_change_directory(
 	return( 1 );
 }
 
-#elif defined( WINAPI ) && !defined( USE_CRT_FUNCTIONS )
+#elif defined( WINAPI )
 
 /* TODO */
 #error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
-#elif defined( HAVE_CHDIR ) || defined( WINAPI )
+#elif defined( HAVE_CHDIR )
 
 /* Changes the directory
  * This function uses the POSIX chdir function or equivalent
@@ -132,21 +132,6 @@ int libcpath_path_change_directory(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	if( _chdir(
-	     directory_name ) != 0 )
-	{
-		libcerror_system_set_error(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 errno,
-		 "%s: unable to change directory.",
-		 function );
-
-		return( -1 );
-	}
-#else
 	if( chdir(
 	     directory_name ) != 0 )
 	{
@@ -160,7 +145,6 @@ int libcpath_path_change_directory(
 
 		return( -1 );
 	}
-#endif
 	return( 1 );
 }
 
@@ -168,7 +152,7 @@ int libcpath_path_change_directory(
 #error Missing change directory function
 #endif
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
+#if defined( WINAPI ) && ( WINVER >= 0x0501 )
 
 /* Retrieves the current working directory
  * This function uses the WINAPI function for Windows XP or later
@@ -303,12 +287,12 @@ on_error:
 	return( -1 );
 }
 
-#elif defined( WINAPI ) && !defined( USE_CRT_FUNCTIONS )
+#elif defined( WINAPI )
 
 /* TODO */
 #error WINAPI get current working directory function for Windows 2000 or earlier NOT implemented yet
 
-#elif defined( HAVE_GETCWD ) || defined( WINAPI )
+#elif defined( HAVE_GETCWD )
 
 /* Retrieves the current working directory
  * This function uses the POSIX getcwd function or equivalent
@@ -354,11 +338,8 @@ int libcpath_path_get_current_working_directory(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	*current_working_directory_size = (size_t) _MAX_PATH;
-#else
 	*current_working_directory_size = (size_t) PATH_MAX;
-#endif
+
 	*current_working_directory = libcstring_narrow_string_allocate(
 	                              *current_working_directory_size );
 
@@ -387,22 +368,6 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
-#if defined( WINAPI )
-	if( _getcwd(
-	     *current_working_directory,
-	     *current_working_directory_size ) == NULL )
-	{
-		libcerror_system_set_error(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 errno,
-		 "%s: unable to retrieve current working directory.",
-		 function );
-
-		goto on_error;
-	}
-#else
 	if( getcwd(
 	     *current_working_directory,
 	     *current_working_directory_size ) == NULL )
@@ -417,7 +382,6 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
-#endif
 	return( 1 );
 
 on_error:
@@ -443,6 +407,8 @@ on_error:
  * The function uses the extended-length path format
  * (path with \\?\ prefix)
  *
+ * Multiple successive \ not at the start of the path are combined into one
+ *
  * Scenario's that are considered full paths:
  * Device path:			\\.\PhysicalDrive0
  * Extended-length path:	\\?\C:\directory\file.txt
@@ -450,6 +416,7 @@ on_error:
  *
  * Scenario's that are not considered full paths:
  * Local 'absolute' path:	\directory\file.txt
+ *                       	\directory\\file.txt
  * Local 'relative' path:	..\directory\file.txt
  * Local 'relative' path:	.\directory\file.txt
  * Volume 'absolute' path:	C:\directory\file.txt
@@ -462,7 +429,6 @@ on_error:
  * TODO handle:
  * Volume device path:		\\.\C:
  * Volume file system path:	\\.\C:\
- * non-starting \\
  *
  * Returns 1 if succesful or -1 on error
  */
@@ -1509,9 +1475,11 @@ on_error:
 #else
 
 /* Determines the full path of the POSIX path specified
+ * Multiple successive / are combined into one
  *
  * Scenarios:
  * /home/user/file.txt
+ * /home/user//file.txt
  * /home/user/../user/file.txt
  * /../home/user/file.txt
  * user/../user/file.txt
@@ -2361,7 +2329,7 @@ on_error:
 	return( -1 );
 }
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
+#if defined( WINAPI ) && ( WINVER >= 0x0501 )
 
 /* Makes the directory
  * This function uses the WINAPI function for Windows XP or later
@@ -2404,12 +2372,12 @@ int libcpath_path_make_directory(
 	return( 1 );
 }
 
-#elif defined( WINAPI ) && !defined( USE_CRT_FUNCTIONS )
+#elif defined( WINAPI )
 
 /* TODO */
 #error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
-#elif defined( HAVE_MKDIR ) || defined( WINAPI )
+#elif defined( HAVE_MKDIR )
 
 /* Makes the directory
  * This function uses the POSIX mkdir function or equivalent
@@ -2432,22 +2400,6 @@ int libcpath_path_make_directory(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	if( _mkdir(
-	     directory_name ) != 0 )
-	{
-		libcerror_system_set_error(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 errno,
-		 "%s: unable to make directory.",
-		 function );
-
-		return( -1 );
-	}
-
-#else
 	if( mkdir(
 	     directory_name,
 	     0755 ) != 0 )
@@ -2463,7 +2415,6 @@ int libcpath_path_make_directory(
 		return( -1 );
 	}
 
-#endif
 	return( 1 );
 }
 
@@ -2660,7 +2611,7 @@ int libcpath_path_sanitize_filename(
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
+#if defined( WINAPI ) && ( WINVER >= 0x0501 )
 
 /* Changes the directory
  * This function uses the WINAPI function for Windows XP or later
@@ -2702,12 +2653,12 @@ int libcpath_path_change_directory_wide(
 	return( 1 );
 }
 
-#elif defined( WINAPI ) && !defined( USE_CRT_FUNCTIONS )
+#elif defined( WINAPI )
 
 /* TODO */
 #error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
-#elif defined( HAVE_CHDIR ) || defined( WINAPI )
+#elif defined( HAVE_CHDIR )
 
 /* Changes the directory
  * This function uses the POSIX chdir function or equivalent
@@ -2718,13 +2669,10 @@ int libcpath_path_change_directory_wide(
      libcerror_error_t **error )
 {
 	static char *function             = "libcpath_path_change_directory_wide";
-
-#if !defined( WINAPI )
 	char *narrow_directory_name       = 0;
 	size_t directory_name_length      = 0;
 	size_t narrow_directory_name_size = 0;
 	int result                        = 0;
-#endif
 
 	if( directory_name == NULL )
 	{
@@ -2737,22 +2685,6 @@ int libcpath_path_change_directory_wide(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	if( _wchdir(
-	     directory_name ) != 0 )
-	{
-		libcerror_system_set_error(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 errno,
-		 "%s: unable to change directory.",
-		 function );
-
-		return( -1 );
-	}
-
-#else
 	directory_name_length = libcstring_wide_string_length(
 	                         directory_name );
 
@@ -2900,10 +2832,8 @@ int libcpath_path_change_directory_wide(
 	memory_free(
 	 narrow_directory_name );
 
-#endif
 	return( 1 );
 
-#if !defined( WINAPI )
 on_error:
 	if( narrow_directory_name != NULL )
 	{
@@ -2911,14 +2841,13 @@ on_error:
 		 narrow_directory_name );
 	}
 	return( -1 );
-#endif
 }
 
 #else
 #error Missing change directory function
 #endif
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
+#if defined( WINAPI ) && ( WINVER >= 0x0501 )
 
 /* Retrieves the current working directory
  * This function uses the WINAPI function for Windows XP or later
@@ -3053,12 +2982,12 @@ on_error:
 	return( -1 );
 }
 
-#elif defined( WINAPI ) && !defined( USE_CRT_FUNCTIONS )
+#elif defined( WINAPI )
 
 /* TODO */
 #error WINAPI get current working directory function for Windows 2000 or earlier NOT implemented yet
 
-#elif defined( HAVE_GETCWD ) || defined( WINAPI )
+#elif defined( HAVE_GETCWD )
 
 /* Retrieves the current working directory
  * This function uses the POSIX getcwd function or equivalent
@@ -3070,12 +2999,9 @@ int libcpath_path_get_current_working_directory_wide(
      libcerror_error_t **error )
 {
 	static char *function                        = "libcpath_path_get_current_working_directory_wide";
-
-#if !defined( WINAPI )
 	char *narrow_current_working_directory       = 0;
 	size_t narrow_current_working_directory_size = 0;
 	int result                                   = 0;
-#endif
 
 	if( current_working_directory == NULL )
 	{
@@ -3110,9 +3036,6 @@ int libcpath_path_get_current_working_directory_wide(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	*current_working_directory_size = (size_t) _MAX_PATH;
-#else
 	narrow_current_working_directory = libcstring_narrow_string_allocate(
 	                                    PATH_MAX );
 
@@ -3196,7 +3119,6 @@ int libcpath_path_get_current_working_directory_wide(
 
 		return( -1 );
 	}
-#endif
 	*current_working_directory = libcstring_wide_string_allocate(
 	                              *current_working_directory_size );
 
@@ -3225,22 +3147,6 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
-#if defined( WINAPI )
-	if( _wgetcwd(
-	     *current_working_directory,
-	     *current_working_directory_size ) == NULL )
-	{
-		libcerror_system_set_error(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 errno,
-		 "%s: unable to retrieve current working directory.",
-		 function );
-
-		goto on_error;
-	}
-#else
 	if( libclocale_codepage == 0 )
 	{
 #if SIZEOF_WCHAR_T == 4
@@ -3294,17 +3200,14 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
-#endif
 	return( 1 );
 
 on_error:
-#if !defined( WINAPI )
 	if( narrow_current_working_directory != NULL )
 	{
 		memory_free(
 		 narrow_current_working_directory );
 	}
-#endif
 	if( *current_working_directory != NULL )
 	{
 		memory_free(
@@ -3326,6 +3229,8 @@ on_error:
 /* Determines the full path of the Windows path specified
  * The function uses the extended-length path format
  * (path with \\?\ prefix)
+ *
+ * Multiple successive \ not at the start of the path are combined into one
  *
  * Scenario's that are considered full paths:
  * Device path:			\\.\PhysicalDrive0
@@ -4390,9 +4295,11 @@ on_error:
 #else
 
 /* Determines the full path of the POSIX path specified
+ * Multiple successive / are combined into one
  *
  * Scenarios:
  * /home/user/file.txt
+ * /home/user//file.txt
  * /home/user/../user/file.txt
  * /../home/user/file.txt
  * user/../user/file.txt
@@ -5242,7 +5149,7 @@ on_error:
 	return( -1 );
 }
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 ) && !defined( USE_CRT_FUNCTIONS )
+#if defined( WINAPI ) && ( WINVER >= 0x0501 )
 
 /* Makes the directory
  * This function uses the WINAPI function for Windows XP or later
@@ -5285,12 +5192,12 @@ int libcpath_path_make_directory_wide(
 	return( 1 );
 }
 
-#elif defined( WINAPI ) && !defined( USE_CRT_FUNCTIONS )
+#elif defined( WINAPI )
 
 /* TODO */
 #error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
-#elif defined( HAVE_MKDIR ) || defined( WINAPI )
+#elif defined( HAVE_MKDIR )
 
 /* Makes the directory
  * This function uses the POSIX mkdir function or equivalent
@@ -5301,13 +5208,10 @@ int libcpath_path_make_directory_wide(
      libcerror_error_t **error )
 {
 	static char *function             = "libcpath_path_make_directory_wide";
-
-#if !defined( WINAPI )
 	char *narrow_directory_name       = 0;
 	size_t directory_name_length      = 0;
 	size_t narrow_directory_name_size = 0;
 	int result                        = 0;
-#endif
 
 	if( directory_name == NULL )
 	{
@@ -5320,22 +5224,6 @@ int libcpath_path_make_directory_wide(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	if( _wmkdir(
-	     directory_name ) != 0 )
-	{
-		libcerror_system_set_error(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 errno,
-		 "%s: unable to make directory.",
-		 function );
-
-		return( -1 );
-	}
-
-#else
 	directory_name_length = libcstring_wide_string_length(
 	                         directory_name );
 
@@ -5483,10 +5371,9 @@ int libcpath_path_make_directory_wide(
 	}
 	memory_free(
 	 narrow_directory_name );
-#endif
+
 	return( 1 );
 
-#if !defined( WINAPI )
 on_error:
 	if( narrow_directory_name != NULL )
 	{
@@ -5494,7 +5381,6 @@ on_error:
 		 narrow_directory_name );
 	}
 	return( -1 );
-#endif
 }
 
 #else

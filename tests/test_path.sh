@@ -95,6 +95,11 @@ then
 	exit ${EXIT_FAILURE};
 fi
 
+if ! test_path "/home/user//test.txt" "/home/user/test.txt"
+then
+	exit ${EXIT_FAILURE};
+fi
+
 if ! test_path "/home/username/../user/test.txt" "/home/user/test.txt"
 then
 	exit ${EXIT_FAILURE};
