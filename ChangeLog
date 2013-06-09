@@ -14,6 +14,9 @@ TODO
   - wide character path functions
   - windows functions
 
+20130609
+* fix in .pc.in file
+
 20130509
 * removed CRT functions
 * updated dependencies
