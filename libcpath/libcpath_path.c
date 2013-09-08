@@ -2509,7 +2509,7 @@ int libcpath_path_sanitize(
 		      || ( path[ path_index ] == '@' )
 		      || ( path[ path_index ] == '|' )
 		      || ( path[ path_index ] == '~' )
-		      || ( path[ path_index ] == 0x7e ) )
+		      || ( path[ path_index ] == 0x7f ) )
 		{
 			path[ path_index ] = '_';
 		}
@@ -2599,9 +2599,9 @@ int libcpath_path_sanitize_filename(
 		      || ( filename[ filename_index ] == '>' )
 		      || ( filename[ filename_index ] == '?' )
 		      || ( filename[ filename_index ] == '@' )
-		      || ( filename[ filename_index ] == '~' )
 		      || ( filename[ filename_index ] == '|' )
-		      || ( filename[ filename_index ] == 0x7e ) )
+		      || ( filename[ filename_index ] == '~' )
+		      || ( filename[ filename_index ] == 0x7f ) )
 		{
 			filename[ filename_index ] = '_';
 		}
@@ -5474,7 +5474,7 @@ int libcpath_path_sanitize_wide(
 		      || ( path[ path_index ] == (wchar_t) '@' )
 		      || ( path[ path_index ] == (wchar_t) '|' )
 		      || ( path[ path_index ] == (wchar_t) '~' )
-		      || ( path[ path_index ] == 0x7e ) )
+		      || ( path[ path_index ] == 0x7f ) )
 		{
 			path[ path_index ] = (wchar_t) '_';
 		}
@@ -5564,9 +5564,9 @@ int libcpath_path_sanitize_filename_wide(
 		      || ( filename[ filename_index ] == (wchar_t) '>' )
 		      || ( filename[ filename_index ] == (wchar_t) '?' )
 		      || ( filename[ filename_index ] == (wchar_t) '@' )
-		      || ( filename[ filename_index ] == (wchar_t) '~' )
 		      || ( filename[ filename_index ] == (wchar_t) '|' )
-		      || ( filename[ filename_index ] == 0x7e ) )
+		      || ( filename[ filename_index ] == (wchar_t) '~' )
+		      || ( filename[ filename_index ] == 0x7f ) )
 		{
 			filename[ filename_index ] = (wchar_t) '_';
 		}
