@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20130832
+# Version: 20130922
 
 # Generic auto-generated build files
 *~
@@ -102,6 +102,7 @@ stamp-h1
 /libcpath/libcpath.rc
 /libcpath/libcpath_definitions.h
 /tests/cpath_test_path
+/tests/tmp
 
 # Local library dependencies specific files
 /libcerror
