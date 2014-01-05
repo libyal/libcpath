@@ -24,6 +24,7 @@ cpath_test_path_SOURCES = \
 
 cpath_test_path_LDADD = \
 	../libcpath/libcpath.la \
+	@LIBCERROR_LIBADD@ \
 	@LIBCSTRING_LIBADD@
 
 MAINTAINERCLEANFILES = \
