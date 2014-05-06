@@ -14,6 +14,9 @@ TODO
   - wide character path functions
   - windows functions
 
+20140506
+* fixes to build static library with mingw and cygwin
+
 20140105
 * 2014 update
 * updated dependencies
