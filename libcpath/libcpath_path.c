@@ -828,12 +828,16 @@ int libcpath_path_get_full_path(
 					}
 					if( volume_name == NULL )
 					{
-						volume_name        = &( current_directory[ 2 ] );
-						volume_name_length = current_directory_name_index - 2;
-					}
-					if( current_directory_name_index == current_directory_size )
-					{
-						volume_name_length -= 1;
+						volume_name = &( current_directory[ 2 ] );
+
+						if( current_directory_name_index == current_directory_size )
+						{
+							volume_name_length = current_directory_name_index - 3;
+						}
+						else
+						{
+							volume_name_length = current_directory_name_index - 2;
+						}
 					}
 				}
 			}
@@ -3652,12 +3656,16 @@ int libcpath_path_get_full_path_wide(
 					}
 					if( volume_name == NULL )
 					{
-						volume_name        = &( current_directory[ 2 ] );
-						volume_name_length = current_directory_name_index - 2;
-					}
-					if( current_directory_name_index == current_directory_size )
-					{
-						volume_name_length -= 1;
+						volume_name = &( current_directory[ 2 ] );
+
+						if( current_directory_name_index == current_directory_size )
+						{
+							volume_name_length = current_directory_name_index - 3;
+						}
+						else
+						{
+							volume_name_length = current_directory_name_index - 2;
+						}
 					}
 				}
 			}
