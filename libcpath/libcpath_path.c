@@ -831,11 +831,16 @@ int libcpath_path_get_full_path(
 						volume_name        = &( current_directory[ 2 ] );
 						volume_name_length = current_directory_name_index - 2;
 					}
+					if( current_directory_name_index == current_directory_size )
+					{
+						volume_name_length -= 1;
+					}
 				}
 			}
 		}
 	}
-	if( current_directory != NULL )
+	if( ( current_directory != NULL )
+	 && ( current_directory_name_index < current_directory_size ) )
 	{
 		if( libcsplit_narrow_string_split(
 		     &( current_directory[ current_directory_name_index ] ),
@@ -895,7 +900,8 @@ int libcpath_path_get_full_path(
 	 * add the size of the current directory
 	 * a directory separator, if necessary
 	 */
-	if( path_type == LIBCPATH_TYPE_RELATIVE )
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
+	 && ( current_directory_name_index < current_directory_size ) )
 	{
 		*full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
 
@@ -3649,11 +3655,16 @@ int libcpath_path_get_full_path_wide(
 						volume_name        = &( current_directory[ 2 ] );
 						volume_name_length = current_directory_name_index - 2;
 					}
+					if( current_directory_name_index == current_directory_size )
+					{
+						volume_name_length -= 1;
+					}
 				}
 			}
 		}
 	}
-	if( current_directory != NULL )
+	if( ( current_directory != NULL )
+	 && ( current_directory_name_index < current_directory_size ) )
 	{
 		if( libcsplit_wide_string_split(
 		     &( current_directory[ current_directory_name_index ] ),
@@ -3715,7 +3726,8 @@ int libcpath_path_get_full_path_wide(
 	 * add the size of the current directory
 	 * a directory separator, if necessary
 	 */
-	if( path_type == LIBCPATH_TYPE_RELATIVE )
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
+	 && ( current_directory_name_index < current_directory_size ) )
 	{
 		*full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
 

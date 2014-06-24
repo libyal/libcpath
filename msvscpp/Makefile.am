@@ -2,7 +2,7 @@ MSVSCPP_FILES = \
 	cpath_test_path/cpath_test_path.vcproj \
 	libcerror/libcerror.vcproj \
 	libclocale/libclocale.vcproj \
-	libcpath_dll/libcpath_dll.vcproj \
+	libcpath/libcpath.vcproj \
 	libcsplit/libcsplit.vcproj \
 	libcstring/libcstring.vcproj \
 	libuna/libuna.vcproj \

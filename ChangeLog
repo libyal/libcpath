@@ -14,6 +14,10 @@ TODO
   - wide character path functions
   - windows functions
 
+20140624
+* fix for handling UNC path with current working directory without a trailing \
+* updated msvscpp files
+
 20140506
 * fixes to build static library with mingw and cygwin
 

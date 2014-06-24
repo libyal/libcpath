@@ -8,6 +8,7 @@ TESTS = \
 	test_path.sh
 
 check_SCRIPTS = \
+	test_runner.sh \
 	test_path.sh
 
 EXTRA_DIST = \
