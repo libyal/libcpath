@@ -82,12 +82,12 @@ int main( int argc, char * const argv[] )
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
 	fprintf(
 	 stdout,
-	 "%ls\n",
+	 "%ls",
 	 full_path );
 #else
 	fprintf(
 	 stdout,
-	 "%s\n",
+	 "%s",
 	 full_path );
 #endif
 	memory_free(

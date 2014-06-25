@@ -1,22 +1,18 @@
 TODO
-* move split functions to libcsplit ?
+* add pre XP WINVER support
+* add support for:
+  - \\
+  - c:\\..\\
+
 * improve sanitize path/filename
-  - update m4 script
-  - update man page
-  - add tests
 * add libcpath_codepage.h and codepage functions
-* complete full path functions
-  - implement libbfio_path_get_full_path_wide
-  - POSIX: add support for absolute paths with x/../y
-* update include header
 * update man page
-* add tests
-  - wide character path functions
-  - windows functions
+* add more tests
 
 20140624
 * fix for handling UNC path with current working directory without a trailing \
 * updated msvscpp files
+* worked on tests for Windows paths
 
 20140506
 * fixes to build static library with mingw and cygwin

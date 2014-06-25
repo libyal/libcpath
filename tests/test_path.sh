@@ -36,7 +36,7 @@ test_path()
 	mkdir ${TMP};
 	cd ${TMP};
 
-	echo ${FULLPATH} > input;
+	echo -n ${FULLPATH} > input;
 
 	../${CPATH_TEST_PATH} ${FILENAME} > output;
 
@@ -80,39 +80,92 @@ fi
 
 rm -rf ${TMP};
 
-if ! test_path "user/test.txt" "${PWD}/tmp/user/test.txt"
-then
-	exit ${EXIT_FAILURE};
-fi
+UNAME=`uname -o`;
 
-if ! test_path "username/../user/test.txt" "${PWD}/tmp/user/test.txt"
+if test ${UNAME} != "Msys";
 then
-	exit ${EXIT_FAILURE};
-fi
+	if ! test_path "user/test.txt" "${PWD}/tmp/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
 
-if ! test_path "/home/user/test.txt" "/home/user/test.txt"
-then
-	exit ${EXIT_FAILURE};
-fi
+	if ! test_path "username/../user/test.txt" "${PWD}/tmp/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
 
-if ! test_path "/home/user//test.txt" "/home/user/test.txt"
-then
-	exit ${EXIT_FAILURE};
-fi
+	if ! test_path "/home/user/test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
 
-if ! test_path "/home/username/../user/test.txt" "/home/user/test.txt"
-then
-	exit ${EXIT_FAILURE};
-fi
+	if ! test_path "/home/user//test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
 
-if ! test_path "/../home/user/test.txt" "/home/user/test.txt"
-then
-	exit ${EXIT_FAILURE};
-fi
+	if ! test_path "/home/username/../user/test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
 
-if ! test_path "/../home/username/../user/test.txt" "/home/user/test.txt"
-then
-	exit ${EXIT_FAILURE};
+	if ! test_path "/../home/user/test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "/../home/username/../user/test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+else
+	WINPWD=`pwd -W | tr '/' '\\'`;
+	DRIVE=`echo ${WINPWD} | cut -c 1`;
+
+	if ! test_path "user\\test.txt" "\\\\?\\${WINPWD}\\tmp\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "username\\..\\user\\test.txt" "\\\\?\\${WINPWD}\\tmp\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "\\home\\user\\test.txt" "\\\\?\\${DRIVE}:\\home\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "c:\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "c:\\home\\user\\\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "c:\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "c:\\..\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "c:\\..\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "\\\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
 fi
 
 exit ${EXIT_SUCCESS};
