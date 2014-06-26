@@ -1,5 +1,4 @@
 TODO
-* add pre XP WINVER support
 * add support for:
   - \\
   - c:\\..\\
@@ -8,6 +7,9 @@ TODO
 * add libcpath_codepage.h and codepage functions
 * update man page
 * add more tests
+
+20140626
+* worked on pre Windows XP support
 
 20140624
 * fix for handling UNC path with current working directory without a trailing \

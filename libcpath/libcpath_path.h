@@ -33,10 +33,21 @@
 extern "C" {
 #endif
 
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+BOOL libcpath_SetCurrentDirectoryA(
+      LPCSTR path );
+#endif
+
 LIBCPATH_EXTERN \
 int libcpath_path_change_directory(
      const char *directory_name,
      libcerror_error_t **error );
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+DWORD libcpath_GetCurrentDirectoryA(
+       DWORD buffer_size,
+       LPCSTR buffer );
+#endif
 
 LIBCPATH_EXTERN \
 int libcpath_path_get_current_working_directory(
@@ -62,6 +73,12 @@ int libcpath_path_join(
      size_t filename_length,
      libcerror_error_t **error );
 
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+BOOL libcpath_CreateDirectoryA(
+      LPCSTR path,
+      SECURITY_ATTRIBUTES *security_attributes );
+#endif
+
 LIBCPATH_EXTERN \
 int libcpath_path_make_directory(
      const char *directory_name,
@@ -81,10 +98,21 @@ int libcpath_path_sanitize_filename(
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+BOOL libcpath_SetCurrentDirectoryW(
+      LPCWSTR path );
+#endif
+
 LIBCPATH_EXTERN \
 int libcpath_path_change_directory_wide(
      const wchar_t *directory_name,
      libcerror_error_t **error );
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+DWORD libcpath_GetCurrentDirectoryW(
+       DWORD buffer_size,
+       LPCWSTR buffer );
+#endif
 
 LIBCPATH_EXTERN \
 int libcpath_path_get_current_working_directory_wide(
@@ -109,6 +137,12 @@ int libcpath_path_join_wide(
      const wchar_t *filename,
      size_t filename_length,
      libcerror_error_t **error );
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+BOOL libcpath_CreateDirectoryW(
+      LPCWSTR path,
+      SECURITY_ATTRIBUTES *security_attributes );
+#endif
 
 LIBCPATH_EXTERN \
 int libcpath_path_make_directory_wide(

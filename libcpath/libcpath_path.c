@@ -62,10 +62,59 @@ enum LIBCPATH_TYPES
 
 #endif
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of SetCurrentDirectoryA
+ * Returns TRUE if successful or FALSE on error
+ */
+BOOL libcpath_SetCurrentDirectoryA(
+      LPCSTR path )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	BOOL result            = FALSE;
+
+	if( filename == NULL )
+	{
+		return( FALSE );
+	}
+	library_handle = LoadLibrary(
+	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( FALSE );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "SetCurrentDirectoryA" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  path );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcfile_CloseHandle(
+		 result );
+
+		return( FALSE );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
+#if defined( WINAPI )
 
 /* Changes the directory
- * This function uses the WINAPI function for Windows XP or later
+ * This function uses the WINAPI function for Windows XP (0x0501) or later
+ * or tries to dynamically call the function for Windows 2000 (0x0500) or earlier
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_change_directory(
@@ -86,8 +135,13 @@ int libcpath_path_change_directory(
 
 		return( -1 );
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	if( libcpath_SetCurrentDirectoryA(
+	     directory_name ) == 0 )
+#else
 	if( SetCurrentDirectoryA(
 	     directory_name ) == 0 )
+#endif
 	{
 		error_code = GetLastError();
 
@@ -103,11 +157,6 @@ int libcpath_path_change_directory(
 	}
 	return( 1 );
 }
-
-#elif defined( WINAPI )
-
-/* TODO */
-#error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
 #elif defined( HAVE_CHDIR )
 
@@ -152,10 +201,61 @@ int libcpath_path_change_directory(
 #error Missing change directory function
 #endif
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of GetCurrentDirectoryA
+ * Returns the number of characters in the current directory string or 0 on error
+ */
+DWORD libcpath_GetCurrentDirectoryA(
+       DWORD buffer_size,
+       LPCSTR buffer )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	DWORD result           = 0;
+
+	if( filename == NULL )
+	{
+		return( 0 );
+	}
+	library_handle = LoadLibrary(
+	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( 0 );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "GetCurrentDirectoryA" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  buffer_size,
+			  buffer );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcfile_CloseHandle(
+		 result );
+
+		return( 0 );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
+#if defined( WINAPI )
 
 /* Retrieves the current working directory
- * This function uses the WINAPI function for Windows XP or later
+ * This function uses the WINAPI function for Windows XP (0x0501) or later
+ * or tries to dynamically call the function for Windows 2000 (0x0500) or earlier
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_current_working_directory(
@@ -256,9 +356,15 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	if( libcpath_GetCurrentDirectory(
+	     safe_current_working_directory_size,
+	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+#else
 	if( GetCurrentDirectoryA(
 	     safe_current_working_directory_size,
 	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+#endif
 	{
 		error_code = GetLastError();
 
@@ -286,11 +392,6 @@ on_error:
 
 	return( -1 );
 }
-
-#elif defined( WINAPI )
-
-/* TODO */
-#error WINAPI get current working directory function for Windows 2000 or earlier NOT implemented yet
 
 #elif defined( HAVE_GETCWD )
 
@@ -2339,10 +2440,61 @@ on_error:
 	return( -1 );
 }
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of CreateDirectoryA
+ * Returns TRUE if successful or FALSE on error
+ */
+BOOL libcpath_CreateDirectoryA(
+      LPCSTR path,
+      SECURITY_ATTRIBUTES *security_attributes )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	BOOL result            = FALSE;
+
+	if( filename == NULL )
+	{
+		return( 0 );
+	}
+	library_handle = LoadLibrary(
+	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( 0 );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "CreateDirectoryA" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  path,
+			  security_attributes );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcfile_CloseHandle(
+		 result );
+
+		return( 0 );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
+#if defined( WINAPI )
 
 /* Makes the directory
- * This function uses the WINAPI function for Windows XP or later
+ * This function uses the WINAPI function for Windows XP (0x0501) or later
+ * or tries to dynamically call the function for Windows 2000 (0x0500) or earlier
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_make_directory(
@@ -2363,9 +2515,15 @@ int libcpath_path_make_directory(
 
 		return( -1 );
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	if( libcpath_CreateDirectoryA(
+	     directory_name,
+	     NULL ) == 0 )
+#else
 	if( CreateDirectoryA(
 	     directory_name,
 	     NULL ) == 0 )
+#endif
 	{
 		error_code = GetLastError();
 
@@ -2381,11 +2539,6 @@ int libcpath_path_make_directory(
 	}
 	return( 1 );
 }
-
-#elif defined( WINAPI )
-
-/* TODO */
-#error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
 #elif defined( HAVE_MKDIR )
 
@@ -2621,10 +2774,59 @@ int libcpath_path_sanitize_filename(
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of SetCurrentDirectoryW
+ * Returns TRUE if successful or FALSE on error
+ */
+BOOL libcpath_SetCurrentDirectoryW(
+      LPCWSTR path )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	BOOL result            = FALSE;
+
+	if( filename == NULL )
+	{
+		return( FALSE );
+	}
+	library_handle = LoadLibrary(
+	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( FALSE );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "SetCurrentDirectoryW" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  path );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcfile_CloseHandle(
+		 result );
+
+		return( FALSE );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
+#if defined( WINAPI )
 
 /* Changes the directory
- * This function uses the WINAPI function for Windows XP or later
+ * This function uses the WINAPI function for Windows XP (0x0501) or later
+ * or tries to dynamically call the function for Windows 2000 (0x0500) or earlier
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_change_directory_wide(
@@ -2645,8 +2847,13 @@ int libcpath_path_change_directory_wide(
 
 		return( -1 );
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	if( libcpath_SetCurrentDirectoryW(
+	     directory_name ) == 0 )
+#else
 	if( SetCurrentDirectoryW(
 	     directory_name ) == 0 )
+#endif
 	{
 		error_code = GetLastError();
 
@@ -2662,11 +2869,6 @@ int libcpath_path_change_directory_wide(
 	}
 	return( 1 );
 }
-
-#elif defined( WINAPI )
-
-/* TODO */
-#error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
 #elif defined( HAVE_CHDIR )
 
@@ -2857,10 +3059,61 @@ on_error:
 #error Missing change directory function
 #endif
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of GetCurrentDirectoryW
+ * Returns the number of characters in the current directory string or 0 on error
+ */
+DWORD libcpath_GetCurrentDirectoryW(
+       DWORD buffer_size,
+       LPCWSTR buffer )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	DWORD result           = 0;
+
+	if( filename == NULL )
+	{
+		return( 0 );
+	}
+	library_handle = LoadLibrary(
+	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( 0 );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "GetCurrentDirectoryW" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  buffer_size,
+			  buffer );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcfile_CloseHandle(
+		 result );
+
+		return( 0 );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
+#if defined( WINAPI )
 
 /* Retrieves the current working directory
- * This function uses the WINAPI function for Windows XP or later
+ * This function uses the WINAPI function for Windows XP (0x0501) or later
+ * or tries to dynamically call the function for Windows 2000 (0x0500) or earlier
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_current_working_directory_wide(
@@ -2961,9 +3214,15 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	if( libcpath_GetCurrentDirectoryW(
+	     safe_current_working_directory_size,
+	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+#else
 	if( GetCurrentDirectoryW(
 	     safe_current_working_directory_size,
 	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+#endif
 	{
 		error_code = GetLastError();
 
@@ -2991,11 +3250,6 @@ on_error:
 
 	return( -1 );
 }
-
-#elif defined( WINAPI )
-
-/* TODO */
-#error WINAPI get current working directory function for Windows 2000 or earlier NOT implemented yet
 
 #elif defined( HAVE_GETCWD )
 
@@ -5169,10 +5423,61 @@ on_error:
 	return( -1 );
 }
 
-#if defined( WINAPI ) && ( WINVER >= 0x0501 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of CreateDirectoryW
+ * Returns TRUE if successful or FALSE on error
+ */
+BOOL libcpath_CreateDirectoryW(
+      LPCWSTR path,
+      SECURITY_ATTRIBUTES *security_attributes )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	BOOL result            = FALSE;
+
+	if( filename == NULL )
+	{
+		return( 0 );
+	}
+	library_handle = LoadLibrary(
+	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( 0 );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "CreateDirectoryW" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  path,
+			  security_attributes );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcfile_CloseHandle(
+		 result );
+
+		return( 0 );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
+#if defined( WINAPI )
 
 /* Makes the directory
- * This function uses the WINAPI function for Windows XP or later
+ * This function uses the WINAPI function for Windows XP (0x0501) or later
+ * or tries to dynamically call the function for Windows 2000 (0x0500) or earlier
  * Returns 1 if successful or -1 on error
  */
 int libcpath_path_make_directory_wide(
@@ -5193,9 +5498,15 @@ int libcpath_path_make_directory_wide(
 
 		return( -1 );
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	if( libcpath_CreateDirectoryW(
+	     directory_name,
+	     NULL ) == 0 )
+#else
 	if( CreateDirectoryW(
 	     directory_name,
 	     NULL ) == 0 )
+#endif
 	{
 		error_code = GetLastError();
 
@@ -5211,11 +5522,6 @@ int libcpath_path_make_directory_wide(
 	}
 	return( 1 );
 }
-
-#elif defined( WINAPI )
-
-/* TODO */
-#error WINAPI make directory function for Windows 2000 or earlier NOT implemented yet
 
 #elif defined( HAVE_MKDIR )
 
