@@ -10,8 +10,16 @@ Package: libcpath
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: libcpath-dbg
 Description: Library to support cross-platform C path functions
  libcpath is a library to support cross-platform C path functions.
+
+Package: libcpath-dbg
+Architecture: any
+Section: debug
+Depends: libcpath (= ${Source-Version}), ${misc:Depends}
+Description: Debugging symbols for libcpath
+ Debugging symbols for libcpath.
 
 Package: libcpath-dev
 Section: libdevel
