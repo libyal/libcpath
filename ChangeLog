@@ -8,6 +8,10 @@ TODO
 * update man page
 * add more tests
 
+20141003
+* changes for project site move
+* worked on support for paths that start with \\?\ or \\.\
+
 20140915
 * changes for project site move
 

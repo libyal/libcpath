@@ -166,6 +166,16 @@ else
 	then
 		exit ${EXIT_FAILURE};
 	fi
+
+	if ! test_path "\\\\.\\PhysicalDrive0" "\\\\.\\PhysicalDrive0"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}" "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}"
+	then
+		exit ${EXIT_FAILURE};
+	fi
 fi
 
 exit ${EXIT_SUCCESS};
