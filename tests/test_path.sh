@@ -80,7 +80,7 @@ fi
 
 rm -rf ${TMP};
 
-UNAME=`uname -o`;
+UNAME=`uname -o | sed 's/[\r\n]//'`;
 
 if test ${UNAME} != "Msys";
 then
