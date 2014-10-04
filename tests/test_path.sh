@@ -132,8 +132,7 @@ else
 		exit ${EXIT_FAILURE};
 	fi
 
-        # TODO: add support for \
-	if test_path "\\home\\user\\test.txt" "\\\\?\\${DRIVE}:\\home\\user\\test.txt"
+	if ! test_path "\\home\\user\\test.txt" "\\\\?\\${DRIVE}:\\home\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
