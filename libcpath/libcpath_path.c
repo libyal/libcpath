@@ -119,7 +119,7 @@ BOOL libcpath_SetCurrentDirectoryA(
 	HMODULE library_handle = NULL;
 	BOOL result            = FALSE;
 
-	if( filename == NULL )
+	if( path == NULL )
 	{
 		return( FALSE );
 	}
@@ -146,7 +146,7 @@ BOOL libcpath_SetCurrentDirectoryA(
 	     library_handle ) != TRUE )
 	{
 		libcpath_CloseHandle(
-		 result );
+		 library_handle );
 
 		return( FALSE );
 	}
@@ -259,7 +259,7 @@ DWORD libcpath_GetCurrentDirectoryA(
 	HMODULE library_handle = NULL;
 	DWORD result           = 0;
 
-	if( filename == NULL )
+	if( path == NULL )
 	{
 		return( 0 );
 	}
@@ -287,7 +287,7 @@ DWORD libcpath_GetCurrentDirectoryA(
 	     library_handle ) != TRUE )
 	{
 		libcpath_CloseHandle(
-		 result );
+		 library_handle );
 
 		return( 0 );
 	}
@@ -2526,7 +2526,7 @@ BOOL libcpath_CreateDirectoryA(
 	     library_handle ) != TRUE )
 	{
 		libcpath_CloseHandle(
-		 result );
+		 library_handle );
 
 		return( 0 );
 	}
@@ -2858,7 +2858,7 @@ BOOL libcpath_SetCurrentDirectoryW(
 	     library_handle ) != TRUE )
 	{
 		libcpath_CloseHandle(
-		 result );
+		 library_handle );
 
 		return( FALSE );
 	}
@@ -3145,7 +3145,7 @@ DWORD libcpath_GetCurrentDirectoryW(
 	     library_handle ) != TRUE )
 	{
 		libcpath_CloseHandle(
-		 result );
+		 library_handle );
 
 		return( 0 );
 	}
@@ -5509,7 +5509,7 @@ BOOL libcpath_CreateDirectoryW(
 	     library_handle ) != TRUE )
 	{
 		libcpath_CloseHandle(
-		 result );
+		 library_handle );
 
 		return( 0 );
 	}
