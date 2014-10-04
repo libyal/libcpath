@@ -64,6 +64,51 @@ enum LIBCPATH_TYPES
 
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
 
+/* Cross Windows safe version of CloseHandle
+ * Returns TRUE if successful or FALSE on error
+ */
+BOOL libcpath_CloseHandle(
+      HANDLE file_handle )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	BOOL result            = FALSE;
+
+	if( file_handle == NULL )
+	{
+		return( FALSE );
+	}
+	library_handle = LoadLibrary(
+	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( FALSE );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "CloseHandle" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  file_handle );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		result = FALSE;
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
 /* Cross Windows safe version of SetCurrentDirectoryA
  * Returns TRUE if successful or FALSE on error
  */
@@ -100,7 +145,7 @@ BOOL libcpath_SetCurrentDirectoryA(
 	if( FreeLibrary(
 	     library_handle ) != TRUE )
 	{
-		libcfile_CloseHandle(
+		libcpath_CloseHandle(
 		 result );
 
 		return( FALSE );
@@ -241,7 +286,7 @@ DWORD libcpath_GetCurrentDirectoryA(
 	if( FreeLibrary(
 	     library_handle ) != TRUE )
 	{
-		libcfile_CloseHandle(
+		libcpath_CloseHandle(
 		 result );
 
 		return( 0 );
@@ -2480,7 +2525,7 @@ BOOL libcpath_CreateDirectoryA(
 	if( FreeLibrary(
 	     library_handle ) != TRUE )
 	{
-		libcfile_CloseHandle(
+		libcpath_CloseHandle(
 		 result );
 
 		return( 0 );
@@ -2812,7 +2857,7 @@ BOOL libcpath_SetCurrentDirectoryW(
 	if( FreeLibrary(
 	     library_handle ) != TRUE )
 	{
-		libcfile_CloseHandle(
+		libcpath_CloseHandle(
 		 result );
 
 		return( FALSE );
@@ -3099,7 +3144,7 @@ DWORD libcpath_GetCurrentDirectoryW(
 	if( FreeLibrary(
 	     library_handle ) != TRUE )
 	{
-		libcfile_CloseHandle(
+		libcpath_CloseHandle(
 		 result );
 
 		return( 0 );
@@ -5463,7 +5508,7 @@ BOOL libcpath_CreateDirectoryW(
 	if( FreeLibrary(
 	     library_handle ) != TRUE )
 	{
-		libcfile_CloseHandle(
+		libcpath_CloseHandle(
 		 result );
 
 		return( 0 );

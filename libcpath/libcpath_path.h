@@ -34,6 +34,11 @@ extern "C" {
 #endif
 
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
+BOOL libcpath_CloseHandle(
+      HANDLE file_handle );
+#endif
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
 BOOL libcpath_SetCurrentDirectoryA(
       LPCSTR path );
 #endif

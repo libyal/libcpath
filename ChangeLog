@@ -8,6 +8,9 @@ TODO
 * update man page
 * add more tests
 
+20141004
+* fixes for WINAPI < 0x0500 compatibility
+
 20141003
 * changes for project site move
 * worked on support for paths that start with \\?\ or \\.\
