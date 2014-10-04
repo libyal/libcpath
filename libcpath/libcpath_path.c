@@ -402,7 +402,7 @@ int libcpath_path_get_current_working_directory(
 		goto on_error;
 	}
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
-	if( libcpath_GetCurrentDirectory(
+	if( libcpath_GetCurrentDirectoryA(
 	     safe_current_working_directory_size,
 	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
 #else
