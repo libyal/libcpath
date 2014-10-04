@@ -5481,7 +5481,7 @@ BOOL libcpath_CreateDirectoryW(
 	HMODULE library_handle = NULL;
 	BOOL result            = FALSE;
 
-	if( filename == NULL )
+	if( path == NULL )
 	{
 		return( 0 );
 	}
