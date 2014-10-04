@@ -259,7 +259,7 @@ DWORD libcpath_GetCurrentDirectoryA(
 	HMODULE library_handle = NULL;
 	DWORD result           = 0;
 
-	if( path == NULL )
+	if( buffer == NULL )
 	{
 		return( 0 );
 	}
@@ -3117,7 +3117,7 @@ DWORD libcpath_GetCurrentDirectoryW(
 	HMODULE library_handle = NULL;
 	DWORD result           = 0;
 
-	if( filename == NULL )
+	if( buffer == NULL )
 	{
 		return( 0 );
 	}
