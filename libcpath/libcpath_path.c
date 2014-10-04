@@ -681,7 +681,12 @@ int libcpath_path_get_full_path(
 
 		return( -1 );
 	}
-	if( path_length >= 2 )
+	if( ( path_length == 2 )
+	 && ( path[ 1 ] == '\\' ) )
+	{
+		path_type = LIBCPATH_TYPE_ABSOLUTE;
+	}
+	else if( path_length >= 2 )
 	{
 		/* Check if the path starts with a volume letter
 		 */
@@ -765,6 +770,12 @@ int libcpath_path_get_full_path(
 				volume_name        = &( path[ 2 ] );
 				volume_name_length = path_directory_name_index - 2;
 			}
+		}
+		/* Check for absolue paths
+		 */
+		else if( path[ 0 ] == (wchar_t) '\\' )
+		{
+			path_type = LIBCPATH_TYPE_ABSOLUTE;
 		}
 	}
 	/* If the path is a device path, an extended-length path or an UNC
@@ -3663,7 +3674,12 @@ int libcpath_path_get_full_path_wide(
 
 		return( -1 );
 	}
-	if( path_length >= 2 )
+	if( ( path_length == 2 )
+	 && ( path[ 1 ] == (wchar_t) '\\' ) )
+	{
+		path_type = LIBCPATH_TYPE_ABSOLUTE;
+	}
+	else if( path_length >= 2 )
 	{
 		/* Check if the path starts with a volume letter
 		 */
@@ -3747,6 +3763,12 @@ int libcpath_path_get_full_path_wide(
 				volume_name        = &( path[ 2 ] );
 				volume_name_length = path_directory_name_index - 2;
 			}
+		}
+		/* Check for absolue paths
+		 */
+		else if( path[ 0 ] == (wchar_t) '\\' )
+		{
+			path_type = LIBCPATH_TYPE_ABSOLUTE;
 		}
 	}
 	/* If the path is a device path, an extended-length path or an UNC
