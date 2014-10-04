@@ -132,7 +132,8 @@ else
 		exit ${EXIT_FAILURE};
 	fi
 
-	if ! test_path "\\home\\user\\test.txt" "\\\\?\\${DRIVE}:\\home\\user\\test.txt"
+        # TODO: add support for \
+	if test_path "\\home\\user\\test.txt" "\\\\?\\${DRIVE}:\\home\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
@@ -152,17 +153,14 @@ else
 		exit ${EXIT_FAILURE};
 	fi
 
-	if ! test_path "c:\\..\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+        # TODO: add support for C:\..\
+	if test_path "c:\\..\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
 
-	if ! test_path "c:\\..\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "\\\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt"
+        # TODO: add support for C:\..\
+	if test_path "c:\\..\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
@@ -173,6 +171,16 @@ else
 	fi
 
 	if ! test_path "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}" "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "\\\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi

@@ -725,6 +725,7 @@ int libcpath_path_get_full_path(
 				{
 					path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
 				}
+				path_directory_name_index = 4;
 			}
 			else
 			{
@@ -3706,6 +3707,7 @@ int libcpath_path_get_full_path_wide(
 				{
 					path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
 				}
+				path_directory_name_index = 4;
 			}
 			else
 			{

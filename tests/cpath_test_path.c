@@ -40,12 +40,12 @@ int main( int argc, char * const argv[] )
 #endif
 {
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	wchar_t *full_path      = NULL;
+	wchar_t *full_path       = NULL;
 #else
-	char *full_path         = NULL;
+	char *full_path          = NULL;
 #endif
 	libcerror_error_t *error = NULL;
-	size_t full_path_size   = 0;
+	size_t full_path_size    = 0;
 
 	if( argc < 2 )
 	{
