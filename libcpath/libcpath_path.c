@@ -2498,7 +2498,7 @@ BOOL libcpath_CreateDirectoryA(
 	HMODULE library_handle = NULL;
 	BOOL result            = FALSE;
 
-	if( filename == NULL )
+	if( path == NULL )
 	{
 		return( 0 );
 	}
@@ -2831,7 +2831,7 @@ BOOL libcpath_SetCurrentDirectoryW(
 	HMODULE library_handle = NULL;
 	BOOL result            = FALSE;
 
-	if( filename == NULL )
+	if( path == NULL )
 	{
 		return( FALSE );
 	}
