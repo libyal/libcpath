@@ -11,6 +11,7 @@ TODO
 20141004
 * fixes for WINAPI < 0x0500 compatibility
 * worked on support for paths that start with \\?\ or \\.\
+* worked on Windows absolue path support
 
 20141003
 * changes for project site move
