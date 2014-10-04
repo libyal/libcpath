@@ -153,14 +153,12 @@ else
 		exit ${EXIT_FAILURE};
 	fi
 
-        # TODO: add support for C:\..\
-	if test_path "c:\\..\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+	if ! test_path "c:\\..\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
 
-        # TODO: add support for C:\..\
-	if test_path "c:\\..\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
+	if ! test_path "c:\\..\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
