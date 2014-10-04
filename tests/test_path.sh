@@ -80,7 +80,7 @@ fi
 
 rm -rf ${TMP};
 
-UNAME=`uname -o | cut -c 4`;
+UNAME=`uname -o`;
 
 if test ${UNAME} != "Msys";
 then
