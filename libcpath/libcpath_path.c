@@ -566,11 +566,9 @@ on_error:
  * Local 'relative' path:	..\directory\file.txt
  * Local 'relative' path:	.\directory\file.txt
  * Volume 'absolute' path:	C:\directory\file.txt
+ *                              C:\..\directory\file.txt
  * Volume 'relative' path:	C:directory\file.txt
  * UNC path:			\\server\share\directory\file.txt
- *
- * This function does not support paths like (although Windows does):
- * C:\..\directory\file.txt
  *
  * TODO handle:
  * Volume device path:		\\.\C:
@@ -3563,11 +3561,9 @@ on_error:
  * Local 'relative' path:	..\directory\file.txt
  * Local 'relative' path:	.\directory\file.txt
  * Volume 'absolute' path:	C:\directory\file.txt
+ *                              C:\..\directory\file.txt
  * Volume 'relative' path:	C:directory\file.txt
  * UNC path:			\\server\share\directory\file.txt
- *
- * This function does not support paths like (although Windows does):
- * C:\..\directory\file.txt
  *
  * Returns 1 if succesful or -1 on error
  */

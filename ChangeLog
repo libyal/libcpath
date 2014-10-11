@@ -1,12 +1,11 @@
 TODO
-* add support for:
-  - \\
-  - c:\\..\\
-
 * improve sanitize path/filename
 * add libcpath_codepage.h and codepage functions
 * update man page
 * add more tests
+
+20141011
+* worked on utility scripts
 
 20141004
 * fixes for WINAPI < 0x0500 compatibility
