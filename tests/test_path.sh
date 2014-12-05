@@ -80,45 +80,12 @@ fi
 
 rm -rf ${TMP};
 
-UNAME=`uname -o`;
+# Note that not all version of uname support the -o option
+# so we cannot use: `uname -o` = "Msys"
+UNAME=`uname -s | sed 's/-[^-]*$//'`;
 
-if test ${UNAME} != "Msys";
+if test ${UNAME} = "MINGW32_NT";
 then
-	if ! test_path "user/test.txt" "${PWD}/tmp/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "username/../user/test.txt" "${PWD}/tmp/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/home/user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/home/user//test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/home/username/../user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/../home/user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/../home/username/../user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-else
 	WINPWD=`pwd -W | tr '/' '\\'`;
 	DRIVE=`echo ${WINPWD} | cut -c 1`;
 
@@ -178,6 +145,41 @@ else
 	fi
 
 	if ! test_path "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+else
+	if ! test_path "user/test.txt" "${PWD}/tmp/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "username/../user/test.txt" "${PWD}/tmp/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "/home/user/test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "/home/user//test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "/home/username/../user/test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "/../home/user/test.txt" "/home/user/test.txt"
+	then
+		exit ${EXIT_FAILURE};
+	fi
+
+	if ! test_path "/../home/username/../user/test.txt" "/home/user/test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
