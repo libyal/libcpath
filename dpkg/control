@@ -1,13 +1,12 @@
 Source: libcpath
-Section: unknown
+Section: libs
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
 Build-Depends: debhelper (>= 7), autotools-dev
-Standards-Version: 3.8.3
+Standards-Version: 3.9.5
 Homepage: https://github.com/libyal/libcpath/
 
 Package: libcpath
-Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: libcpath-dbg
@@ -17,14 +16,14 @@ Description: Library to support cross-platform C path functions
 Package: libcpath-dbg
 Architecture: any
 Section: debug
-Depends: libcpath (= ${Source-Version}), ${misc:Depends}
+Depends: libcpath (= ${binary:Version}), ${misc:Depends}
 Description: Debugging symbols for libcpath
  Debugging symbols for libcpath.
 
 Package: libcpath-dev
 Section: libdevel
 Architecture: any
-Depends: libcpath (= ${Source-Version})
+Depends: libcpath (= ${binary:Version}), ${misc:Depends}
 Description: Header files and libraries for developing applications for libcpath
  Header files and libraries for developing applications for libcpath.
 
