@@ -44,28 +44,16 @@ Path functions
 Available when compiled with wide character string support:
 .Ft int
 .Fn libcpath_path_change_directory_wide "const wchar_t *directory_name, libcpath_error_t **error"
-.Pp
-Available when compiled with wide character string support:
 .Ft int
 .Fn libcpath_path_get_current_working_directory_wide "wchar_t **current_working_directory, size_t *current_working_directory_size, libcpath_error_t **error"
-.Pp
-Available when compiled with wide character string support:
 .Ft int
 .Fn libcpath_path_get_full_path_wide "const wchar_t *path, size_t path_length, wchar_t **full_path, size_t *full_path_size, libcpath_error_t **error"
-.Pp
-Available when compiled with wide character string support:
 .Ft int
 .Fn libcpath_path_join_wide "wchar_t **path, size_t *path_size, const wchar_t *directory_name, size_t directory_name_length, const wchar_t *filename, size_t filename_length, libcpath_error_t **error"
-.Pp
-Available when compiled with wide character string support:
 .Ft int
 .Fn libcpath_path_make_directory_wide "const wchar_t *directory_name, libcpath_error_t **error"
-.Pp
-Available when compiled with wide character string support:
 .Ft int
 .Fn libcpath_path_get_sanitized_path_wide "const wchar_t *path, size_t *path_size, wchar_t **sanitized_path, size_t *sanitized_path_size, libcpath_error_t **error"
-.Pp
-Available when compiled with wide character string support:
 .Ft int
 .Fn libcpath_path_get_sanitized_filename_wide "const wchar_t *filename, size_t *filename_size, wchar_t **sanitized_filename, size_t *sanitized_filename_size, libcpath_error_t **error"
 .Sh DESCRIPTION
