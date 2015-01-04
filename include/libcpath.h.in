@@ -162,7 +162,7 @@ int libcpath_path_get_sanitized_filename(
      size_t *sanitized_filename_size,
      libcpath_error_t **error );
 
-#if defined( HAVE_WIDE_CHARACTER_TYPE )
+#if defined( LIBCPATH_HAVE_WIDE_CHARACTER_TYPE )
 
 /* Changes the directory
  * Returns 1 if successful or -1 on error
@@ -235,7 +235,7 @@ int libcpath_path_get_sanitized_filename_wide(
      size_t *sanitized_filename_size,
      libcpath_error_t **error );
 
-#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
+#endif /* defined( LIBCPATH_HAVE_WIDE_CHARACTER_TYPE ) */
 
 #if defined( __cplusplus )
 }

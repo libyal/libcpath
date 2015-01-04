@@ -1,8 +1,11 @@
 TODO
 * improve sanitize path/filename
 * add libcpath_codepage.h and codepage functions
-* update man page
 * add more tests
+
+20150104
+* corrections in include header
+* updated man page: libcpath.3
 
 20150101
 * 2015 update
