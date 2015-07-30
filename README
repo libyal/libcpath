@@ -1,10 +1,12 @@
 libcpath is a library for cross-platform C path functions.
 
 Project information:
+
 * Status: alpha
 * Licence: LGPLv3+
 
 For more information see:
+
 * Project documentation: https://github.com/libyal/libcpath/wiki/Home
 * How to build from source: https://github.com/libyal/libcpath/wiki/Building
 
