@@ -3,6 +3,9 @@ TODO
 * add libcpath_codepage.h and codepage functions
 * add more tests
 
+20150730
+* worked on tests
+
 20150104
 * corrections in include header
 * updated man page: libcpath.3

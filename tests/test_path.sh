@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Basic File IO (CPATH) library path testing script
+# Library path testing script
 #
 # Copyright (C) 2008-2015, Joachim Metz <joachim.metz@gmail.com>
 #
@@ -18,40 +18,49 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this software.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
-
-TMP="tmp";
-
-CMP="cmp";
 
 test_path()
 { 
 	FILENAME=$1;
 	FULLPATH=$2;
 
-	mkdir ${TMP};
-	cd ${TMP};
+	TEST_RUNNER="tests/test_runner.sh";
 
-	echo -n ${FULLPATH} > input;
+	if ! test -x "${TEST_RUNNER}";
+	then
+		TEST_RUNNER="./test_runner.sh";
+	fi
 
-	../${CPATH_TEST_PATH} ${FILENAME} > output;
+	if ! test -x "${TEST_RUNNER}";
+	then
+		echo "Missing test runner: ${TEST_RUNNER}";
+
+		return ${EXIT_FAILURE};
+	fi
+	TMPDIR="tmp$$";
+
+	rm -rf ${TMPDIR};
+	mkdir ${TMPDIR};
+
+	echo -n ${FULLPATH} > ${TMPDIR}/input;
+
+	${TEST_RUNNER} ${TMPDIR} ./${TEST_PATH} ${FILENAME} > ${TMPDIR}/output;
 
 	RESULT=$?;
 
 	if test ${RESULT} -eq ${EXIT_SUCCESS};
 	then
-		if ! ${CMP} -s input output;
+		if ! cmp -s ${TMPDIR}/input ${TMPDIR}/output;
 		then
 			RESULT=${EXIT_FAILURE};
 		fi
 	fi
 
-	cd ..;
-	rm -rf ${TMP};
+	rm -rf ${TMPDIR};
 
 	echo -n "Testing full path: ${FILENAME} ";
 
@@ -64,21 +73,19 @@ test_path()
 	return ${RESULT};
 }
 
-CPATH_TEST_PATH="cpath_test_path";
+TEST_PATH="cpath_test_path";
 
-if ! test -x ${CPATH_TEST_PATH};
+if ! test -x ${TEST_PATH};
 then
-	CPATH_TEST_PATH="cpath_test_path.exe";
+	TEST_PATH="cpath_test_path.exe";
 fi
 
-if ! test -x ${CPATH_TEST_PATH};
+if ! test -x ${TEST_PATH};
 then
-	echo "Missing executable: ${CPATH_TEST_PATH}";
+	echo "Missing executable: ${TEST_PATH}";
 
 	exit ${EXIT_FAILURE};
 fi
-
-rm -rf ${TMP};
 
 # Note that not all version of uname support the -o option
 # so we cannot use: `uname -o` = "Msys"
@@ -89,12 +96,12 @@ then
 	WINPWD=`pwd -W | tr '/' '\\'`;
 	DRIVE=`echo ${WINPWD} | cut -c 1`;
 
-	if ! test_path "user\\test.txt" "\\\\?\\${WINPWD}\\tmp\\user\\test.txt"
+	if ! test_path "user\\test.txt" "\\\\?\\${WINPWD}\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
 
-	if ! test_path "username\\..\\user\\test.txt" "\\\\?\\${WINPWD}\\tmp\\user\\test.txt"
+	if ! test_path "username\\..\\user\\test.txt" "\\\\?\\${WINPWD}\\user\\test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
@@ -149,12 +156,12 @@ then
 		exit ${EXIT_FAILURE};
 	fi
 else
-	if ! test_path "user/test.txt" "${PWD}/tmp/user/test.txt"
+	if ! test_path "user/test.txt" "${PWD}/user/test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
 
-	if ! test_path "username/../user/test.txt" "${PWD}/tmp/user/test.txt"
+	if ! test_path "username/../user/test.txt" "${PWD}/user/test.txt"
 	then
 		exit ${EXIT_FAILURE};
 	fi
