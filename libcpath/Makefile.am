@@ -23,7 +23,7 @@ libcpath_la_SOURCES = \
 	libcpath_support.c libcpath_support.h \
 	libcpath_unused.h
 
-libcpath_la_LIBADD  = \
+libcpath_la_LIBADD = \
 	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
