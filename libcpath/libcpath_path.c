@@ -2135,6 +2135,20 @@ int libcpath_path_get_full_path(
 
 		goto on_error;
 	}
+	if( memory_set(
+	     *full_path,
+	     0,
+	     sizeof( char ) * *full_path_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear full path.",
+		 function );
+
+		goto on_error;
+	}
 	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
 		( *full_path )[ full_path_index ] = '/';
@@ -4360,6 +4374,20 @@ int libcpath_path_get_full_path_wide(
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create full path.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     *full_path,
+	     0,
+	     sizeof( wchar_t ) * *full_path_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear full path.",
 		 function );
 
 		goto on_error;
