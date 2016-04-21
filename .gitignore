@@ -116,6 +116,7 @@ stamp-h[1-9]
 /include/libcpath/types.h
 /libcpath/libcpath.rc
 /libcpath/libcpath_definitions.h
+/tests/cpath_test_get_version
 /tests/cpath_test_path
 /tests/tmp*
 

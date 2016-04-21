@@ -6,17 +6,29 @@ AM_CPPFLAGS = \
 	@LIBCPATH_DLL_IMPORT@
 
 TESTS = \
+	test_api_functions.sh \
 	test_path.sh
 
 check_SCRIPTS = \
-	test_runner.sh \
-	test_path.sh
+	test_api_functions.sh \
+	test_path.sh \
+	test_runner.sh
 
 EXTRA_DIST = \
 	$(check_SCRIPTS)
 
 check_PROGRAMS = \
+	cpath_test_get_version \
 	cpath_test_path
+
+cpath_test_get_version_SOURCES = \
+	cpath_test_libcpath.h \
+	cpath_test_libcstring.h \
+	cpath_test_get_version.c
+
+cpath_test_get_version_LDADD = \
+	../libcpath/libcpath.la \
+	@LIBCSTRING_LIBADD@
 
 cpath_test_path_SOURCES = \
 	cpath_test_libcerror.h \

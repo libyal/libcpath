@@ -1,56 +1,37 @@
 #!/bin/bash
-#
 # Library path testing script
 #
-# Copyright (C) 2008-2016, Joachim Metz <joachim.metz@gmail.com>
-#
-# Refer to AUTHORS for acknowledgements.
-#
-# This software is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This software is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+# Version: 20160420
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-test_path()
+TEST_PREFIX=`dirname ${PWD}`;
+TEST_PREFIX=`basename ${TEST_PREFIX} | sed 's/^lib\([^-]*\)/\1/'`;
+
+TEST_PROFILE="lib${TEST_PREFIX}";
+TEST_DESCRIPTION="path";
+OPTION_SETS="";
+
+TEST_TOOL_DIRECTORY=".";
+TEST_TOOL="${TEST_PREFIX}_test_path";
+
+run_test()
 { 
-	FILENAME=$1;
-	FULLPATH=$2;
+	local TEST_EXECUTABLE=$1;
+	local FILENAME=$2;
+	local FULLPATH=$3;
 
-	TEST_RUNNER="tests/test_runner.sh";
-
-	if ! test -x "${TEST_RUNNER}";
-	then
-		TEST_RUNNER="./test_runner.sh";
-	fi
-
-	if ! test -x "${TEST_RUNNER}";
-	then
-		echo "Missing test runner: ${TEST_RUNNER}";
-
-		return ${EXIT_FAILURE};
-	fi
-	TMPDIR="tmp$$";
+	local TMPDIR="tmp$$";
 
 	rm -rf ${TMPDIR};
 	mkdir ${TMPDIR};
 
 	echo -n ${FULLPATH} > ${TMPDIR}/input;
 
-	${TEST_RUNNER} ${TMPDIR} ./${TEST_PATH} ${FILENAME} > ${TMPDIR}/output;
-
-	RESULT=$?;
+	run_test_with_arguments "${TEST_EXECUTABLE}" ${FILENAME} > ${TMPDIR}/output;
+	local RESULT=$?;
 
 	if test ${RESULT} -eq ${EXIT_SUCCESS};
 	then
@@ -73,124 +54,221 @@ test_path()
 	return ${RESULT};
 }
 
-TEST_PATH="cpath_test_path";
+test_path()
+{
+	local TEST_EXECUTABLE=$1;
 
-if ! test -x ${TEST_PATH};
+	local RESULT=${EXIT_IGNORE};
+
+	# Note that not all version of uname support the -o option
+	# so we cannot use: `uname -o` = "Msys"
+	UNAME=`uname -s | sed 's/-[^-]*$//'`;
+
+	if test ${UNAME} = "MINGW32_NT";
+	then
+		WINPWD=`pwd -W | tr '/' '\\'`;
+		DRIVE=`echo ${WINPWD} | cut -c 1`;
+
+		run_test "${TEST_EXECUTABLE}" "user\\test.txt" "\\\\?\\${WINPWD}\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "username\\..\\user\\test.txt" "\\\\?\\${WINPWD}\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "\\home\\user\\test.txt" "\\\\?\\${DRIVE}:\\home\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "c:\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "c:\\home\\user\\\\test.txt" "\\\\?\\c:\\home\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "c:\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "c:\\..\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "c:\\..\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "\\\\.\\PhysicalDrive0" "\\\\.\\PhysicalDrive0";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}" "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "\\\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+	else
+		run_test "${TEST_EXECUTABLE}" "user/test.txt" "${PWD}/user/test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "username/../user/test.txt" "${PWD}/user/test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "/home/user/test.txt" "/home/user/test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "/home/user//test.txt" "/home/user/test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "/home/username/../user/test.txt" "/home/user/test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "/../home/user/test.txt" "/home/user/test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+
+		run_test "${TEST_EXECUTABLE}" "/../home/username/../user/test.txt" "/home/user/test.txt";
+		RESULT=$?;
+
+		if test ${RESULT} -ne ${EXIT_SUCCESS};
+		then
+			return ${RESULT};
+		fi
+	fi
+	return ${EXIT_SUCCESS};
+}
+
+if ! test -z ${SKIP_LIBRARY_TESTS};
 then
-	TEST_PATH="cpath_test_path.exe";
+	exit ${EXIT_IGNORE};
 fi
 
-if ! test -x ${TEST_PATH};
+TEST_EXECUTABLE="${TEST_TOOL_DIRECTORY}/${TEST_TOOL}";
+
+if ! test -x "${TEST_EXECUTABLE}";
 then
-	echo "Missing executable: ${TEST_PATH}";
+	TEST_EXECUTABLE="${TEST_TOOL_DIRECTORY}/${TEST_TOOL}.exe";
+fi
+
+if ! test -x "${TEST_EXECUTABLE}";
+then
+	echo "Missing test executable: ${TEST_EXECUTABLE}";
 
 	exit ${EXIT_FAILURE};
 fi
 
-# Note that not all version of uname support the -o option
-# so we cannot use: `uname -o` = "Msys"
-UNAME=`uname -s | sed 's/-[^-]*$//'`;
+TEST_RUNNER="tests/test_runner.sh";
 
-if test ${UNAME} = "MINGW32_NT";
+if ! test -f "${TEST_RUNNER}";
 then
-	WINPWD=`pwd -W | tr '/' '\\'`;
-	DRIVE=`echo ${WINPWD} | cut -c 1`;
-
-	if ! test_path "user\\test.txt" "\\\\?\\${WINPWD}\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "username\\..\\user\\test.txt" "\\\\?\\${WINPWD}\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "\\home\\user\\test.txt" "\\\\?\\${DRIVE}:\\home\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "c:\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "c:\\home\\user\\\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "c:\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "c:\\..\\home\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "c:\\..\\home\\username\\..\\user\\test.txt" "\\\\?\\c:\\home\\user\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "\\\\.\\PhysicalDrive0" "\\\\.\\PhysicalDrive0"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}" "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "\\\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt" "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-else
-	if ! test_path "user/test.txt" "${PWD}/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "username/../user/test.txt" "${PWD}/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/home/user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/home/user//test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/home/username/../user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/../home/user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
-
-	if ! test_path "/../home/username/../user/test.txt" "/home/user/test.txt"
-	then
-		exit ${EXIT_FAILURE};
-	fi
+	TEST_RUNNER="./test_runner.sh";
 fi
 
-exit ${EXIT_SUCCESS};
+if ! test -f "${TEST_RUNNER}";
+then
+	echo "Missing test runner: ${TEST_RUNNER}";
+
+	exit ${EXIT_FAILURE};
+fi
+
+source ${TEST_RUNNER};
+
+assert_availability_binary cmp;
+
+test_path;
+RESULT=$1;
+
+exit ${RESULT};
 
