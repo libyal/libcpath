@@ -22,9 +22,10 @@ check_PROGRAMS = \
 	cpath_test_path
 
 cpath_test_get_version_SOURCES = \
+	cpath_test_get_version.c \
 	cpath_test_libcpath.h \
 	cpath_test_libcstring.h \
-	cpath_test_get_version.c
+	cpath_test_unused.h
 
 cpath_test_get_version_LDADD = \
 	../libcpath/libcpath.la \
