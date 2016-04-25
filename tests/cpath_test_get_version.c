@@ -30,32 +30,45 @@
 #include "cpath_test_libcstring.h"
 #include "cpath_test_unused.h"
 
+/* Tests retrieving the library version
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_get_version(
+     void )
+{
+	const char *version_string = NULL;
+	int result                 = 0;
+
+	version_string = libcpath_get_version();
+
+	result = libcstring_narrow_string_compare(
+	          version_string,
+	          LIBCPATH_VERSION_STRING,
+	          9 );
+
+	if( result != 0 )
+	{
+		return( 0 );
+	}
+	return( 1 );
+}
+
 /* The main program
  */
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-int wmain( int argc, wchar_t * const argv[] CPATH_TEST_ATTRIBUTE_UNUSED )
+int wmain(
+     int argc CPATH_TEST_ATTRIBUTE_UNUSED,
+     wchar_t * const argv[] CPATH_TEST_ATTRIBUTE_UNUSED )
 #else
-int main( int argc, char * const argv[] CPATH_TEST_ATTRIBUTE_UNUSED )
+int main(
+     int argc CPATH_TEST_ATTRIBUTE_UNUSED,
+     char * const argv[] CPATH_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
-	const char *version_string = NULL;
-
+	CPATH_TEST_UNREFERENCED_PARAMETER( argc )
 	CPATH_TEST_UNREFERENCED_PARAMETER( argv )
 
-	if( argc != 1 )
-	{
-		fprintf(
-		 stderr,
-		 "Unsupported number of arguments.\n" );
-
-		return( EXIT_FAILURE );
-	}
-	version_string = libcpath_get_version();
-
-	if( libcstring_narrow_string_compare(
-	     version_string,
-	     LIBCPATH_VERSION_STRING,
-	     9 ) != 0 )
+	if( cpath_test_get_version() != 1 )
 	{
 		return( EXIT_FAILURE );
 	}
