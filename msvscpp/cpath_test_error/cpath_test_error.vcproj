@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="cpath_test_get_version"
-	ProjectGUID="{A95B98ED-3AC1-4638-A958-C730E9C349CA}"
-	RootNamespace="cpath_test_get_version"
+	Name="cpath_test_error"
+	ProjectGUID="{7868169F-E57D-4BEA-B746-899AE661B510}"
+	RootNamespace="cpath_test_error"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\cpath_test_get_version.c"
+				RelativePath="..\..\tests\cpath_test_error.c"
 				>
 			</File>
 		</Filter>
