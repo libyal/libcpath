@@ -172,5 +172,5 @@ int libcpath_path_sanitize_filename_wide(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBCPATH_PATH_H ) */
 

@@ -30,6 +30,8 @@
 #include "cpath_test_libcerror.h"
 #include "cpath_test_libcpath.h"
 #include "cpath_test_libcstring.h"
+#include "cpath_test_macros.h"
+#include "cpath_test_unused.h"
 
 /* The main program
  */
