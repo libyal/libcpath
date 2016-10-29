@@ -170,62 +170,6 @@ test_path()
 		then
 			return ${RESULT};
 		fi
-	else
-		run_test "${TEST_EXECUTABLE}" "user/test.txt" "${PWD}/user/test.txt";
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			return ${RESULT};
-		fi
-
-		run_test "${TEST_EXECUTABLE}" "username/../user/test.txt" "${PWD}/user/test.txt";
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			return ${RESULT};
-		fi
-
-		run_test "${TEST_EXECUTABLE}" "/home/user/test.txt" "/home/user/test.txt";
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			return ${RESULT};
-		fi
-
-		run_test "${TEST_EXECUTABLE}" "/home/user//test.txt" "/home/user/test.txt";
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			return ${RESULT};
-		fi
-
-		run_test "${TEST_EXECUTABLE}" "/home/username/../user/test.txt" "/home/user/test.txt";
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			return ${RESULT};
-		fi
-
-		run_test "${TEST_EXECUTABLE}" "/../home/user/test.txt" "/home/user/test.txt";
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			return ${RESULT};
-		fi
-
-		run_test "${TEST_EXECUTABLE}" "/../home/username/../user/test.txt" "/home/user/test.txt";
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			return ${RESULT};
-		fi
 	fi
 	return ${EXIT_SUCCESS};
 }

@@ -6,12 +6,10 @@ AM_CPPFLAGS = \
 	@LIBCPATH_DLL_IMPORT@
 
 TESTS = \
-	test_api_functions.sh \
-	test_path.sh
+	test_api_functions.sh
 
 check_SCRIPTS = \
 	test_api_functions.sh \
-	test_path.sh \
 	test_runner.sh
 
 EXTRA_DIST = \

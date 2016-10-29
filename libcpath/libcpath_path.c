@@ -635,7 +635,7 @@ int libcpath_path_get_full_path(
 
 		return( -1 );
 	}
-	if( path_length >= (size_t) SSIZE_MAX )
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -1700,7 +1700,7 @@ int libcpath_path_get_full_path(
 
 		return( -1 );
 	}
-	if( path_length >= (size_t) SSIZE_MAX )
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -3640,7 +3640,7 @@ int libcpath_path_get_full_path_wide(
 
 		return( -1 );
 	}
-	if( path_length >= (size_t) SSIZE_MAX )
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -4721,7 +4721,7 @@ int libcpath_path_get_full_path_wide(
 
 		return( -1 );
 	}
-	if( path_length >= (size_t) SSIZE_MAX )
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
