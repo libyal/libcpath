@@ -123,23 +123,23 @@ int main(
 
 	CPATH_TEST_RUN(
 	 "libcpath_error_free",
-	 cpath_test_error_free() )
+	 cpath_test_error_free );
 
 	CPATH_TEST_RUN(
 	 "libcpath_error_fprint",
-	 cpath_test_error_fprint() )
+	 cpath_test_error_fprint );
 
 	CPATH_TEST_RUN(
 	 "libcpath_error_sprint",
-	 cpath_test_error_sprint() )
+	 cpath_test_error_sprint );
 
 	CPATH_TEST_RUN(
 	 "libcpath_error_backtrace_fprint",
-	 cpath_test_error_backtrace_fprint() )
+	 cpath_test_error_backtrace_fprint );
 
 	CPATH_TEST_RUN(
 	 "libcpath_error_backtrace_sprint",
-	 cpath_test_error_backtrace_sprint() )
+	 cpath_test_error_backtrace_sprint );
 
 	return( EXIT_SUCCESS );
 
