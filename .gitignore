@@ -120,8 +120,8 @@ stamp-h[1-9]
 /libcpath/libcpath.rc
 /libcpath/libcpath_definitions.h
 /tests/cpath_test_error
-/tests/cpath_test_get_version
 /tests/cpath_test_path
+/tests/cpath_test_support
 /tests/tmp*
 
 # Local library dependencies specific files

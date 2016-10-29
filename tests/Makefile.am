@@ -19,8 +19,8 @@ EXTRA_DIST = \
 
 check_PROGRAMS = \
 	cpath_test_error \
-	cpath_test_get_version \
-	cpath_test_path
+	cpath_test_path \
+	cpath_test_support
 
 cpath_test_error_SOURCES = \
 	cpath_test_error.c \
@@ -30,17 +30,6 @@ cpath_test_error_SOURCES = \
 	cpath_test_unused.h
 
 cpath_test_error_LDADD = \
-	../libcpath/libcpath.la \
-	@LIBCSTRING_LIBADD@
-
-cpath_test_get_version_SOURCES = \
-	cpath_test_get_version.c \
-	cpath_test_libcpath.h \
-	cpath_test_libcstring.h \
-	cpath_test_macros.h \
-	cpath_test_unused.h
-
-cpath_test_get_version_LDADD = \
 	../libcpath/libcpath.la \
 	@LIBCSTRING_LIBADD@
 
@@ -56,6 +45,17 @@ cpath_test_path_SOURCES = \
 cpath_test_path_LDADD = \
 	../libcpath/libcpath.la \
 	@LIBCERROR_LIBADD@ \
+	@LIBCSTRING_LIBADD@
+
+cpath_test_support_SOURCES = \
+	cpath_test_libcpath.h \
+	cpath_test_libcstring.h \
+	cpath_test_macros.h \
+	cpath_test_support.c \
+	cpath_test_unused.h
+
+cpath_test_support_LDADD = \
+	../libcpath/libcpath.la \
 	@LIBCSTRING_LIBADD@
 
 MAINTAINERCLEANFILES = \
