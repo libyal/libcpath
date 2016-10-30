@@ -119,6 +119,28 @@ int libcpath_path_get_full_path(
      size_t *full_path_size,
      libcpath_error_t **error );
 
+/* Retrieves a sanitized version of the filename
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_filename(
+     const char *filename,
+     size_t filename_size,
+     char **sanitized_filename,
+     size_t *sanitized_filename_size,
+     libcpath_error_t **error );
+
+/* Retrieves a sanitized version of the path
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_path(
+     const char *path,
+     size_t path_size,
+     char **sanitized_path,
+     size_t *sanitized_path_size,
+     libcpath_error_t **error );
+
 /* Combines the directory name and filename into a path
  * Returns 1 if successful or -1 on error
  */
@@ -138,28 +160,6 @@ int libcpath_path_join(
 LIBCPATH_EXTERN \
 int libcpath_path_make_directory(
      const char *directory_name,
-     libcpath_error_t **error );
-
-/* Retrieves a sanitized version of the path
- * Returns 1 if successful or -1 on error
- */
-LIBCPATH_EXTERN \
-int libcpath_path_get_sanitized_path(
-     const char *path,
-     size_t *path_size,
-     char **sanitized_path,
-     size_t *sanitized_path_size,
-     libcpath_error_t **error );
-
-/* Retrieves a sanitized version of the filename
- * Returns 1 if successful or -1 on error
- */
-LIBCPATH_EXTERN \
-int libcpath_path_get_sanitized_filename(
-     const char *filename,
-     size_t *filename_size,
-     char **sanitized_filename,
-     size_t *sanitized_filename_size,
      libcpath_error_t **error );
 
 #if defined( LIBCPATH_HAVE_WIDE_CHARACTER_TYPE )
@@ -192,6 +192,28 @@ int libcpath_path_get_full_path_wide(
      size_t *full_path_size,
      libcpath_error_t **error );
 
+/* Retrieves a sanitized version of the filename
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_filename_wide(
+     const wchar_t *filename,
+     size_t filename_size,
+     wchar_t **sanitized_filename,
+     size_t *sanitized_filename_size,
+     libcpath_error_t **error );
+
+/* Retrieves a sanitized version of the path
+ * Returns 1 if successful or -1 on error
+ */
+LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_path_wide(
+     const wchar_t *path,
+     size_t path_size,
+     wchar_t **sanitized_path,
+     size_t *sanitized_path_size,
+     libcpath_error_t **error );
+
 /* Combines the directory name and filename into a path
  * Returns 1 if successful or -1 on error
  */
@@ -211,28 +233,6 @@ int libcpath_path_join_wide(
 LIBCPATH_EXTERN \
 int libcpath_path_make_directory_wide(
      const wchar_t *directory_name,
-     libcpath_error_t **error );
-
-/* Retrieves a sanitized version of the path
- * Returns 1 if successful or -1 on error
- */
-LIBCPATH_EXTERN \
-int libcpath_path_get_sanitized_path_wide(
-     const wchar_t *path,
-     size_t *path_size,
-     wchar_t **sanitized_path,
-     size_t *sanitized_path_size,
-     libcpath_error_t **error );
-
-/* Retrieves a sanitized version of the filename
- * Returns 1 if successful or -1 on error
- */
-LIBCPATH_EXTERN \
-int libcpath_path_get_sanitized_filename_wide(
-     const wchar_t *filename,
-     size_t *filename_size,
-     wchar_t **sanitized_filename,
-     size_t *sanitized_filename_size,
      libcpath_error_t **error );
 
 #endif /* defined( LIBCPATH_HAVE_WIDE_CHARACTER_TYPE ) */

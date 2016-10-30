@@ -31,7 +31,59 @@
 #include "cpath_test_libcpath.h"
 #include "cpath_test_libcstring.h"
 #include "cpath_test_macros.h"
+#include "cpath_test_memory.h"
 #include "cpath_test_unused.h"
+
+/* Tests the libcpath_path_change_directory function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_change_directory(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	result = libcpath_path_change_directory(
+	          ".",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_change_directory(
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
 
 /* Tests the libcpath_path_get_current_working_directory function
  * Returns 1 if successful or 0 if not
@@ -86,6 +138,27 @@ int cpath_test_path_get_current_working_directory(
 	libcerror_error_free(
 	 &error );
 
+	current_working_directory = (char *) 0x12345678UL;
+
+	result = libcpath_path_get_current_working_directory(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	current_working_directory = NULL;
+
 	result = libcpath_path_get_current_working_directory(
 	          &current_working_directory,
 	          NULL,
@@ -102,6 +175,88 @@ int cpath_test_path_get_current_working_directory(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_get_current_working_directory with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_get_current_working_directory(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( current_working_directory != NULL )
+		{
+			memory_free(
+			 current_working_directory );
+
+			current_working_directory = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "current_working_directory",
+		 current_working_directory );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_current_working_directory with memset failing
+	 */
+	cpath_test_memset_attempts_before_fail = 0;
+
+	result = libcpath_path_get_current_working_directory(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	if( cpath_test_memset_attempts_before_fail != -1 )
+	{
+		cpath_test_memset_attempts_before_fail = -1;
+
+		if( current_working_directory != NULL )
+		{
+			memory_free(
+			 current_working_directory );
+
+			current_working_directory = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "current_working_directory",
+		 current_working_directory );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
 
 	return( 1 );
 
@@ -125,6 +280,28 @@ on_error:
 int cpath_test_path_get_full_path(
      void )
 {
+#if defined( WINAPI )
+	char *absolute_paths[] = {
+		"\\home\\user\\test.txt",
+		"c:\\home\\user\\test.txt",
+		"c:\\home\\user\\\\test.txt",
+		"c:\\home\\username\\..\\user\\test.txt",
+		"c:\\..\\home\\user\\test.txt",
+		"c:\\..\\home\\username\\..\\user\\test.txt",
+	};
+	char *relative_paths[] = {
+		"user\\test.txt",
+		"username\\..\\user\\test.txt",
+	};
+	char *special_paths[] = {
+		"\\\\.\\PhysicalDrive0",
+		"\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}"
+	};
+	char *unc_paths[] = {
+		"\\\\172.0.0.1\\C$\\test.txt",
+		"\\\\?\\UNC\\172.0.0.1\\C$\\test.txt",
+	};
+#else
 	char *absolute_paths[] = {
 		"/home/user/test.txt",
 		"/home/user//test.txt",
@@ -135,6 +312,7 @@ int cpath_test_path_get_full_path(
 		"user/test.txt",
 		"username/../user/test.txt",
 	};
+#endif /* defined( WINAPI ) */
 
 	libcerror_error_t *error                = NULL;
 	char *current_working_directory         = NULL;
@@ -330,6 +508,576 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libcpath_path_get_sanitized_filename function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_sanitized_filename(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_sanitized_filename(
+	          NULL,
+	          0,
+	          NULL,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_get_sanitized_path function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_sanitized_path(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_sanitized_path(
+	          NULL,
+	          0,
+	          NULL,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_join function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_join(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_join(
+	          NULL,
+	          NULL,
+	          NULL,
+	          0,
+	          NULL,
+	          0,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_make_directory function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_make_directory(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_make_directory(
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+#if defined( HAVE_WIDE_CHARACTER_TYPE )
+
+/* Tests the libcpath_path_change_directory_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_change_directory_wide(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	result = libcpath_path_change_directory_wide(
+	          L".",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_change_directory_wide(
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_get_current_working_directory_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_current_working_directory_wide(
+     void )
+{
+	libcerror_error_t *error              = NULL;
+	wchar_t *current_working_directory    = NULL;
+	size_t current_working_directory_size = 0;
+	int result                            = 0;
+
+	result = libcpath_path_get_current_working_directory_wide(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "current_working_directory",
+         current_working_directory );
+
+	memory_free(
+	 current_working_directory );
+
+	current_working_directory = NULL;
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_current_working_directory_wide(
+	          NULL,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	current_working_directory = (wchar_t *) 0x12345678UL;
+
+	result = libcpath_path_get_current_working_directory_wide(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	current_working_directory = NULL;
+
+	result = libcpath_path_get_current_working_directory_wide(
+	          &current_working_directory,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_get_current_working_directory_wide with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_get_current_working_directory_wide(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( current_working_directory != NULL )
+		{
+			memory_free(
+			 current_working_directory );
+
+			current_working_directory = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "current_working_directory",
+		 current_working_directory );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_current_working_directory_wide with memset failing
+	 */
+	cpath_test_memset_attempts_before_fail = 0;
+
+	result = libcpath_path_get_current_working_directory_wide(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	if( cpath_test_memset_attempts_before_fail != -1 )
+	{
+		cpath_test_memset_attempts_before_fail = -1;
+
+		if( current_working_directory != NULL )
+		{
+			memory_free(
+			 current_working_directory );
+
+			current_working_directory = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "current_working_directory",
+		 current_working_directory );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( current_working_directory != NULL )
+	{
+		memory_free(
+		 current_working_directory );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_get_sanitized_filename_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_sanitized_filename_wide(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_sanitized_filename_wide(
+	          NULL,
+	          0,
+	          NULL,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_get_sanitized_path_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_sanitized_path_wide(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_sanitized_path_wide(
+	          NULL,
+	          0,
+	          NULL,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_join_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_join_wide(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_join_wide(
+	          NULL,
+	          NULL,
+	          NULL,
+	          0,
+	          NULL,
+	          0,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_make_directory_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_make_directory_wide(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test error cases
+	 */
+	result = libcpath_path_make_directory_wide(
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
+
 /* The main program
  */
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
@@ -345,7 +1093,9 @@ int main(
 	CPATH_TEST_UNREFERENCED_PARAMETER( argc )
 	CPATH_TEST_UNREFERENCED_PARAMETER( argv )
 
-	/* TODO: add tests for libcpath_path_change_directory */
+	CPATH_TEST_RUN(
+	 "libcpath_path_change_directory",
+	 cpath_test_path_change_directory );
 
 	CPATH_TEST_RUN(
 	 "libcpath_path_get_current_working_directory",
@@ -355,20 +1105,49 @@ int main(
 	 "libcpath_path_get_full_path",
 	 cpath_test_path_get_full_path );
 
-	/* TODO: add tests for libcpath_path_join */
-	/* TODO: add tests for libcpath_path_make_directory */
-	/* TODO: add tests for libcpath_path_sanitize */
-	/* TODO: add tests for libcpath_path_sanitize_filename */
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_sanitized_filename",
+	 cpath_test_path_get_sanitized_filename );
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_sanitized_path",
+	 cpath_test_path_get_sanitized_path );
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_join",
+	 cpath_test_path_join );
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_make_directory",
+	 cpath_test_path_make_directory );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
-	/* TODO: add tests for libcpath_path_change_directory_wide */
-	/* TODO: add tests for libcpath_path_get_current_working_directory_wide */
+	CPATH_TEST_RUN(
+	 "libcpath_path_change_directory_wide",
+	 cpath_test_path_change_directory_wide );
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_current_working_directory_wide",
+	 cpath_test_path_get_current_working_directory_wide );
+
 	/* TODO: add tests for libcpath_path_get_full_path_wide */
-	/* TODO: add tests for libcpath_path_join_wide */
-	/* TODO: add tests for libcpath_path_make_directory_wide */
-	/* TODO: add tests for libcpath_path_sanitize_wide */
-	/* TODO: add tests for libcpath_path_sanitize_filename_wide */
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_sanitized_filename_wide",
+	 cpath_test_path_get_sanitized_filename_wide );
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_sanitized_path_wide",
+	 cpath_test_path_get_sanitized_path_wide );
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_join_wide",
+	 cpath_test_path_join_wide );
+
+	CPATH_TEST_RUN(
+	 "libcpath_path_make_directory_wide",
+	 cpath_test_path_make_directory_wide );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 

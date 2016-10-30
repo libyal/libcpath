@@ -69,6 +69,22 @@ int libcpath_path_get_full_path(
      libcerror_error_t **error );
 
 LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_filename(
+     const char *filename,
+     size_t filename_size,
+     char **sanitized_filename,
+     size_t *sanitized_filename_size,
+     libcerror_error_t **error );
+
+LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_path(
+     const char *path,
+     size_t path_size,
+     char **sanitized_path,
+     size_t *sanitized_path_size,
+     libcerror_error_t **error );
+
+LIBCPATH_EXTERN \
 int libcpath_path_join(
      char **path,
      size_t *path_size,
@@ -89,12 +105,14 @@ int libcpath_path_make_directory(
      const char *directory_name,
      libcerror_error_t **error );
 
+LIBCPATH_DEPRECATED \
 LIBCPATH_EXTERN \
 int libcpath_path_sanitize(
      char *path,
      size_t *path_size,
      libcerror_error_t **error );
 
+LIBCPATH_DEPRECATED \
 LIBCPATH_EXTERN \
 int libcpath_path_sanitize_filename(
      char *filename,
@@ -134,6 +152,22 @@ int libcpath_path_get_full_path_wide(
      libcerror_error_t **error );
 
 LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_filename_wide(
+     const wchar_t *filename,
+     size_t filename_size,
+     wchar_t **sanitized_filename,
+     size_t *sanitized_filename_size,
+     libcerror_error_t **error );
+
+LIBCPATH_EXTERN \
+int libcpath_path_get_sanitized_path_wide(
+     const wchar_t *path,
+     size_t path_size,
+     wchar_t **sanitized_path,
+     size_t *sanitized_path_size,
+     libcerror_error_t **error );
+
+LIBCPATH_EXTERN \
 int libcpath_path_join_wide(
      wchar_t **path,
      size_t *path_size,
@@ -154,12 +188,14 @@ int libcpath_path_make_directory_wide(
      const wchar_t *directory_name,
      libcerror_error_t **error );
 
+LIBCPATH_DEPRECATED \
 LIBCPATH_EXTERN \
 int libcpath_path_sanitize_wide(
      wchar_t *path,
      size_t *path_size,
      libcerror_error_t **error );
 
+LIBCPATH_DEPRECATED \
 LIBCPATH_EXTERN \
 int libcpath_path_sanitize_filename_wide(
      wchar_t *filename,

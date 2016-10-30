@@ -2346,6 +2346,104 @@ on_error:
 
 #endif /* defined( WINAPI ) */
 
+/* Retrieves a sanitized version of the filename
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_filename(
+     const char *filename,
+     size_t filename_size,
+     char **sanitized_filename,
+     size_t *sanitized_filename_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_path_get_sanitized_filename";
+
+	if( sanitized_filename == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized filename.",
+		 function );
+
+		return( -1 );
+	}
+	if( *sanitized_filename != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid sanitized filename value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_filename_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized filename size.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO implement */
+	return( -1 );
+}
+
+/* Retrieves a sanitized version of the path
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_path(
+     const char *path,
+     size_t path_size,
+     char **sanitized_path,
+     size_t *sanitized_path_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_path_get_sanitized_path";
+
+	if( sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
+		 function );
+
+		return( -1 );
+	}
+	if( *sanitized_path != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid sanitized path value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path size.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO implement */
+	return( -1 );
+}
+
 /* Combines the directory name and filename into a path
  * Returns 1 if successful or -1 on error
  */
@@ -5352,6 +5450,104 @@ on_error:
 }
 
 #endif /* defined( WINAPI ) */
+
+/* Retrieves a sanitized version of the filename
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_filename_wide(
+     const wchar_t *filename,
+     size_t filename_size,
+     wchar_t **sanitized_filename,
+     size_t *sanitized_filename_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_path_get_sanitized_filename_wide";
+
+	if( sanitized_filename == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized filename.",
+		 function );
+
+		return( -1 );
+	}
+	if( *sanitized_filename != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid sanitized filename value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_filename_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized filename size.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO implement */
+	return( -1 );
+}
+
+/* Retrieves a sanitized version of the path
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_path_wide(
+     const wchar_t *path,
+     size_t path_size,
+     wchar_t **sanitized_path,
+     size_t *sanitized_path_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_path_get_sanitized_path_wide";
+
+	if( sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
+		 function );
+
+		return( -1 );
+	}
+	if( *sanitized_path != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid sanitized path value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path size.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO implement */
+	return( -1 );
+}
 
 /* Combines the directory name and filename into a path
  * Returns 1 if successful or -1 on error

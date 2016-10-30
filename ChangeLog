@@ -1,7 +1,10 @@
 TODO
-* improve sanitize path/filename
+* implement sanitize path/filename functions
 * add libcpath_codepage.h and codepage functions
-* add more tests
+* remove libcpath_path_sanitize and libcpath_path_sanitize_filename
+
+20161029
+* worked on tests
 
 20160829
 * worked on tests
