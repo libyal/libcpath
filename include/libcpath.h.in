@@ -241,5 +241,5 @@ int libcpath_path_make_directory_wide(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBCPATH_H ) */
 

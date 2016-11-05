@@ -38,10 +38,9 @@
 #include <libcpath/extern.h>
 
 #else
-
 #define LIBCPATH_EXTERN	extern
 
 #endif
 
-#endif
+#endif /* !defined( _LIBCPATH_INTERNAL_EXTERN_H ) */
 

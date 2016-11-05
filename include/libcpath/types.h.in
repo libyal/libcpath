@@ -203,5 +203,5 @@ typedef int64_t off64_t;
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBCPATH_TYPES_H ) */
 

@@ -39,7 +39,7 @@ enum LIBCPATH_ERROR_DOMAINS
 	LIBCPATH_ERROR_DOMAIN_INPUT			= (int) 'i',
 	LIBCPATH_ERROR_DOMAIN_MEMORY			= (int) 'm',
 	LIBCPATH_ERROR_DOMAIN_OUTPUT			= (int) 'o',
-	LIBCPATH_ERROR_DOMAIN_RUNTIME			= (int) 'r',
+	LIBCPATH_ERROR_DOMAIN_RUNTIME			= (int) 'r'
 };
 
 /* The argument error codes
@@ -208,6 +208,17 @@ enum LIBCPATH_MEMORY_ERROR
 	LIBCPATH_MEMORY_ERROR_SET_FAILED		= 3
 };
 
+/* The output error codes
+ */
+enum LIBCPATH_OUTPUT_ERROR
+{
+	LIBCPATH_OUTPUT_ERROR_GENERIC			= 0,
+
+	/* There is insuficient space to write the output
+	 */
+	LIBCPATH_OUTPUT_ERROR_INSUFFICIENT_SPACE	= 1
+};
+
 /* The runtime error codes
  * to signify errors regarding runtime processing
  */
@@ -276,16 +287,5 @@ enum LIBCPATH_RUNTIME_ERROR
 	LIBCPATH_RUNTIME_ERROR_ABORT_REQUESTED		= 15
 };
 
-/* The output error codes
- */
-enum LIBCPATH_OUTPUT_ERROR
-{
-	LIBCPATH_OUTPUT_ERROR_GENERIC			= 0,
-
-	/* There is insuficient space to write the output
-	 */
-	LIBCPATH_OUTPUT_ERROR_INSUFFICIENT_SPACE	= 1
-};
-
-#endif
+#endif /* !defined( _LIBCPATH_ERROR_H ) */
 
