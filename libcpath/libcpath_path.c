@@ -2457,6 +2457,7 @@ int libcpath_path_join(
      libcerror_error_t **error )
 {
 	static char *function = "libcpath_path_join";
+	size_t filename_index = 0;
 	size_t path_index     = 0;
 
 	if( path == NULL )
@@ -2536,12 +2537,26 @@ int libcpath_path_join(
 
 		return( -1 );
 	}
-	*path_size = directory_name_length + filename_length + 1;
-
-	if( directory_name[ directory_name_length ] != (char) LIBCPATH_SEPARATOR )
+/* TODO strip other patterns like /./ */
+	while( directory_name_length > 0 )
 	{
-		*path_size += 1;
+		if( directory_name[ directory_name_length - 1 ] != (char) LIBCPATH_SEPARATOR )
+		{
+			break;
+		}
+		directory_name_length--;
 	}
+	while( filename_length > 0 )
+	{
+		if( filename[ filename_index ] != (char) LIBCPATH_SEPARATOR )
+		{
+			break;
+		}
+		filename_index++;
+		filename_length--;
+	}
+	*path_size = directory_name_length + filename_length + 2;
+
 	*path = libcstring_narrow_string_allocate(
 	         *path_size );
 
@@ -2576,7 +2591,7 @@ int libcpath_path_join(
 
 	if( libcstring_narrow_string_copy(
 	     &( ( *path )[ path_index ] ),
-	     filename,
+	     &( filename[ filename_index ] ),
 	     filename_length ) == NULL )
 	{
 		libcerror_error_set(
@@ -5562,6 +5577,7 @@ int libcpath_path_join_wide(
      libcerror_error_t **error )
 {
 	static char *function = "libcpath_path_join_wide";
+	size_t filename_index = 0;
 	size_t path_index     = 0;
 
 	if( path == NULL )
@@ -5641,12 +5657,26 @@ int libcpath_path_join_wide(
 
 		return( -1 );
 	}
-	*path_size = directory_name_length + filename_length + 1;
-
-	if( directory_name[ directory_name_length ] != (wchar_t) LIBCPATH_SEPARATOR )
+/* TODO strip other patterns like /./ */
+	while( directory_name_length > 0 )
 	{
-		*path_size += 1;
+		if( directory_name[ directory_name_length - 1 ] != (wchar_t) LIBCPATH_SEPARATOR )
+		{
+			break;
+		}
+		directory_name_length--;
 	}
+	while( filename_length > 0 )
+	{
+		if( filename[ filename_index ] != (wchar_t) LIBCPATH_SEPARATOR )
+		{
+			break;
+		}
+		filename_index++;
+		filename_length--;
+	}
+	*path_size = directory_name_length + filename_length + 2;
+
 	*path = libcstring_wide_string_allocate(
 	         *path_size );
 
@@ -5681,7 +5711,7 @@ int libcpath_path_join_wide(
 
 	if( libcstring_wide_string_copy(
 	     &( ( *path )[ path_index ] ),
-	     filename,
+	     &( filename[ filename_index ] ),
 	     filename_length ) == NULL )
 	{
 		libcerror_error_set(

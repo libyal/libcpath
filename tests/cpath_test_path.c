@@ -597,17 +597,238 @@ int cpath_test_path_join(
      void )
 {
 	libcerror_error_t *error = NULL;
+	char *path               = NULL;
+	size_t path_size         = 0;
 	int result               = 0;
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          "/first/second",
+	          13,
+	          "third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	result = libcstring_narrow_string_compare(
+	          path,
+	          "/first/second/third/fourth",
+	          26 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 path );
+
+	path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_size",
+	 path_size,
+	 27 );
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          "/first/second/",
+	          14,
+	          "third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	result = libcstring_narrow_string_compare(
+	          path,
+	          "/first/second/third/fourth",
+	          26 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 path );
+
+	path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_size",
+	 path_size,
+	 27 );
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          "/first/second",
+	          13,
+	          "/third/fourth",
+	          13,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	result = libcstring_narrow_string_compare(
+	          path,
+	          "/first/second/third/fourth",
+	          26 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 path );
+
+	path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_size",
+	 path_size,
+	 27 );
 
 	/* Test error cases
 	 */
 	result = libcpath_path_join(
 	          NULL,
+	          &path_size,
+	          "/first/second",
+	          13,
+	          "third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join(
+	          &path,
 	          NULL,
+	          "/first/second",
+	          13,
+	          "third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
 	          NULL,
-	          0,
+	          13,
+	          "third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          "/first/second",
+	          (size_t) SSIZE_MAX + 1,
+	          "third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          "/first/second",
+	          13,
 	          NULL,
-	          0,
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          "/first/second",
+	          13,
+	          "third/fourth",
+	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -629,6 +850,11 @@ on_error:
 	{
 		libcerror_error_free(
 		 &error );
+	}
+	if( path != NULL )
+	{
+		memory_free(
+		 path );
 	}
 	return( 0 );
 }
@@ -1002,17 +1228,238 @@ int cpath_test_path_join_wide(
      void )
 {
 	libcerror_error_t *error = NULL;
+	wchar_t *path            = NULL;
+	size_t path_size         = 0;
 	int result               = 0;
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          L"/first/second",
+	          13,
+	          L"third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	result = libcstring_wide_string_compare(
+	          path,
+	          L"/first/second/third/fourth",
+	          26 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 path );
+
+	path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_size",
+	 path_size,
+	 27 );
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          L"/first/second/",
+	          14,
+	          L"third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	result = libcstring_wide_string_compare(
+	          path,
+	          L"/first/second/third/fourth",
+	          26 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 path );
+
+	path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_size",
+	 path_size,
+	 27 );
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          L"/first/second",
+	          13,
+	          L"/third/fourth",
+	          13,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	result = libcstring_wide_string_compare(
+	          path,
+	          L"/first/second/third/fourth",
+	          26 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 path );
+
+	path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_size",
+	 path_size,
+	 27 );
 
 	/* Test error cases
 	 */
 	result = libcpath_path_join_wide(
 	          NULL,
+	          &path_size,
+	          L"/first/second",
+	          13,
+	          L"third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join_wide(
+	          &path,
 	          NULL,
+	          L"/first/second",
+	          13,
+	          L"third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
 	          NULL,
-	          0,
+	          13,
+	          L"third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          L"/first/second",
+	          (size_t) SSIZE_MAX + 1,
+	          L"third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          L"/first/second",
+	          13,
 	          NULL,
-	          0,
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          L"/first/second",
+	          13,
+	          L"third/fourth",
+	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -1034,6 +1481,11 @@ on_error:
 	{
 		libcerror_error_free(
 		 &error );
+	}
+	if( path != NULL )
+	{
+		memory_free(
+		 path );
 	}
 	return( 0 );
 }
