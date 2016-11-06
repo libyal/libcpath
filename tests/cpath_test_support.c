@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #endif
 
+#include "cpath_test_libcerror.h"
 #include "cpath_test_libcpath.h"
 #include "cpath_test_macros.h"
 #include "cpath_test_unused.h"
@@ -59,6 +60,109 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libcpath_get_codepage function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_get_codepage(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int codepage             = 0;
+	int result               = 0;
+
+	result = libcpath_get_codepage(
+	          &codepage,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_get_codepage(
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_set_codepage function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_set_codepage(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	result = libcpath_set_codepage(
+	          0,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_set_codepage(
+	          -1,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
@@ -77,6 +181,14 @@ int main(
 	CPATH_TEST_RUN(
 	 "libcpath_get_version",
 	 cpath_test_get_version );
+
+	CPATH_TEST_RUN(
+	 "libcpath_get_codepage",
+	 cpath_test_get_codepage );
+
+	CPATH_TEST_RUN(
+	 "libcpath_set_codepage",
+	 cpath_test_set_codepage );
 
 	return( EXIT_SUCCESS );
 

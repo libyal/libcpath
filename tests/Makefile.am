@@ -41,13 +41,15 @@ cpath_test_path_LDADD = \
 	@LIBCERROR_LIBADD@
 
 cpath_test_support_SOURCES = \
+	cpath_test_libcerror.h \
 	cpath_test_libcpath.h \
 	cpath_test_macros.h \
 	cpath_test_support.c \
 	cpath_test_unused.h
 
 cpath_test_support_LDADD = \
-	../libcpath/libcpath.la
+	../libcpath/libcpath.la \
+	@LIBCERROR_LIBADD@
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

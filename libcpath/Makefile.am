@@ -19,6 +19,7 @@ libcpath_la_SOURCES = \
 	libcpath_libcsplit.h \
 	libcpath_libuna.h \
 	libcpath_support.c libcpath_support.h \
+	libcpath_system_string.c libcpath_system_string.h \
 	libcpath_unused.h
 
 libcpath_la_LIBADD = \

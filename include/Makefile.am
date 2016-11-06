@@ -2,6 +2,7 @@ include_HEADERS = \
 	libcpath.h
 
 pkginclude_HEADERS = \
+	libcpath/codepage.h \
 	libcpath/definitions.h \
 	libcpath/error.h \
 	libcpath/extern.h \
