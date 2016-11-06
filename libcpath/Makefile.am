@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
 	@LIBCSPLIT_CPPFLAGS@ \
@@ -18,13 +17,11 @@ libcpath_la_SOURCES = \
 	libcpath_libcerror.h \
 	libcpath_libclocale.h \
 	libcpath_libcsplit.h \
-	libcpath_libcstring.h \
 	libcpath_libuna.h \
 	libcpath_support.c libcpath_support.h \
 	libcpath_unused.h
 
 libcpath_la_LIBADD = \
-	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCSPLIT_LIBADD@ \

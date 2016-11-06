@@ -20,16 +20,18 @@
  */
 
 #include <common.h>
+#include <file_stream.h>
+#include <memory.h>
+#include <narrow_string.h>
+#include <types.h>
+#include <wide_string.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
 #endif
 
-#include <stdio.h>
-
 #include "cpath_test_libcerror.h"
 #include "cpath_test_libcpath.h"
-#include "cpath_test_libcstring.h"
 #include "cpath_test_macros.h"
 #include "cpath_test_memory.h"
 #include "cpath_test_unused.h"
@@ -348,14 +350,14 @@ int cpath_test_path_get_full_path(
          "error",
          error );
 
-	current_working_directory_length = libcstring_narrow_string_length(
+	current_working_directory_length = narrow_string_length(
 	                                    current_working_directory );
 
 	/* Test get full path
 	 */
 	expected_path = "/home/user/test.txt";
 
-	expected_path_length = libcstring_narrow_string_length(
+	expected_path_length = narrow_string_length(
 	                        expected_path );
 
 	for( path_index = 0;
@@ -364,7 +366,7 @@ int cpath_test_path_get_full_path(
 	{
 		path = absolute_paths[ path_index ];
 
-		path_length = libcstring_narrow_string_length(
+		path_length = narrow_string_length(
 		               path );
 
 		result = libcpath_path_get_full_path(
@@ -383,7 +385,7 @@ int cpath_test_path_get_full_path(
 		 "error",
 		 error );
 
-		full_path_length = libcstring_narrow_string_length(
+		full_path_length = narrow_string_length(
 		                    full_path );
 
 		CPATH_TEST_ASSERT_EQUAL_SIZE(
@@ -396,7 +398,7 @@ int cpath_test_path_get_full_path(
 		 full_path_size,
 		 expected_path_length + 1 );
 
-		result = libcstring_narrow_string_compare(
+		result = narrow_string_compare(
 		          full_path,
 		          expected_path,
 		          expected_path_length );
@@ -413,7 +415,7 @@ int cpath_test_path_get_full_path(
 	}
 	expected_path = "/user/test.txt";
 
-	expected_path_length = libcstring_narrow_string_length(
+	expected_path_length = narrow_string_length(
 	                        expected_path );
 
 	for( path_index = 0;
@@ -422,7 +424,7 @@ int cpath_test_path_get_full_path(
 	{
 		path = relative_paths[ path_index ];
 
-		path_length = libcstring_narrow_string_length(
+		path_length = narrow_string_length(
 		               path );
 
 		result = libcpath_path_get_full_path(
@@ -441,7 +443,7 @@ int cpath_test_path_get_full_path(
 		 "error",
 		 error );
 
-		full_path_length = libcstring_narrow_string_length(
+		full_path_length = narrow_string_length(
 		                    full_path );
 
 /* TODO fix full_path_size
@@ -456,7 +458,7 @@ int cpath_test_path_get_full_path(
 		 current_working_directory_length + expected_path_length + 1 );
 */
 
-		result = libcstring_narrow_string_compare(
+		result = narrow_string_compare(
 		          full_path,
 		          current_working_directory,
 		          current_working_directory_length );
@@ -466,7 +468,7 @@ int cpath_test_path_get_full_path(
 		 result,
 		 0 );
 
-		result = libcstring_narrow_string_compare(
+		result = narrow_string_compare(
 		          &( full_path[ current_working_directory_length ] ),
 		          expected_path,
 		          expected_path_length );
@@ -619,7 +621,7 @@ int cpath_test_path_join(
          "error",
          error );
 
-	result = libcstring_narrow_string_compare(
+	result = narrow_string_compare(
 	          path,
 	          "/first/second/third/fourth",
 	          26 );
@@ -657,7 +659,7 @@ int cpath_test_path_join(
          "error",
          error );
 
-	result = libcstring_narrow_string_compare(
+	result = narrow_string_compare(
 	          path,
 	          "/first/second/third/fourth",
 	          26 );
@@ -695,7 +697,7 @@ int cpath_test_path_join(
          "error",
          error );
 
-	result = libcstring_narrow_string_compare(
+	result = narrow_string_compare(
 	          path,
 	          "/first/second/third/fourth",
 	          26 );
@@ -1250,7 +1252,7 @@ int cpath_test_path_join_wide(
          "error",
          error );
 
-	result = libcstring_wide_string_compare(
+	result = wide_string_compare(
 	          path,
 	          L"/first/second/third/fourth",
 	          26 );
@@ -1288,7 +1290,7 @@ int cpath_test_path_join_wide(
          "error",
          error );
 
-	result = libcstring_wide_string_compare(
+	result = wide_string_compare(
 	          path,
 	          L"/first/second/third/fourth",
 	          26 );
@@ -1326,7 +1328,7 @@ int cpath_test_path_join_wide(
          "error",
          error );
 
-	result = libcstring_wide_string_compare(
+	result = wide_string_compare(
 	          path,
 	          L"/first/second/third/fourth",
 	          26 );
@@ -1532,7 +1534,7 @@ on_error:
 
 /* The main program
  */
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
      int argc CPATH_TEST_ATTRIBUTE_UNUSED,
      wchar_t * const argv[] CPATH_TEST_ATTRIBUTE_UNUSED )

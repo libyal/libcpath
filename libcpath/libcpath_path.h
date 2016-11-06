@@ -27,7 +27,6 @@
 
 #include "libcpath_extern.h"
 #include "libcpath_libcerror.h"
-#include "libcpath_libcstring.h"
 
 #if defined( __cplusplus )
 extern "C" {

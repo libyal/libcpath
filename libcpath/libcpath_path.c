@@ -21,7 +21,9 @@
 
 #include <common.h>
 #include <memory.h>
+#include <narrow_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #if defined( HAVE_ERRNO_H )
 #include <errno.h>
@@ -39,7 +41,6 @@
 #include "libcpath_libcerror.h"
 #include "libcpath_libclocale.h"
 #include "libcpath_libcsplit.h"
-#include "libcpath_libcstring.h"
 #include "libcpath_libuna.h"
 #include "libcpath_path.h"
 
@@ -79,7 +80,7 @@ BOOL libcpath_CloseHandle(
 		return( FALSE );
 	}
 	library_handle = LoadLibrary(
-	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
 	if( library_handle == NULL )
 	{
@@ -124,7 +125,7 @@ BOOL libcpath_SetCurrentDirectoryA(
 		return( FALSE );
 	}
 	library_handle = LoadLibrary(
-	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
 	if( library_handle == NULL )
 	{
@@ -264,7 +265,7 @@ DWORD libcpath_GetCurrentDirectoryA(
 		return( 0 );
 	}
 	library_handle = LoadLibrary(
-	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
 	if( library_handle == NULL )
 	{
@@ -373,7 +374,7 @@ int libcpath_path_get_current_working_directory(
 	}
 	*current_working_directory_size = (size_t) safe_current_working_directory_size;
 
-	*current_working_directory = libcstring_narrow_string_allocate(
+	*current_working_directory = narrow_string_allocate(
 	                              *current_working_directory_size );
 
 	if( *current_working_directory == NULL )
@@ -486,7 +487,7 @@ int libcpath_path_get_current_working_directory(
 	}
 	*current_working_directory_size = (size_t) PATH_MAX;
 
-	*current_working_directory = libcstring_narrow_string_allocate(
+	*current_working_directory = narrow_string_allocate(
 	                              *current_working_directory_size );
 
 	if( *current_working_directory == NULL )
@@ -594,6 +595,7 @@ int libcpath_path_get_full_path(
 	char *path_string_segment                                       = NULL;
 	const char *volume_name                                         = NULL;
 	static char *function                                           = "libcpath_path_get_full_path";
+	size_t current_directory_length                                 = 0;
 	size_t current_directory_name_index                             = 0;
 	size_t current_directory_size                                   = 0;
 	size_t current_directory_string_segment_size                    = 0;
@@ -802,7 +804,7 @@ int libcpath_path_get_full_path(
 
 				goto on_error;
 			}
-			change_volume_name = libcstring_narrow_string_allocate(
+			change_volume_name = narrow_string_allocate(
 			                      volume_name_length + 1 );
 
 			if( change_volume_name == NULL )
@@ -816,7 +818,7 @@ int libcpath_path_get_full_path(
 
 				goto on_error;
 			}
-			if( libcstring_narrow_string_copy(
+			if( narrow_string_copy(
 			     change_volume_name,
 			     volume_name,
 			     volume_name_length ) == NULL )
@@ -1002,10 +1004,12 @@ int libcpath_path_get_full_path(
 	if( ( current_directory != NULL )
 	 && ( current_directory_name_index < current_directory_size ) )
 	{
+		current_directory_length = 1 + narrow_string_length(
+		                                &( current_directory[ current_directory_name_index ] ) );
+
 		if( libcsplit_narrow_string_split(
 		     &( current_directory[ current_directory_name_index ] ),
-		     libcstring_narrow_string_length(
-		      &( current_directory[ current_directory_name_index ] ) ) + 1,
+		     current_directory_length,
 		     '\\',
 		     &current_directory_split_string,
 		     error ) != 1 )
@@ -1357,7 +1361,7 @@ int libcpath_path_get_full_path(
 	 */
 	full_path_index = 0;
 
-	*full_path = libcstring_narrow_string_allocate(
+	*full_path = narrow_string_allocate(
 	              *full_path_size );
 
 	if( *full_path == NULL )
@@ -1381,7 +1385,7 @@ int libcpath_path_get_full_path(
 		full_path_prefix        = "\\\\?\\";
 		full_path_prefix_length = 4;
 	}
-	if( libcstring_narrow_string_copy(
+	if( narrow_string_copy(
 	     &( ( *full_path )[ full_path_index ] ),
 	     full_path_prefix,
 	     full_path_prefix_length ) == NULL )
@@ -1401,7 +1405,7 @@ int libcpath_path_get_full_path(
 	 */
 	if( share_name_index > 0 )
 	{
-		if( libcstring_narrow_string_copy(
+		if( narrow_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     "UNC\\",
 		     4 ) == NULL )
@@ -1419,7 +1423,7 @@ int libcpath_path_get_full_path(
 	}
 	if( volume_name != NULL )
 	{
-		if( libcstring_narrow_string_copy(
+		if( narrow_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     volume_name,
 		     volume_name_length ) == NULL )
@@ -1480,7 +1484,7 @@ int libcpath_path_get_full_path(
 
 					goto on_error;
 				}
-				if( libcstring_narrow_string_copy(
+				if( narrow_string_copy(
 				     &( ( *full_path )[ full_path_index ] ),
 				     current_directory_string_segment,
 				     current_directory_string_segment_size - 1 ) == NULL )
@@ -1538,7 +1542,7 @@ int libcpath_path_get_full_path(
 
 				goto on_error;
 			}
-			if( libcstring_narrow_string_copy(
+			if( narrow_string_copy(
 			     &( ( *full_path )[ full_path_index ] ),
 			     path_string_segment,
 			     path_string_segment_size - 1 ) == NULL )
@@ -1666,6 +1670,7 @@ int libcpath_path_get_full_path(
 	char *last_used_path_string_segment                             = NULL;
 	char *path_string_segment                                       = NULL;
 	static char *function                                           = "libcpath_path_get_full_path";
+	size_t current_directory_length                                 = 0;
 	size_t current_directory_size                                   = 0;
 	size_t current_directory_string_segment_size                    = 0;
 	size_t full_path_index                                          = 0;
@@ -1767,10 +1772,12 @@ int libcpath_path_get_full_path(
 	}
 	if( current_directory != NULL )
 	{
+		current_directory_length = 1 + narrow_string_length(
+		                                current_directory );
+
 		if( libcsplit_narrow_string_split(
 		     current_directory,
-		     libcstring_narrow_string_length(
-		      current_directory ) + 1,
+		     current_directory_length,
 		     '/',
 		     &current_directory_split_string,
 		     error ) != 1 )
@@ -2121,7 +2128,7 @@ int libcpath_path_get_full_path(
 	 */
 	full_path_index = 0;
 
-	*full_path = libcstring_narrow_string_allocate(
+	*full_path = narrow_string_allocate(
 	              *full_path_size );
 
 	if( *full_path == NULL )
@@ -2196,7 +2203,7 @@ int libcpath_path_get_full_path(
 
 					goto on_error;
 				}
-				if( libcstring_narrow_string_copy(
+				if( narrow_string_copy(
 				     &( ( *full_path )[ full_path_index ] ),
 				     current_directory_string_segment,
 				     current_directory_string_segment_size - 1 ) == NULL )
@@ -2254,7 +2261,7 @@ int libcpath_path_get_full_path(
 
 				goto on_error;
 			}
-			if( libcstring_narrow_string_copy(
+			if( narrow_string_copy(
 			     &( ( *full_path )[ full_path_index ] ),
 			     path_string_segment,
 			     path_string_segment_size - 1 ) == NULL )
@@ -2557,7 +2564,7 @@ int libcpath_path_join(
 	}
 	*path_size = directory_name_length + filename_length + 2;
 
-	*path = libcstring_narrow_string_allocate(
+	*path = narrow_string_allocate(
 	         *path_size );
 
 	if( *path == NULL )
@@ -2571,7 +2578,7 @@ int libcpath_path_join(
 
 		goto on_error;
 	}
-	if( libcstring_narrow_string_copy(
+	if( narrow_string_copy(
 	     *path,
 	     directory_name,
 	     directory_name_length ) == NULL )
@@ -2589,7 +2596,7 @@ int libcpath_path_join(
 
 	( *path )[ path_index++ ] = (char) LIBCPATH_SEPARATOR;
 
-	if( libcstring_narrow_string_copy(
+	if( narrow_string_copy(
 	     &( ( *path )[ path_index ] ),
 	     &( filename[ filename_index ] ),
 	     filename_length ) == NULL )
@@ -2640,7 +2647,7 @@ BOOL libcpath_CreateDirectoryA(
 		return( 0 );
 	}
 	library_handle = LoadLibrary(
-	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
 	if( library_handle == NULL )
 	{
@@ -2973,7 +2980,7 @@ BOOL libcpath_SetCurrentDirectoryW(
 		return( FALSE );
 	}
 	library_handle = LoadLibrary(
-	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
 	if( library_handle == NULL )
 	{
@@ -3079,7 +3086,7 @@ int libcpath_path_change_directory_wide(
 
 		return( -1 );
 	}
-	directory_name_length = libcstring_wide_string_length(
+	directory_name_length = wide_string_length(
 	                         directory_name );
 
 	if( libclocale_codepage == 0 )
@@ -3143,7 +3150,7 @@ int libcpath_path_change_directory_wide(
 
 		goto on_error;
 	}
-	narrow_directory_name = libcstring_narrow_string_allocate(
+	narrow_directory_name = narrow_string_allocate(
 	                         narrow_directory_name_size );
 
 	if( narrow_directory_name == NULL )
@@ -3259,7 +3266,7 @@ DWORD libcpath_GetCurrentDirectoryW(
 		return( 0 );
 	}
 	library_handle = LoadLibrary(
-	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
 	if( library_handle == NULL )
 	{
@@ -3368,7 +3375,7 @@ int libcpath_path_get_current_working_directory_wide(
 	}
 	*current_working_directory_size = (size_t) safe_current_working_directory_size;
 
-	*current_working_directory = libcstring_wide_string_allocate(
+	*current_working_directory = wide_string_allocate(
 	                              *current_working_directory_size );
 
 	if( *current_working_directory == NULL )
@@ -3482,7 +3489,7 @@ int libcpath_path_get_current_working_directory_wide(
 
 		return( -1 );
 	}
-	narrow_current_working_directory = libcstring_narrow_string_allocate(
+	narrow_current_working_directory = narrow_string_allocate(
 	                                    PATH_MAX );
 
 	if( narrow_current_working_directory == NULL )
@@ -3510,7 +3517,7 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
-	narrow_current_working_directory_size = 1 + libcstring_narrow_string_length(
+	narrow_current_working_directory_size = 1 + narrow_string_length(
 	                                             narrow_current_working_directory );
 
 	/* Convert the current working directory to a wide string
@@ -3565,7 +3572,7 @@ int libcpath_path_get_current_working_directory_wide(
 
 		return( -1 );
 	}
-	*current_working_directory = libcstring_wide_string_allocate(
+	*current_working_directory = wide_string_allocate(
 	                              *current_working_directory_size );
 
 	if( *current_working_directory == NULL )
@@ -3712,6 +3719,7 @@ int libcpath_path_get_full_path_wide(
 	wchar_t *path_string_segment                                  = NULL;
 	const wchar_t *volume_name                                    = NULL;
 	static char *function                                         = "libcpath_path_get_full_path_wide";
+	size_t current_directory_length                               = 0;
 	size_t current_directory_name_index                           = 0;
 	size_t current_directory_size                                 = 0;
 	size_t current_directory_string_segment_size                  = 0;
@@ -3920,7 +3928,7 @@ int libcpath_path_get_full_path_wide(
 
 				goto on_error;
 			}
-			change_volume_name = libcstring_wide_string_allocate(
+			change_volume_name = wide_string_allocate(
 			                      volume_name_length + 1 );
 
 			if( change_volume_name == NULL )
@@ -3934,7 +3942,7 @@ int libcpath_path_get_full_path_wide(
 
 				goto on_error;
 			}
-			if( libcstring_wide_string_copy(
+			if( wide_string_copy(
 			     change_volume_name,
 			     volume_name,
 			     volume_name_length ) == NULL )
@@ -4120,10 +4128,12 @@ int libcpath_path_get_full_path_wide(
 	if( ( current_directory != NULL )
 	 && ( current_directory_name_index < current_directory_size ) )
 	{
+		current_directory_length = 1 + wide_string_length(
+		                                &( current_directory[ current_directory_name_index ] ) );
+
 		if( libcsplit_wide_string_split(
 		     &( current_directory[ current_directory_name_index ] ),
-		     libcstring_wide_string_length(
-		      &( current_directory[ current_directory_name_index ] ) ) + 1,
+		     current_directory_length,
 		     (wchar_t) '\\',
 		     &current_directory_split_string,
 		     error ) != 1 )
@@ -4477,7 +4487,7 @@ int libcpath_path_get_full_path_wide(
 	 */
 	full_path_index = 0;
 
-	*full_path = libcstring_wide_string_allocate(
+	*full_path = wide_string_allocate(
 	              *full_path_size );
 
 	if( *full_path == NULL )
@@ -4515,7 +4525,7 @@ int libcpath_path_get_full_path_wide(
 		full_path_prefix        = L"\\\\?\\";
 		full_path_prefix_length = 4;
 	}
-	if( libcstring_wide_string_copy(
+	if( wide_string_copy(
 	     &( ( *full_path )[ full_path_index ] ),
 	     full_path_prefix,
 	     full_path_prefix_length ) == NULL )
@@ -4535,7 +4545,7 @@ int libcpath_path_get_full_path_wide(
 	 */
 	if( share_name_index > 0 )
 	{
-		if( libcstring_wide_string_copy(
+		if( wide_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     L"UNC\\",
 		     4 ) == NULL )
@@ -4553,7 +4563,7 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( volume_name != NULL )
 	{
-		if( libcstring_wide_string_copy(
+		if( wide_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     volume_name,
 		     volume_name_length ) == NULL )
@@ -4614,7 +4624,7 @@ int libcpath_path_get_full_path_wide(
 
 					goto on_error;
 				}
-				if( libcstring_wide_string_copy(
+				if( wide_string_copy(
 				     &( ( *full_path )[ full_path_index ] ),
 				     current_directory_string_segment,
 				     current_directory_string_segment_size - 1 ) == NULL )
@@ -4672,7 +4682,7 @@ int libcpath_path_get_full_path_wide(
 
 				goto on_error;
 			}
-			if( libcstring_wide_string_copy(
+			if( wide_string_copy(
 			     &( ( *full_path )[ full_path_index ] ),
 			     path_string_segment,
 			     path_string_segment_size - 1 ) == NULL )
@@ -4800,6 +4810,7 @@ int libcpath_path_get_full_path_wide(
 	wchar_t *last_used_path_string_segment                        = NULL;
 	wchar_t *path_string_segment                                  = NULL;
 	static char *function                                         = "libcpath_path_get_full_path_wide";
+	size_t current_directory_length                               = 0;
 	size_t current_directory_size                                 = 0;
 	size_t current_directory_string_segment_size                  = 0;
 	size_t full_path_index                                        = 0;
@@ -4901,10 +4912,12 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( current_directory != NULL )
 	{
+		current_directory_length = 1 + wide_string_length(
+		                                current_directory );
+
 		if( libcsplit_wide_string_split(
 		     current_directory,
-		     libcstring_wide_string_length(
-		      current_directory ) + 1,
+		     current_directory_length,
 		     (wchar_t) '/',
 		     &current_directory_split_string,
 		     error ) != 1 )
@@ -5255,7 +5268,7 @@ int libcpath_path_get_full_path_wide(
 	 */
 	full_path_index = 0;
 
-	*full_path = libcstring_wide_string_allocate(
+	*full_path = wide_string_allocate(
 	              *full_path_size );
 
 	if( *full_path == NULL )
@@ -5316,7 +5329,7 @@ int libcpath_path_get_full_path_wide(
 
 					goto on_error;
 				}
-				if( libcstring_wide_string_copy(
+				if( wide_string_copy(
 				     &( ( *full_path )[ full_path_index ] ),
 				     current_directory_string_segment,
 				     current_directory_string_segment_size - 1 ) == NULL )
@@ -5374,7 +5387,7 @@ int libcpath_path_get_full_path_wide(
 
 				goto on_error;
 			}
-			if( libcstring_wide_string_copy(
+			if( wide_string_copy(
 			     &( ( *full_path )[ full_path_index ] ),
 			     path_string_segment,
 			     path_string_segment_size - 1 ) == NULL )
@@ -5677,7 +5690,7 @@ int libcpath_path_join_wide(
 	}
 	*path_size = directory_name_length + filename_length + 2;
 
-	*path = libcstring_wide_string_allocate(
+	*path = wide_string_allocate(
 	         *path_size );
 
 	if( *path == NULL )
@@ -5691,7 +5704,7 @@ int libcpath_path_join_wide(
 
 		goto on_error;
 	}
-	if( libcstring_wide_string_copy(
+	if( wide_string_copy(
 	     *path,
 	     directory_name,
 	     directory_name_length ) == NULL )
@@ -5709,7 +5722,7 @@ int libcpath_path_join_wide(
 
 	( *path )[ path_index++ ] = (wchar_t) LIBCPATH_SEPARATOR;
 
-	if( libcstring_wide_string_copy(
+	if( wide_string_copy(
 	     &( ( *path )[ path_index ] ),
 	     &( filename[ filename_index ] ),
 	     filename_length ) == NULL )
@@ -5760,7 +5773,7 @@ BOOL libcpath_CreateDirectoryW(
 		return( 0 );
 	}
 	library_handle = LoadLibrary(
-	                  _LIBCSTRING_SYSTEM_STRING( "kernel32.dll" ) );
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
 	if( library_handle == NULL )
 	{
@@ -5869,7 +5882,7 @@ int libcpath_path_make_directory_wide(
 
 		return( -1 );
 	}
-	directory_name_length = libcstring_wide_string_length(
+	directory_name_length = wide_string_length(
 	                         directory_name );
 
 	if( libclocale_codepage == 0 )
@@ -5933,7 +5946,7 @@ int libcpath_path_make_directory_wide(
 
 		goto on_error;
 	}
-	narrow_directory_name = libcstring_narrow_string_allocate(
+	narrow_directory_name = narrow_string_allocate(
 	                         narrow_directory_name_size );
 
 	if( narrow_directory_name == NULL )

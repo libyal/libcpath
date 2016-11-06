@@ -24,7 +24,7 @@
 
 #include "libcpath_definitions.h"
 #include "libcpath_libcerror.h"
-#include "libcpath_libcstring.h"
+#include "libcpath_libclocale.h"
 #include "libcpath_support.h"
 
 #if !defined( HAVE_LOCAL_LIBCPATH )
@@ -35,6 +35,58 @@ const char *libcpath_get_version(
              void )
 {
 	return( (const char *) LIBCPATH_VERSION_STRING );
+}
+
+/* Retrieves the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_get_codepage(
+     int *codepage,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_get_codepage";
+
+	if( libclocale_codepage_get(
+	     codepage,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve codepage.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Sets the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_set_codepage(
+     int codepage,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_set_codepage";
+
+	if( libclocale_codepage_set(
+	     codepage,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set codepage.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
 }
 
 #endif /* !defined( HAVE_LOCAL_LIBCPATH ) */

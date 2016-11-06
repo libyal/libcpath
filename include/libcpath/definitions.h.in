@@ -38,5 +38,5 @@
 
 #endif /* defined( WINAPI ) */
 
-#endif
+#endif  /* !defined( _LIBCPATH_DEFINITIONS_H ) */
 
