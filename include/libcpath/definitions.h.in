@@ -24,17 +24,17 @@
 
 #include <libcpath/types.h>
 
-#define LIBCPATH_VERSION			@VERSION@
+#define LIBCPATH_VERSION	@VERSION@
 
 /* The libcpath version string
  */
-#define LIBCPATH_VERSION_STRING			"@VERSION@"
+#define LIBCPATH_VERSION_STRING	"@VERSION@"
 
 #if defined( WINAPI )
-#define LIBCPATH_SEPARATOR			'\\'
+#define LIBCPATH_SEPARATOR	'\\'
 
 #else
-#define LIBCPATH_SEPARATOR			'/'
+#define LIBCPATH_SEPARATOR	'/'
 
 #endif /* defined( WINAPI ) */
 
