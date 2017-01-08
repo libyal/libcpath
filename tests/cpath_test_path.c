@@ -1,7 +1,7 @@
 /*
  * Cross-platform C path functions library path testing program
  *
- * Copyright (C) 2008-2016, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2008-2017, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -636,10 +636,10 @@ int cpath_test_path_join(
 
 	path = NULL;
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
-	 27 );
+	 (size_t) 27 );
 
 	result = libcpath_path_join(
 	          &path,
@@ -674,10 +674,10 @@ int cpath_test_path_join(
 
 	path = NULL;
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
-	 27 );
+	 (size_t) 27 );
 
 	result = libcpath_path_join(
 	          &path,
@@ -712,10 +712,10 @@ int cpath_test_path_join(
 
 	path = NULL;
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
-	 27 );
+	 (size_t) 27 );
 
 	/* Test error cases
 	 */
@@ -1267,10 +1267,10 @@ int cpath_test_path_join_wide(
 
 	path = NULL;
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
-	 27 );
+	 (size_t) 27 );
 
 	result = libcpath_path_join_wide(
 	          &path,
@@ -1305,10 +1305,10 @@ int cpath_test_path_join_wide(
 
 	path = NULL;
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
-	 27 );
+	 (size_t) 27 );
 
 	result = libcpath_path_join_wide(
 	          &path,
@@ -1343,10 +1343,10 @@ int cpath_test_path_join_wide(
 
 	path = NULL;
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
-	 27 );
+	 (size_t) 27 );
 
 	/* Test error cases
 	 */
