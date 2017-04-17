@@ -19,10 +19,9 @@ DPKG_FILES = \
 	dpkg/compat \
 	dpkg/control \
 	dpkg/copyright \
-	dpkg/copyright.in \
 	dpkg/rules \
-	dpkg/libcpath-dev.docs \
-	dpkg/libcpath.docs \
+	dpkg/libcpath-dev.install \
+	dpkg/libcpath.install \
 	dpkg/source/format
 
 GETTEXT_FILES = \
