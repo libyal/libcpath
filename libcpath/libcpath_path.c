@@ -724,7 +724,7 @@ int libcpath_path_get_volume_name_and_path_type(
 		}
 		/* Check for absolue paths
 		 */
-		else if( path[ 0 ] == (wchar_t) '\\' )
+		else if( path[ 0 ] == '\\' )
 		{
 			*path_type = LIBCPATH_TYPE_ABSOLUTE;
 		}
@@ -1646,7 +1646,7 @@ int libcpath_path_get_full_path(
 	if( memory_set(
 	     *full_path,
 	     0,
-	     sizeof( wchar_t ) * safe_full_path_size ) == NULL )
+	     sizeof( char ) * safe_full_path_size ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
