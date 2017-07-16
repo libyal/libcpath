@@ -30,11 +30,95 @@
 #include <stdlib.h>
 #endif
 
+#include <errno.h>
+
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
+#define __USE_GNU
+#include <dlfcn.h>
+#undef __USE_GNU
+#endif
+
 #include "cpath_test_libcerror.h"
 #include "cpath_test_libcpath.h"
 #include "cpath_test_macros.h"
 #include "cpath_test_memory.h"
 #include "cpath_test_unused.h"
+
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
+
+static int (*cpath_test_real_chdir)(const char *)      = NULL;
+static char *(*cpath_test_real_getcwd)(char *, size_t) = NULL;
+
+int cpath_test_chdir_attempts_before_fail              = -1;
+int cpath_test_getcwd_attempts_before_fail             = -1;
+
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) */
+
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
+
+/* Custom chdir for testing error cases
+ * Returns 0 if successful or an error value otherwise
+ */
+int chdir(
+     const char *path )
+{
+	int result = 0;
+
+	if( cpath_test_real_chdir == NULL )
+	{
+		cpath_test_real_chdir = dlsym(
+		                         RTLD_NEXT,
+		                         "chdir" );
+	}
+	if( cpath_test_chdir_attempts_before_fail == 0 )
+	{
+		cpath_test_chdir_attempts_before_fail = -1;
+
+		return( -1 );
+	}
+	else if( cpath_test_chdir_attempts_before_fail > 0 )
+	{
+		cpath_test_chdir_attempts_before_fail--;
+	}
+	result = cpath_test_real_chdir(
+	          path );
+
+	return( result );
+}
+
+/* Custom getcwd for testing error cases
+ * Returns 0 if successful or an error value otherwise
+ */
+char *getcwd(
+       char *buf,
+       size_t size )
+{
+	char *result = NULL;
+
+	if( cpath_test_real_getcwd == NULL )
+	{
+		cpath_test_real_getcwd = dlsym(
+		                          RTLD_NEXT,
+		                          "getcwd" );
+	}
+	if( cpath_test_getcwd_attempts_before_fail == 0 )
+	{
+		cpath_test_getcwd_attempts_before_fail = -1;
+
+		return( NULL );
+	}
+	else if( cpath_test_getcwd_attempts_before_fail > 0 )
+	{
+		cpath_test_getcwd_attempts_before_fail--;
+	}
+	result = cpath_test_real_getcwd(
+	          buf,
+	          size );
+
+	return( result );
+}
+
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) */
 
 /* Tests the libcpath_path_change_directory function
  * Returns 1 if successful or 0 if not
@@ -75,6 +159,36 @@ int cpath_test_path_change_directory(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
+
+	/* Test libcpath_path_change_directory with chdir failing
+	 */
+	cpath_test_chdir_attempts_before_fail = 0;
+
+	result = libcpath_path_change_directory(
+	          ".",
+	          &error );
+
+	if( cpath_test_chdir_attempts_before_fail != -1 )
+	{
+		cpath_test_chdir_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) */
 
 	return( 1 );
 
@@ -260,6 +374,41 @@ int cpath_test_path_get_current_working_directory(
 	}
 #endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
 
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
+
+	/* Test libcpath_path_change_directory with getcwd failing
+	 */
+	cpath_test_getcwd_attempts_before_fail = 0;
+
+	result = libcpath_path_get_current_working_directory(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	if( cpath_test_getcwd_attempts_before_fail != -1 )
+	{
+		cpath_test_getcwd_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "current_working_directory",
+		 current_working_directory );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) */
+
 	return( 1 );
 
 on_error:
@@ -381,6 +530,10 @@ int cpath_test_path_get_full_path(
 		 result,
 		 1 );
 
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
+
 		CPATH_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
@@ -483,6 +636,143 @@ int cpath_test_path_get_full_path(
 
 		full_path = NULL;
 	}
+	/* Test error cases
+	 */
+	result = libcpath_path_get_full_path(
+	          NULL,
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          (size_t) -1,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          NULL,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	full_path = (char *) 0x12345678UL;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	full_path = NULL;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ )
+
+	/* Test libcpath_path_change_directory with getcwd failing
+	 */
+	cpath_test_getcwd_attempts_before_fail = 0;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_getcwd_attempts_before_fail != -1 )
+	{
+		cpath_test_getcwd_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) */
 
 	/* Clean up
 	 */
@@ -516,15 +806,124 @@ on_error:
 int cpath_test_path_get_sanitized_filename(
      void )
 {
-	libcerror_error_t *error = NULL;
-	int result               = 0;
+	libcerror_error_t *error       = NULL;
+	char *sanitized_filename       = NULL;
+	size_t sanitized_filename_size = 0;
+	int result                     = 0;
+
+	result = libcpath_path_get_sanitized_filename(
+	          "test.txt",
+	          8,
+	          &sanitized_filename,
+	          &sanitized_filename_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+/* TODO implement function
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "sanitized_filename",
+	 sanitized_filename );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	memory_free(
+	 sanitized_filename );
+
+	sanitized_filename = NULL;
+*/
 
 	/* Test error cases
 	 */
 	result = libcpath_path_get_sanitized_filename(
 	          NULL,
-	          0,
+	          8,
+	          &sanitized_filename,
+	          &sanitized_filename_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_sanitized_filename(
+	          "test.txt",
+	          (size_t) -1,
+	          &sanitized_filename,
+	          &sanitized_filename_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_sanitized_filename(
+	          "test.txt",
+	          8,
 	          NULL,
+	          &sanitized_filename_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	sanitized_filename = (char *) 0x12345678UL;
+
+	result = libcpath_path_get_sanitized_filename(
+	          "test.txt",
+	          8,
+	          &sanitized_filename,
+	          &sanitized_filename_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	sanitized_filename = NULL;
+
+	result = libcpath_path_get_sanitized_filename(
+	          "test.txt",
+	          8,
+	          &sanitized_filename,
 	          NULL,
 	          &error );
 
@@ -543,6 +942,11 @@ int cpath_test_path_get_sanitized_filename(
 	return( 1 );
 
 on_error:
+	if( sanitized_filename != NULL )
+	{
+		memory_free(
+		 sanitized_filename );
+	}
 	if( error != NULL )
 	{
 		libcerror_error_free(
@@ -557,15 +961,124 @@ on_error:
 int cpath_test_path_get_sanitized_path(
      void )
 {
-	libcerror_error_t *error = NULL;
-	int result               = 0;
+	libcerror_error_t *error   = NULL;
+	char *sanitized_path       = NULL;
+	size_t sanitized_path_size = 0;
+	int result                 = 0;
+
+	result = libcpath_path_get_sanitized_path(
+	          "test.txt",
+	          8,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+/* TODO implement function
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "sanitized_path",
+	 sanitized_path );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	memory_free(
+	 sanitized_path );
+
+	sanitized_path = NULL;
+*/
 
 	/* Test error cases
 	 */
 	result = libcpath_path_get_sanitized_path(
 	          NULL,
-	          0,
+	          8,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_sanitized_path(
+	          "test.txt",
+	          (size_t) -1,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_sanitized_path(
+	          "test.txt",
+	          8,
 	          NULL,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	sanitized_path = (char *) 0x12345678UL;
+
+	result = libcpath_path_get_sanitized_path(
+	          "test.txt",
+	          8,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	sanitized_path = NULL;
+
+	result = libcpath_path_get_sanitized_path(
+	          "test.txt",
+	          8,
+	          &sanitized_path,
 	          NULL,
 	          &error );
 
@@ -584,6 +1097,11 @@ int cpath_test_path_get_sanitized_path(
 	return( 1 );
 
 on_error:
+	if( sanitized_path != NULL )
+	{
+		memory_free(
+		 sanitized_path );
+	}
 	if( error != NULL )
 	{
 		libcerror_error_free(
@@ -739,6 +1257,31 @@ int cpath_test_path_join(
 
 	libcerror_error_free(
 	 &error );
+
+	path = (char *) 0x12345678UL;
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          "/first/second",
+	          13,
+	          "third/fourth",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	path = NULL;
 
 	result = libcpath_path_join(
 	          &path,

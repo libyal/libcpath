@@ -2640,13 +2640,46 @@ on_error:
  */
 int libcpath_path_get_sanitized_filename(
      const char *filename,
-     size_t filename_size,
+     size_t filename_length,
      char **sanitized_filename,
      size_t *sanitized_filename_size,
      libcerror_error_t **error )
 {
 	static char *function = "libcpath_path_get_sanitized_filename";
 
+	if( filename == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
+
+		return( -1 );
+	}
+	if( filename_length == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
+		 "%s: invalid filename length is zero.",
+		 function );
+
+		return( -1 );
+	}
+	if( filename_length > (size_t) ( SSIZE_MAX - 1 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid filename length value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
 	if( sanitized_filename == NULL )
 	{
 		libcerror_error_set(
@@ -2689,13 +2722,46 @@ int libcpath_path_get_sanitized_filename(
  */
 int libcpath_path_get_sanitized_path(
      const char *path,
-     size_t path_size,
+     size_t path_length,
      char **sanitized_path,
      size_t *sanitized_path_size,
      libcerror_error_t **error )
 {
 	static char *function = "libcpath_path_get_sanitized_path";
 
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
+		 "%s: invalid path length is zero.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid path length value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
 	if( sanitized_path == NULL )
 	{
 		libcerror_error_set(

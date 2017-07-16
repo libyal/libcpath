@@ -70,7 +70,7 @@ int libcpath_path_get_full_path(
 LIBCPATH_EXTERN \
 int libcpath_path_get_sanitized_filename(
      const char *filename,
-     size_t filename_size,
+     size_t filename_length,
      char **sanitized_filename,
      size_t *sanitized_filename_size,
      libcerror_error_t **error );
@@ -78,7 +78,7 @@ int libcpath_path_get_sanitized_filename(
 LIBCPATH_EXTERN \
 int libcpath_path_get_sanitized_path(
      const char *path,
-     size_t path_size,
+     size_t path_length,
      char **sanitized_path,
      size_t *sanitized_path_size,
      libcerror_error_t **error );
