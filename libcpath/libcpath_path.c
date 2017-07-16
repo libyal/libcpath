@@ -33,6 +33,11 @@
 #include <sys/stat.h>
 #endif
 
+#if defined( HAVE_LIMITS_H ) || defined( WINAPI )
+/* Include for PATH_MAX */
+#include <limits.h>
+#endif
+
 #if defined( HAVE_UNISTD_H )
 #include <unistd.h>
 #endif
