@@ -241,6 +241,27 @@ int cpath_test_system_string_copy_to_narrow_string(
 	libcerror_error_free(
 	 &error );
 
+	result = libcpath_system_string_copy_to_narrow_string(
+	          _SYSTEM_STRING( "test string" ),
+	          12,
+	          narrow_string,
+	          8,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+/* TODO add test with failing system_string_copy */
+
 	return( 1 );
 
 on_error:
@@ -453,6 +474,27 @@ int cpath_test_system_string_copy_from_narrow_string(
 
 	libcerror_error_free(
 	 &error );
+
+	result = libcpath_system_string_copy_from_narrow_string(
+	          system_string,
+	          8,
+	          "test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+/* TODO add test with failing system_string_copy */
 
 	return( 1 );
 
@@ -669,6 +711,27 @@ int cpath_test_system_string_copy_to_wide_string(
 	libcerror_error_free(
 	 &error );
 
+	result = libcpath_system_string_copy_to_wide_string(
+	          _SYSTEM_STRING( "test string" ),
+	          12,
+	          wide_string,
+	          8,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+/* TODO add test with failing system_string_copy */
+
 	return( 1 );
 
 on_error:
@@ -881,6 +944,27 @@ int cpath_test_system_string_copy_from_wide_string(
 
 	libcerror_error_free(
 	 &error );
+
+	result = libcpath_system_string_copy_from_wide_string(
+	          system_string,
+	          8,
+	          L"test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+/* TODO add test with failing system_string_copy */
 
 	return( 1 );
 
