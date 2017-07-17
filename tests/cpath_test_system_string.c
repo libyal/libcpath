@@ -252,6 +252,219 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libcpath_system_string_size_from_narrow_string function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_system_string_size_from_narrow_string(
+     void )
+{
+	libcerror_error_t *error  = NULL;
+	size_t system_string_size = 0;
+	int result                = 0;
+
+	result = libcpath_system_string_size_from_narrow_string(
+	          "test string",
+	          12,
+	          &system_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "system_string_size",
+	 system_string_size,
+	 (size_t) 12 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_system_string_size_from_narrow_string(
+	          NULL,
+	          12,
+	          &system_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_size_from_narrow_string(
+	          "test string",
+	          (size_t) -1,
+	          &system_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_size_from_narrow_string(
+	          "test string",
+	          12,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_system_string_copy_from_narrow_string function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_system_string_copy_from_narrow_string(
+     void )
+{
+	system_character_t system_string[ 32 ];
+
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	result = libcpath_system_string_copy_from_narrow_string(
+	          system_string,
+	          32,
+	          "test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_system_string_copy_from_narrow_string(
+	          NULL,
+	          32,
+	          "test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_copy_from_narrow_string(
+	          system_string,
+	          (size_t) -1,
+	          "test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_copy_from_narrow_string(
+	          system_string,
+	          32,
+	          NULL,
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_copy_from_narrow_string(
+	          system_string,
+	          32,
+	          "test string",
+	          (size_t) -1,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 /* Tests the libcpath_system_string_size_to_wide_string function
@@ -467,6 +680,219 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libcpath_system_string_size_from_wide_string function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_system_string_size_from_wide_string(
+     void )
+{
+	libcerror_error_t *error  = NULL;
+	size_t system_string_size = 0;
+	int result                = 0;
+
+	result = libcpath_system_string_size_from_wide_string(
+	          L"test string",
+	          12,
+	          &system_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "system_string_size",
+	 system_string_size,
+	 (size_t) 12 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_system_string_size_from_wide_string(
+	          NULL,
+	          12,
+	          &system_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_size_from_wide_string(
+	          L"test string",
+	          (size_t) -1,
+	          &system_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_size_from_wide_string(
+	          L"test string",
+	          12,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_system_string_copy_from_wide_string function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_system_string_copy_from_wide_string(
+     void )
+{
+	system_character_t system_string[ 32 ];
+
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	result = libcpath_system_string_copy_from_wide_string(
+	          system_string,
+	          32,
+	          L"test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        CPATH_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libcpath_system_string_copy_from_wide_string(
+	          NULL,
+	          32,
+	          L"test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_copy_from_wide_string(
+	          system_string,
+	          (size_t) -1,
+	          L"test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_copy_from_wide_string(
+	          system_string,
+	          32,
+	          NULL,
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_system_string_copy_from_wide_string(
+	          system_string,
+	          32,
+	          L"test string",
+	          (size_t) -1,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        CPATH_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 #endif /* defined( __GNUC__ ) */
@@ -496,8 +922,13 @@ int main(
 	 "libcpath_system_string_copy_to_narrow_string",
 	 cpath_test_system_string_copy_to_narrow_string );
 
-	/* TODO: add tests for libcpath_system_string_size_from_narrow_string */
-	/* TODO: add tests for libcpath_system_string_copy_from_narrow_string */
+	CPATH_TEST_RUN(
+	 "libcpath_system_string_size_from_narrow_string",
+	 cpath_test_system_string_size_from_narrow_string );
+
+	CPATH_TEST_RUN(
+	 "libcpath_system_string_copy_from_narrow_string",
+	 cpath_test_system_string_copy_from_narrow_string );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
@@ -509,8 +940,13 @@ int main(
 	 "libcpath_system_string_copy_to_wide_string",
 	 cpath_test_system_string_copy_to_wide_string );
 
-	/* TODO: add tests for libcpath_system_string_size_from_wide_string */
-	/* TODO: add tests for libcpath_system_string_copy_from_wide_string */
+	CPATH_TEST_RUN(
+	 "libcpath_system_string_size_from_wide_string",
+	 cpath_test_system_string_size_from_wide_string );
+
+	CPATH_TEST_RUN(
+	 "libcpath_system_string_copy_from_wide_string",
+	 cpath_test_system_string_copy_from_wide_string );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
