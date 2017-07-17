@@ -659,6 +659,25 @@ int cpath_test_path_get_full_path(
 
 	result = libcpath_path_get_full_path(
 	          "test.txt",
+	          0,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
 	          (size_t) -1,
 	          &full_path,
 	          &full_path_size,

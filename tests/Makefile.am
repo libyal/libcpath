@@ -20,7 +20,8 @@ EXTRA_DIST = \
 check_PROGRAMS = \
 	cpath_test_error \
 	cpath_test_path \
-	cpath_test_support
+	cpath_test_support \
+	cpath_test_system_string
 
 cpath_test_error_SOURCES = \
 	cpath_test_error.c \
@@ -53,6 +54,15 @@ cpath_test_support_SOURCES = \
 cpath_test_support_LDADD = \
 	../libcpath/libcpath.la \
 	@LIBCERROR_LIBADD@
+
+cpath_test_system_string_SOURCES = \
+	cpath_test_libcpath.h \
+	cpath_test_macros.h \
+	cpath_test_system_string.c \
+	cpath_test_unused.h
+
+cpath_test_system_string_LDADD = \
+	../libcpath/libcpath.la
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
