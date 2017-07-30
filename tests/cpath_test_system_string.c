@@ -37,7 +37,7 @@
 
 #include "../libcpath/libcpath_system_string.h"
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT )
 
 /* Tests the libcpath_system_string_size_to_narrow_string function
  * Returns 1 if successful or 0 if not
@@ -979,7 +979,7 @@ on_error:
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) */
 
 /* The main program
  */
@@ -996,7 +996,7 @@ int main(
 	CPATH_TEST_UNREFERENCED_PARAMETER( argc )
 	CPATH_TEST_UNREFERENCED_PARAMETER( argv )
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT )
 
 	CPATH_TEST_RUN(
 	 "libcpath_system_string_size_to_narrow_string",
@@ -1034,7 +1034,7 @@ int main(
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
