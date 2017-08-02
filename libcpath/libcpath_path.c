@@ -25,6 +25,10 @@
 #include <types.h>
 #include <wide_string.h>
 
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#include <system_string.h>
+#endif
+
 #if defined( HAVE_ERRNO_H )
 #include <errno.h>
 #endif
