@@ -504,8 +504,12 @@ int cpath_test_path_get_full_path(
 
 	/* Test get full path
 	 */
+#if defined( WINAPI )
+/* TODO handle lower case c: */
+	expected_path = "\\\\?\\C:\\home\\user\\test.txt";
+#else
 	expected_path = "/home/user/test.txt";
-
+#endif
 	expected_path_length = narrow_string_length(
 	                        expected_path );
 
@@ -566,8 +570,12 @@ int cpath_test_path_get_full_path(
 
 		full_path = NULL;
 	}
+#if defined( WINAPI )
+/* TODO handle lower case c: */
+	expected_path = "\\\\?\\C:\\user\\test.txt";
+#else
 	expected_path = "/user/test.txt";
-
+#endif
 	expected_path_length = narrow_string_length(
 	                        expected_path );
 
