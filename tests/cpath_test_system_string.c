@@ -65,9 +65,9 @@ int cpath_test_system_string_size_to_narrow_string(
 	 narrow_string_size,
 	 (size_t) 12 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -82,9 +82,9 @@ int cpath_test_system_string_size_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -100,9 +100,9 @@ int cpath_test_system_string_size_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -118,9 +118,9 @@ int cpath_test_system_string_size_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -159,9 +159,9 @@ int cpath_test_system_string_copy_to_narrow_string(
 	 result,
 	 1 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -177,9 +177,9 @@ int cpath_test_system_string_copy_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -196,9 +196,9 @@ int cpath_test_system_string_copy_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -215,9 +215,9 @@ int cpath_test_system_string_copy_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -234,9 +234,9 @@ int cpath_test_system_string_copy_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -253,9 +253,9 @@ int cpath_test_system_string_copy_to_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -299,9 +299,9 @@ int cpath_test_system_string_size_from_narrow_string(
 	 system_string_size,
 	 (size_t) 12 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -316,9 +316,9 @@ int cpath_test_system_string_size_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -334,9 +334,9 @@ int cpath_test_system_string_size_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -352,9 +352,9 @@ int cpath_test_system_string_size_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -393,9 +393,9 @@ int cpath_test_system_string_copy_from_narrow_string(
 	 result,
 	 1 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -411,9 +411,9 @@ int cpath_test_system_string_copy_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -430,9 +430,9 @@ int cpath_test_system_string_copy_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -449,9 +449,9 @@ int cpath_test_system_string_copy_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -468,9 +468,9 @@ int cpath_test_system_string_copy_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -487,9 +487,9 @@ int cpath_test_system_string_copy_from_narrow_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -535,9 +535,9 @@ int cpath_test_system_string_size_to_wide_string(
 	 wide_string_size,
 	 (size_t) 12 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -552,9 +552,9 @@ int cpath_test_system_string_size_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -570,9 +570,9 @@ int cpath_test_system_string_size_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -588,9 +588,9 @@ int cpath_test_system_string_size_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -629,9 +629,9 @@ int cpath_test_system_string_copy_to_wide_string(
 	 result,
 	 1 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -647,9 +647,9 @@ int cpath_test_system_string_copy_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -666,9 +666,9 @@ int cpath_test_system_string_copy_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -685,9 +685,9 @@ int cpath_test_system_string_copy_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -704,9 +704,9 @@ int cpath_test_system_string_copy_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -723,9 +723,9 @@ int cpath_test_system_string_copy_to_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -769,9 +769,9 @@ int cpath_test_system_string_size_from_wide_string(
 	 system_string_size,
 	 (size_t) 12 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -786,9 +786,9 @@ int cpath_test_system_string_size_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -804,9 +804,9 @@ int cpath_test_system_string_size_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -822,9 +822,9 @@ int cpath_test_system_string_size_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -863,9 +863,9 @@ int cpath_test_system_string_copy_from_wide_string(
 	 result,
 	 1 );
 
-        CPATH_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -881,9 +881,9 @@ int cpath_test_system_string_copy_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -900,9 +900,9 @@ int cpath_test_system_string_copy_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -919,9 +919,9 @@ int cpath_test_system_string_copy_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -938,9 +938,9 @@ int cpath_test_system_string_copy_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -957,9 +957,9 @@ int cpath_test_system_string_copy_from_wide_string(
 	 result,
 	 -1 );
 
-        CPATH_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
