@@ -505,7 +505,6 @@ int cpath_test_path_get_full_path(
 	/* Test get full path
 	 */
 #if defined( WINAPI )
-/* TODO handle lower case c: */
 	expected_path = "\\\\?\\C:\\home\\user\\test.txt";
 #else
 	expected_path = "/home/user/test.txt";
@@ -555,10 +554,17 @@ int cpath_test_path_get_full_path(
 		 full_path_size,
 		 expected_path_length + 1 );
 
+#if defined( WINAPI )
+		result = narrow_string_compare_no_case(
+		          full_path,
+		          expected_path,
+		          expected_path_length );
+#else
 		result = narrow_string_compare(
 		          full_path,
 		          expected_path,
 		          expected_path_length );
+#endif
 
 		CPATH_TEST_ASSERT_EQUAL_INT(
 		 "result",
@@ -571,7 +577,6 @@ int cpath_test_path_get_full_path(
 		full_path = NULL;
 	}
 #if defined( WINAPI )
-/* TODO handle lower case c: */
 	expected_path = "\\\\?\\C:\\user\\test.txt";
 #else
 	expected_path = "/user/test.txt";
@@ -619,20 +624,34 @@ int cpath_test_path_get_full_path(
 		 current_working_directory_length + expected_path_length + 1 );
 */
 
+#if defined( WINAPI )
+		result = narrow_string_compare_no_case(
+		          full_path,
+		          current_working_directory,
+		          current_working_directory_length );
+#else
 		result = narrow_string_compare(
 		          full_path,
 		          current_working_directory,
 		          current_working_directory_length );
+#endif
 
 		CPATH_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 0 );
 
+#if defined( WINAPI )
+		result = narrow_string_compare_no_case(
+		          &( full_path[ current_working_directory_length ] ),
+		          expected_path,
+		          expected_path_length );
+#else
 		result = narrow_string_compare(
 		          &( full_path[ current_working_directory_length ] ),
 		          expected_path,
 		          expected_path_length );
+#endif
 
 		CPATH_TEST_ASSERT_EQUAL_INT(
 		 "result",
