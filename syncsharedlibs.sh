@@ -25,7 +25,7 @@ do
 		continue
 	fi
 
-	(cd ${SHARED_LIB}-$$ && ./synclibs.sh && ./autogen.sh);
+	(cd ${SHARED_LIB}-$$ && ./synclibs.sh --use-head && ./autogen.sh);
 
 	CONFIGURE_OPTIONS="";
 
