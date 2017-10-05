@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the shared library dependencies
 #
-# Version: 20170904
+# Version: 20170905
 
 GIT_URL_PREFIX="https://github.com/libyal";
 SHARED_LIBS="libcerror libclocale libcsplit libuna";
@@ -29,9 +29,7 @@ do
 
 	CONFIGURE_OPTIONS="";
 
-	(cd ${SHARED_LIB}-$$ && CONFIGURE_HELP=`./configure --help`);
-
-	echo "${CONFIGURE_HELP}" | grep -- '--enable-wide-character-type' > /dev/null;
+	(cd ${SHARED_LIB}-$$ && ./configure --help | grep -- '--enable-wide-character-type' > /dev/null);
 
 	if test $? -eq 0;
 	then
