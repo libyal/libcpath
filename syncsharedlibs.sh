@@ -3,6 +3,9 @@
 #
 # Version: 20170905
 
+EXIT_SUCCESS=0;
+EXIT_FAILURE=1;
+
 GIT_URL_PREFIX="https://github.com/libyal";
 SHARED_LIBS="libcerror libclocale libcsplit libuna";
 
@@ -13,19 +16,44 @@ then
 	exit 1;
 fi
 
+USE_HEAD="";
+
+if test "$1" = "--use-head";
+then
+	USE_HEAD="--use-head";
+fi
+
 OLDIFS=$IFS;
 IFS=" ";
 
 for SHARED_LIB in ${SHARED_LIBS};
 do
-	git clone ${GIT_URL_PREFIX}/${SHARED_LIB}.git ${SHARED_LIB}-$$;
+	GIT_URL="${GIT_URL_PREFIX}/${SHARED_LIB}.git";
+
+	git clone --quiet ${GIT_URL} ${SHARED_LIB}-$$;
 
 	if ! test -d ${SHARED_LIB}-$$;
 	then
-		continue
+		echo "Unable to git clone: ${GIT_URL}";
+
+		IFS=$OLDIFS;
+
+		exit ${EXIT_FAILURE};
+	fi
+	(cd ${SHARED_LIB}-$$ && git fetch --quiet --all --tags --prune)
+
+	LATEST_TAG=`cd ${SHARED_LIB}-$$ && git describe --tags --abbrev=0`;
+
+	if test -n ${LATEST_TAG} && test -z ${USE_HEAD};
+	then
+		echo "Synchronizing: ${SHARED_LIB} from ${GIT_URL} tag ${LATEST_TAG}";
+
+		(cd ${SHARED_LIB}-$$ && git checkout --quiet tags/${LATEST_TAG});
+	else
+		echo "Synchronizing: ${SHARED_LIB} from ${GIT_URL} HEAD";
 	fi
 
-	(cd ${SHARED_LIB}-$$ && ./synclibs.sh --use-head && ./autogen.sh);
+	(cd ${SHARED_LIB}-$$ && ./synclibs.sh ${USE_HEAD} && ./autogen.sh);
 
 	CONFIGURE_OPTIONS="";
 
@@ -42,4 +70,6 @@ do
 done
 
 IFS=$OLDIFS;
+
+exit ${EXIT_SUCCESS};
 
