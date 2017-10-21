@@ -477,6 +477,7 @@ int cpath_test_path_get_full_path(
 	size_t full_path_size                   = 0;
 	size_t path_length                      = 0;
 	int path_index                          = 0;
+	int string_index                        = 0;
 	int result                              = 0;
 
 	/* Initialize test
@@ -577,7 +578,7 @@ int cpath_test_path_get_full_path(
 		full_path = NULL;
 	}
 #if defined( WINAPI )
-	expected_path = "\\\\?\\C:\\user\\test.txt";
+	expected_path = "\\user\\test.txt";
 #else
 	expected_path = "/user/test.txt";
 #endif
@@ -612,26 +613,41 @@ int cpath_test_path_get_full_path(
 		full_path_length = narrow_string_length(
 		                    full_path );
 
-/* TODO fix full_path_size
+		/* A full path on Windows is prefixed with \\?\ while
+		 * the current working directory is not.
+		 */
+		if( ( full_path_length >= 4 ) 
+		 && ( full_path[ 0 ] == '\\' )
+		 && ( full_path[ 1 ] == '\\' )
+		 && ( full_path[ 2 ] == '?' )
+		 && ( full_path[ 3 ] == '\\' ) )
+		{
+			string_index = 4;
+		}
+		else
+		{
+			string_index = 0;
+		}
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 string_index + current_working_directory_length + expected_path_length );
+
+/* TODO fix
 		CPATH_TEST_ASSERT_EQUAL_SIZE(
 		 "full_path_size",
 		 full_path_size,
 		 full_path_length + 1 );
-
-		CPATH_TEST_ASSERT_EQUAL_SIZE(
-		 "full_path_size",
-		 full_path_size,
-		 current_working_directory_length + expected_path_length + 1 );
 */
 
 #if defined( WINAPI )
 		result = narrow_string_compare_no_case(
-		          full_path,
+		          &( full_path[ string_index ] ),
 		          current_working_directory,
 		          current_working_directory_length );
 #else
 		result = narrow_string_compare(
-		          full_path,
+		          &( full_path[ string_index ] ),
 		          current_working_directory,
 		          current_working_directory_length );
 #endif
@@ -643,12 +659,12 @@ int cpath_test_path_get_full_path(
 
 #if defined( WINAPI )
 		result = narrow_string_compare_no_case(
-		          &( full_path[ current_working_directory_length ] ),
+		          &( full_path[ string_index + current_working_directory_length ] ),
 		          expected_path,
 		          expected_path_length );
 #else
 		result = narrow_string_compare(
-		          &( full_path[ current_working_directory_length ] ),
+		          &( full_path[ string_index + current_working_directory_length ] ),
 		          expected_path,
 		          expected_path_length );
 #endif
@@ -1162,17 +1178,36 @@ on_error:
 int cpath_test_path_join(
      void )
 {
-	libcerror_error_t *error = NULL;
-	char *path               = NULL;
-	size_t path_size         = 0;
-	int result               = 0;
+	libcerror_error_t *error  = NULL;
+	const char *expected_path = NULL;
+	const char *test_path1    = NULL;
+	const char *test_path2    = NULL;
+	const char *test_path3    = NULL;
+	const char *test_path4    = NULL;
+	char *path                = NULL;
+	size_t path_size          = 0;
+	int result                = 0;
+
+#if defined( WINAPI )
+	test_path1    = "\\first\\second";
+	test_path2    = "third\\fourth";
+	test_path3    = "\\first\\second\\";
+	test_path4    = "\\third\\fourth";
+	expected_path = "\\first\\second\\third\\fourth";
+#else
+	test_path1    = "/first/second";
+	test_path2    = "third/fourth";
+	test_path3    = "/first/second/";
+	test_path4    = "/third/fourth";
+	expected_path = "/first/second/third/fourth";
+#endif
 
 	result = libcpath_path_join(
 	          &path,
 	          &path_size,
-	          "/first/second",
+	          test_path1,
 	          13,
-	          "third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1187,7 +1222,7 @@ int cpath_test_path_join(
 
 	result = narrow_string_compare(
 	          path,
-	          "/first/second/third/fourth",
+	          expected_path,
 	          26 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -1208,9 +1243,9 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          &path,
 	          &path_size,
-	          "/first/second/",
+	          test_path3,
 	          14,
-	          "third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1225,7 +1260,7 @@ int cpath_test_path_join(
 
 	result = narrow_string_compare(
 	          path,
-	          "/first/second/third/fourth",
+	          expected_path,
 	          26 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -1246,9 +1281,9 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          &path,
 	          &path_size,
-	          "/first/second",
+	          test_path1,
 	          13,
-	          "/third/fourth",
+	          test_path4,
 	          13,
 	          &error );
 
@@ -1263,7 +1298,7 @@ int cpath_test_path_join(
 
 	result = narrow_string_compare(
 	          path,
-	          "/first/second/third/fourth",
+	          expected_path,
 	          26 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -1286,9 +1321,9 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          NULL,
 	          &path_size,
-	          "/first/second",
+	          test_path1,
 	          13,
-	          "third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1309,9 +1344,9 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          &path,
 	          &path_size,
-	          "/first/second",
+	          test_path1,
 	          13,
-	          "third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1332,9 +1367,9 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          &path,
 	          NULL,
-	          "/first/second",
+	          test_path1,
 	          13,
-	          "third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1355,7 +1390,7 @@ int cpath_test_path_join(
 	          &path_size,
 	          NULL,
 	          13,
-	          "third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1374,9 +1409,9 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          &path,
 	          &path_size,
-	          "/first/second",
+	          test_path1,
 	          (size_t) SSIZE_MAX + 1,
-	          "third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1395,7 +1430,7 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          &path,
 	          &path_size,
-	          "/first/second",
+	          test_path1,
 	          13,
 	          NULL,
 	          12,
@@ -1416,9 +1451,9 @@ int cpath_test_path_join(
 	result = libcpath_path_join(
 	          &path,
 	          &path_size,
-	          "/first/second",
+	          test_path1,
 	          13,
-	          "third/fourth",
+	          test_path2,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
@@ -1818,17 +1853,36 @@ on_error:
 int cpath_test_path_join_wide(
      void )
 {
-	libcerror_error_t *error = NULL;
-	wchar_t *path            = NULL;
-	size_t path_size         = 0;
-	int result               = 0;
+	libcerror_error_t *error     = NULL;
+	const wchar_t *expected_path = NULL;
+	wchar_t *path                = NULL;
+	const wchar_t *test_path1    = NULL;
+	const wchar_t *test_path2    = NULL;
+	const wchar_t *test_path3    = NULL;
+	const wchar_t *test_path4    = NULL;
+	size_t path_size             = 0;
+	int result                   = 0;
+
+#if defined( WINAPI )
+	test_path1    = L"\\first\\second";
+	test_path2    = L"third\\fourth";
+	test_path3    = L"\\first\\second\\";
+	test_path4    = L"\\third\\fourth";
+	expected_path = L"\\first\\second\\third\\fourth";
+#else
+	test_path1    = L"/first/second";
+	test_path2    = L"third/fourth";
+	test_path3    = L"/first/second/";
+	test_path4    = L"/third/fourth";
+	expected_path = L"/first/second/third/fourth";
+#endif
 
 	result = libcpath_path_join_wide(
 	          &path,
 	          &path_size,
-	          L"/first/second",
+	          test_path1,
 	          13,
-	          L"third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1841,9 +1895,9 @@ int cpath_test_path_join_wide(
 	 "error",
 	 error );
 
-	result = wide_string_compare(
+	result = narrow_string_compare(
 	          path,
-	          L"/first/second/third/fourth",
+	          expected_path,
 	          26 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -1864,9 +1918,9 @@ int cpath_test_path_join_wide(
 	result = libcpath_path_join_wide(
 	          &path,
 	          &path_size,
-	          L"/first/second/",
+	          test_path3,
 	          14,
-	          L"third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1879,9 +1933,9 @@ int cpath_test_path_join_wide(
 	 "error",
 	 error );
 
-	result = wide_string_compare(
+	result = narrow_string_compare(
 	          path,
-	          L"/first/second/third/fourth",
+	          expected_path,
 	          26 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -1902,9 +1956,9 @@ int cpath_test_path_join_wide(
 	result = libcpath_path_join_wide(
 	          &path,
 	          &path_size,
-	          L"/first/second",
+	          test_path1,
 	          13,
-	          L"/third/fourth",
+	          test_path4,
 	          13,
 	          &error );
 
@@ -1917,9 +1971,9 @@ int cpath_test_path_join_wide(
 	 "error",
 	 error );
 
-	result = wide_string_compare(
+	result = narrow_string_compare(
 	          path,
-	          L"/first/second/third/fourth",
+	          expected_path,
 	          26 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -1942,9 +1996,9 @@ int cpath_test_path_join_wide(
 	result = libcpath_path_join_wide(
 	          NULL,
 	          &path_size,
-	          L"/first/second",
+	          test_path1,
 	          13,
-	          L"third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1960,12 +2014,37 @@ int cpath_test_path_join_wide(
 	libcerror_error_free(
 	 &error );
 
+	path = (wchar_t *) 0x12345678UL;
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          test_path1,
+	          13,
+	          test_path2,
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	path = NULL;
+
 	result = libcpath_path_join_wide(
 	          &path,
 	          NULL,
-	          L"/first/second",
+	          test_path1,
 	          13,
-	          L"third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -1986,7 +2065,7 @@ int cpath_test_path_join_wide(
 	          &path_size,
 	          NULL,
 	          13,
-	          L"third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -2005,9 +2084,9 @@ int cpath_test_path_join_wide(
 	result = libcpath_path_join_wide(
 	          &path,
 	          &path_size,
-	          L"/first/second",
+	          test_path1,
 	          (size_t) SSIZE_MAX + 1,
-	          L"third/fourth",
+	          test_path2,
 	          12,
 	          &error );
 
@@ -2026,7 +2105,7 @@ int cpath_test_path_join_wide(
 	result = libcpath_path_join_wide(
 	          &path,
 	          &path_size,
-	          L"/first/second",
+	          test_path1,
 	          13,
 	          NULL,
 	          12,
@@ -2047,9 +2126,9 @@ int cpath_test_path_join_wide(
 	result = libcpath_path_join_wide(
 	          &path,
 	          &path_size,
-	          L"/first/second",
+	          test_path1,
 	          13,
-	          L"third/fourth",
+	          test_path2,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
