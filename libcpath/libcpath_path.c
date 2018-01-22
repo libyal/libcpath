@@ -2727,16 +2727,16 @@ int libcpath_path_get_sanitized_filename(
 	     filename_index < filename_length;
 	     filename_index++ )
 	{
-#if defined( WINAPI )
-		/* TODO implement */
-		*sanitized_filename_size += 1;
-#else
 		if( ( filename[ filename_index ] >= 0x00 )
 		 && ( filename[ filename_index ] <= 0x1f ) )
 		{
 			*sanitized_filename_size += 4;
 		}
+#if defined( WINAPI )
+		else if( filename[ filename_index ] == '^' )
+#else
 		else if( filename[ filename_index ] == '\\' )
+#endif
 		{
 			*sanitized_filename_size += 2;
 		}
@@ -2763,7 +2763,6 @@ int libcpath_path_get_sanitized_filename(
 		{
 			*sanitized_filename_size += 1;
 		}
-#endif
 	}
 	if( *sanitized_filename_size > (size_t) ( SSIZE_MAX - 1 ) )
 	{
@@ -2794,10 +2793,6 @@ int libcpath_path_get_sanitized_filename(
 	     filename_index < filename_length;
 	     filename_index++ )
 	{
-#if defined( WINAPI )
-		/* TODO implement */
-		( *sanitized_filename )[ sanitized_filename_index++ ] = filename[ filename_index ];
-#else
 		if( ( filename[ filename_index ] >= 0x00 )
 		 && ( filename[ filename_index ] <= 0x1f ) )
 		{
@@ -2820,15 +2815,24 @@ int libcpath_path_get_sanitized_filename(
 			{
 				upper_nibble += '0';
 			}
+#if defined( WINAPI )
+			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
+#else
 			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
+#endif
 			( *sanitized_filename )[ sanitized_filename_index++ ] = 'x';
 			( *sanitized_filename )[ sanitized_filename_index++ ] = upper_nibble;
 			( *sanitized_filename )[ sanitized_filename_index++ ] = lower_nibble;
 		}
 		else if( filename[ filename_index ] == '\\' )
 		{
+#if defined( WINAPI )
+			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
+			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
+#else
 			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
 			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
+#endif
 		}
 		else if( ( filename[ filename_index ] == '/' )
 		      || ( filename[ filename_index ] == '\\' )
@@ -2867,7 +2871,11 @@ int libcpath_path_get_sanitized_filename(
 			{
 				upper_nibble += '0';
 			}
+#if defined( WINAPI )
+			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
+#else
 			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
+#endif
 			( *sanitized_filename )[ sanitized_filename_index++ ] = 'x';
 			( *sanitized_filename )[ sanitized_filename_index++ ] = upper_nibble;
 			( *sanitized_filename )[ sanitized_filename_index++ ] = lower_nibble;
@@ -2876,7 +2884,6 @@ int libcpath_path_get_sanitized_filename(
 		{
 			( *sanitized_filename )[ sanitized_filename_index++ ] = filename[ filename_index ];
 		}
-#endif
 	}
 	( *sanitized_filename )[ sanitized_filename_index ] = 0;
 

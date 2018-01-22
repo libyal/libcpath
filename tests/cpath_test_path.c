@@ -869,15 +869,24 @@ int cpath_test_path_get_sanitized_filename(
      void )
 {
 	libcerror_error_t *error       = NULL;
+	char *expected_filename        = NULL;
 	char *sanitized_filename       = NULL;
+	char *test_filename            = NULL;
+	size_t expected_filename_size  = 0;
 	size_t sanitized_filename_size = 0;
+	size_t test_filename_length    = 0;
 	int result                     = 0;
 
 	/* Test libcpath_path_get_sanitized_filename without replacement characters
 	 */
+	test_filename          = "test.txt";
+	test_filename_length   = 8;
+	expected_filename      = "test.txt";
+	expected_filename_size = 9;
+
 	result = libcpath_path_get_sanitized_filename(
-	          "test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
@@ -894,7 +903,7 @@ int cpath_test_path_get_sanitized_filename(
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "sanitized_filename_size",
 	 sanitized_filename_size,
-	 (size_t) 9 );
+	 expected_filename_size );
 
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -902,8 +911,8 @@ int cpath_test_path_get_sanitized_filename(
 
 	result = narrow_string_compare(
 	          sanitized_filename,
-	          "test.txt",
-	          8 );
+	          expected_filename,
+	          expected_filename_size );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -918,6 +927,18 @@ int cpath_test_path_get_sanitized_filename(
 
 	/* Test libcpath_path_get_sanitized_filename with replacement characters
 	 */
+#if defined( WINAPI )
+	test_filename          = "t\x00sT!.t^t";
+	test_filename_length   = 8;
+	expected_filename      = "t^x00sT^x21.t^^t";
+	expected_filename_size = 17;
+#else
+	test_filename          = "t\x00sT!.t\\t";
+	test_filename_length   = 9;
+	expected_filename      = "t\\x00sT\\x21.t\\\\t";
+	expected_filename_size = 17;
+#endif
+
 	result = libcpath_path_get_sanitized_filename(
 	          "t\x00sT!.t\\t",
 	          9,
@@ -937,7 +958,7 @@ int cpath_test_path_get_sanitized_filename(
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "sanitized_filename_size",
 	 sanitized_filename_size,
-	 (size_t) 17 );
+	 expected_filename_size );
 
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -945,8 +966,8 @@ int cpath_test_path_get_sanitized_filename(
 
 	result = narrow_string_compare(
 	          sanitized_filename,
-	          "t\\x00sT\\x21.t\\\\t",
-	          17 );
+	          expected_filename,
+	          expected_filename_size );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
