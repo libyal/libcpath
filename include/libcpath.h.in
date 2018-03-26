@@ -29,6 +29,8 @@
 #include <libcpath/features.h>
 #include <libcpath/types.h>
 
+#include <stdio.h>
+
 #if defined( __cplusplus )
 extern "C" {
 #endif
