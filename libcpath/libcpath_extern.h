@@ -37,8 +37,11 @@
 
 #include <libcpath/extern.h>
 
+#define LIBCPATH_EXTERN_VARIABLE	LIBCPATH_EXTERN
+
 #else
-#define LIBCPATH_EXTERN	/* extern */
+#define LIBCPATH_EXTERN		/* extern */
+#define LIBCPATH_EXTERN_VARIABLE	extern
 
 #endif /* !defined( HAVE_LOCAL_LIBCPATH ) */
 

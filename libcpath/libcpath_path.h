@@ -153,7 +153,7 @@ int libcpath_path_get_full_path_wide(
 LIBCPATH_EXTERN \
 int libcpath_path_get_sanitized_filename_wide(
      const wchar_t *filename,
-     size_t filename_size,
+     size_t filename_length,
      wchar_t **sanitized_filename,
      size_t *sanitized_filename_size,
      libcerror_error_t **error );
@@ -161,7 +161,7 @@ int libcpath_path_get_sanitized_filename_wide(
 LIBCPATH_EXTERN \
 int libcpath_path_get_sanitized_path_wide(
      const wchar_t *path,
-     size_t path_size,
+     size_t path_length,
      wchar_t **sanitized_path,
      size_t *sanitized_path_size,
      libcerror_error_t **error );
