@@ -1,7 +1,5 @@
 TODO
-* implement sanitize path/filename functions
 * add libcpath_codepage.h and codepage functions
-* remove libcpath_path_sanitize and libcpath_path_sanitize_filename
 
 20120403
 * see `git log' for more recent change log

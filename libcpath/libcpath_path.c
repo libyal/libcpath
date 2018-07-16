@@ -2649,11 +2649,13 @@ int libcpath_path_get_sanitized_filename(
      size_t *sanitized_filename_size,
      libcerror_error_t **error )
 {
-	static char *function           = "libcpath_path_get_sanitized_filename";
-	size_t filename_index           = 0;
-	size_t sanitized_filename_index = 0;
-	char lower_nibble               = 0;
-	char upper_nibble               = 0;
+	static char *function               = "libcpath_path_get_sanitized_filename";
+	char *safe_sanitized_filename       = NULL;
+	size_t filename_index               = 0;
+	size_t safe_sanitized_filename_size = 0;
+	size_t sanitized_filename_index     = 0;
+	char lower_nibble                   = 0;
+	char upper_nibble                   = 0;
 
 	if( filename == NULL )
 	{
@@ -2721,7 +2723,7 @@ int libcpath_path_get_sanitized_filename(
 
 		return( -1 );
 	}
-	*sanitized_filename_size = 1;
+	safe_sanitized_filename_size = 1;
 
 	for( filename_index = 0;
 	     filename_index < filename_length;
@@ -2730,7 +2732,7 @@ int libcpath_path_get_sanitized_filename(
 		if( ( filename[ filename_index ] >= 0x00 )
 		 && ( filename[ filename_index ] <= 0x1f ) )
 		{
-			*sanitized_filename_size += 4;
+			safe_sanitized_filename_size += 4;
 		}
 #if defined( WINAPI )
 		else if( filename[ filename_index ] == '^' )
@@ -2738,9 +2740,10 @@ int libcpath_path_get_sanitized_filename(
 		else if( filename[ filename_index ] == '\\' )
 #endif
 		{
-			*sanitized_filename_size += 2;
+			safe_sanitized_filename_size += 2;
 		}
 		else if( ( filename[ filename_index ] == '/' )
+		      || ( filename[ filename_index ] == '\\' )
 		      || ( filename[ filename_index ] == '!' )
 		      || ( filename[ filename_index ] == '$' )
 		      || ( filename[ filename_index ] == '%' )
@@ -2757,14 +2760,14 @@ int libcpath_path_get_sanitized_filename(
 		      || ( filename[ filename_index ] == '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
 		{
-			*sanitized_filename_size += 4;
+			safe_sanitized_filename_size += 4;
 		}
 		else
 		{
-			*sanitized_filename_size += 1;
+			safe_sanitized_filename_size += 1;
 		}
 	}
-	if( *sanitized_filename_size > (size_t) ( SSIZE_MAX - 1 ) )
+	if( safe_sanitized_filename_size > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
 		 error,
@@ -2775,10 +2778,10 @@ int libcpath_path_get_sanitized_filename(
 
 		goto on_error;
 	}
-	*sanitized_filename = (char *) memory_allocate(
-	                                sizeof( char ) * *sanitized_filename_size );
+	safe_sanitized_filename = narrow_string_allocate(
+	                           safe_sanitized_filename_size );
 
-	if( *sanitized_filename == NULL )
+	if( safe_sanitized_filename == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -2816,22 +2819,22 @@ int libcpath_path_get_sanitized_filename(
 				upper_nibble += '0';
 			}
 #if defined( WINAPI )
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
 #else
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
 #endif
-			( *sanitized_filename )[ sanitized_filename_index++ ] = 'x';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = upper_nibble;
-			( *sanitized_filename )[ sanitized_filename_index++ ] = lower_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = 'x';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
 		}
 		else if( filename[ filename_index ] == '\\' )
 		{
 #if defined( WINAPI )
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
 #else
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
 #endif
 		}
 		else if( ( filename[ filename_index ] == '/' )
@@ -2872,33 +2875,32 @@ int libcpath_path_get_sanitized_filename(
 				upper_nibble += '0';
 			}
 #if defined( WINAPI )
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
 #else
-			( *sanitized_filename )[ sanitized_filename_index++ ] = '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
 #endif
-			( *sanitized_filename )[ sanitized_filename_index++ ] = 'x';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = upper_nibble;
-			( *sanitized_filename )[ sanitized_filename_index++ ] = lower_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = 'x';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
 		}
 		else
 		{
-			( *sanitized_filename )[ sanitized_filename_index++ ] = filename[ filename_index ];
+			safe_sanitized_filename[ sanitized_filename_index++ ] = filename[ filename_index ];
 		}
 	}
-	( *sanitized_filename )[ sanitized_filename_index ] = 0;
+	safe_sanitized_filename[ sanitized_filename_index ] = 0;
+
+	*sanitized_filename      = safe_sanitized_filename;
+	*sanitized_filename_size = safe_sanitized_filename_size;
 
 	return( 1 );
 
 on_error:
-	if( *sanitized_filename != NULL )
+	if( safe_sanitized_filename != NULL )
 	{
 		memory_free(
-		 *sanitized_filename );
-
-		*sanitized_filename = NULL;
+		 safe_sanitized_filename );
 	}
-	*sanitized_filename_size = 0;
-
 	return( -1 );
 }
 
@@ -2912,7 +2914,14 @@ int libcpath_path_get_sanitized_path(
      size_t *sanitized_path_size,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_path_get_sanitized_path";
+	static char *function                    = "libcpath_path_get_sanitized_path";
+	char *safe_sanitized_path                = NULL;
+	size_t last_path_segment_seperator_index = 0;
+	size_t path_index                        = 0;
+	size_t safe_sanitized_path_size          = 0;
+	size_t sanitized_path_index              = 0;
+	char lower_nibble                        = 0;
+	char upper_nibble                        = 0;
 
 	if( path == NULL )
 	{
@@ -2980,7 +2989,243 @@ int libcpath_path_get_sanitized_path(
 
 		return( -1 );
 	}
-/* TODO implement */
+	safe_sanitized_path_size = 1;
+
+	for( path_index = 0;
+	     path_index < path_length;
+	     path_index++ )
+	{
+		if( ( path[ path_index ] >= 0x00 )
+		 && ( path[ path_index ] <= 0x1f ) )
+		{
+			safe_sanitized_path_size += 4;
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == '^' )
+#else
+		else if( path[ path_index ] == '\\' )
+#endif
+		{
+			safe_sanitized_path_size += 2;
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == '/' )
+#else
+		else if( path[ path_index ] == '\\' )
+#endif
+		{
+			safe_sanitized_path_size += 4;
+		}
+		else if( ( path[ path_index ] == '!' )
+		      || ( path[ path_index ] == '$' )
+		      || ( path[ path_index ] == '%' )
+		      || ( path[ path_index ] == '&' )
+		      || ( path[ path_index ] == '*' )
+		      || ( path[ path_index ] == '+' )
+		      || ( path[ path_index ] == ':' )
+		      || ( path[ path_index ] == ';' )
+		      || ( path[ path_index ] == '<' )
+		      || ( path[ path_index ] == '>' )
+		      || ( path[ path_index ] == '?' )
+		      || ( path[ path_index ] == '@' )
+		      || ( path[ path_index ] == '|' )
+		      || ( path[ path_index ] == '~' )
+		      || ( path[ path_index ] == 0x7f ) )
+		{
+			safe_sanitized_path_size += 4;
+		}
+		else
+		{
+			if( path[ path_index ] == LIBCPATH_SEPARATOR )
+			{
+				last_path_segment_seperator_index = path_index;
+			}
+			safe_sanitized_path_size += 1;
+		}
+	}
+	if( safe_sanitized_path_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid sanitized path size value exceeds maximum.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( WINAPI )
+	if( last_path_segment_seperator_index > 32767 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: last path segment separator value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	if( safe_sanitized_path_size > 32767 )
+	{
+		safe_sanitized_path_size = 32767;
+	}
+#endif
+	safe_sanitized_path = narrow_string_allocate(
+	                       safe_sanitized_path_size );
+
+	if( safe_sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create sanitized path.",
+		 function );
+
+		goto on_error;
+	}
+	for( path_index = 0;
+	     path_index < path_length;
+	     path_index++ )
+	{
+		if( ( path[ path_index ] >= 0x00 )
+		 && ( path[ path_index ] <= 0x1f ) )
+		{
+			lower_nibble = path[ path_index ] & 0x0f;
+			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+
+			if( lower_nibble > 10 )
+			{
+				lower_nibble += 'a';
+			}
+			else
+			{
+				lower_nibble += '0';
+			}
+			if( upper_nibble > 10 )
+			{
+				upper_nibble += 'a';
+			}
+			else
+			{
+				upper_nibble += '0';
+			}
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
+#endif
+			safe_sanitized_path[ sanitized_path_index++ ] = 'x';
+			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
+			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+		}
+		else if( path[ path_index ] == '\\' )
+		{
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = '^';
+			safe_sanitized_path[ sanitized_path_index++ ] = '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
+			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
+#endif
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == '/' )
+#else
+		else if( path[ path_index ] == '\\' )
+#endif
+		{
+			lower_nibble = path[ path_index ] & 0x0f;
+			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+
+			if( lower_nibble > 10 )
+			{
+				lower_nibble += 'a';
+			}
+			else
+			{
+				lower_nibble += '0';
+			}
+			if( upper_nibble > 10 )
+			{
+				upper_nibble += 'a';
+			}
+			else
+			{
+				upper_nibble += '0';
+			}
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
+#endif
+			safe_sanitized_path[ sanitized_path_index++ ] = 'x';
+			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
+			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+		}
+		else if( ( path[ path_index ] == '!' )
+		      || ( path[ path_index ] == '$' )
+		      || ( path[ path_index ] == '%' )
+		      || ( path[ path_index ] == '&' )
+		      || ( path[ path_index ] == '*' )
+		      || ( path[ path_index ] == '+' )
+		      || ( path[ path_index ] == ':' )
+		      || ( path[ path_index ] == ';' )
+		      || ( path[ path_index ] == '<' )
+		      || ( path[ path_index ] == '>' )
+		      || ( path[ path_index ] == '?' )
+		      || ( path[ path_index ] == '@' )
+		      || ( path[ path_index ] == '|' )
+		      || ( path[ path_index ] == '~' )
+		      || ( path[ path_index ] == 0x7f ) )
+		{
+			lower_nibble = path[ path_index ] & 0x0f;
+			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+
+			if( lower_nibble > 10 )
+			{
+				lower_nibble += 'a';
+			}
+			else
+			{
+				lower_nibble += '0';
+			}
+			if( upper_nibble > 10 )
+			{
+				upper_nibble += 'a';
+			}
+			else
+			{
+				upper_nibble += '0';
+			}
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
+#endif
+			safe_sanitized_path[ sanitized_path_index++ ] = 'x';
+			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
+			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+		}
+		else
+		{
+			safe_sanitized_path[ sanitized_path_index++ ] = path[ path_index ];
+		}
+	}
+	safe_sanitized_path[ sanitized_path_index ] = 0;
+
+	*sanitized_path      = safe_sanitized_path;
+	*sanitized_path_size = safe_sanitized_path_size;
+
+	return( 1 );
+
+on_error:
+	if( safe_sanitized_path != NULL )
+	{
+		memory_free(
+		 safe_sanitized_path );
+	}
 	return( -1 );
 }
 
@@ -3306,193 +3551,6 @@ int libcpath_path_make_directory(
 #else
 #error Missing make directory function
 #endif
-
-/* Sanitizes the path
- * Returns 1 if successful or -1 on error
- */
-int libcpath_path_sanitize(
-     char *path,
-     size_t *path_size,
-     libcerror_error_t **error )
-{
-	static char *function = "libcpath_path_sanitize";
-	size_t path_index     = 0;
-
-	if( path == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_size == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path size.",
-		 function );
-
-		return( -1 );
-	}
-	if( *path_size > (size_t) SSIZE_MAX )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( WINAPI ) || defined( __CYGWIN__ )
-	if( *path_size > 32767 )
-	{
-		path[ 32766 ] = 0;
-
-		*path_size = 32767;
-	}
-#endif
-	for( path_index = 0;
-	     path_index < *path_size;
-	     path_index++ )
-	{
-		if( path[ path_index ] == 0x00 )
-		{
-			break;
-		}
-		else if( ( path[ path_index ] >= 0x01 )
-		      && ( path[ path_index ] <= 0x1f ) )
-		{
-			path[ path_index ] = '_';
-		}
-#if defined( WINAPI )
-		else if( path[ path_index ] == '/' )
-#else
-		else if( path[ path_index ] == '\\' )
-#endif
-		{
-			path[ path_index ] = '_';
-		}
-		else if( ( path[ path_index ] == '!' )
-		      || ( path[ path_index ] == '$' )
-		      || ( path[ path_index ] == '%' )
-		      || ( path[ path_index ] == '&' )
-		      || ( path[ path_index ] == '*' )
-		      || ( path[ path_index ] == '+' )
-		      || ( path[ path_index ] == ':' )
-		      || ( path[ path_index ] == ';' )
-		      || ( path[ path_index ] == '<' )
-		      || ( path[ path_index ] == '>' )
-		      || ( path[ path_index ] == '?' )
-		      || ( path[ path_index ] == '@' )
-		      || ( path[ path_index ] == '|' )
-		      || ( path[ path_index ] == '~' )
-		      || ( path[ path_index ] == 0x7f ) )
-		{
-			path[ path_index ] = '_';
-		}
-	}
-	return( 1 );
-}
-
-/* Sanitizes the filename
- * Returns 1 if successful or -1 on error
- */
-int libcpath_path_sanitize_filename(
-     char *filename,
-     size_t *filename_size,
-     libcerror_error_t **error )
-{
-	static char *function = "libcpath_path_sanitize_filename";
-	size_t filename_index = 0;
-
-	if( filename == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid filename.",
-		 function );
-
-		return( -1 );
-	}
-	if( filename_size == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid filename size.",
-		 function );
-
-		return( -1 );
-	}
-	if( *filename_size > (size_t) SSIZE_MAX )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid filename size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( WINAPI ) || defined( __CYGWIN__ )
-	if( *filename_size > 256 )
-	{
-		filename[ 255 ] = 0;
-
-		*filename_size = 256;
-	}
-#endif
-	for( filename_index = 0;
-	     filename_index < *filename_size;
-	     filename_index++ )
-	{
-		if( filename[ filename_index ] == 0x00 )
-		{
-			break;
-		}
-		else if( ( filename[ filename_index ] >= 0x01 )
-		      && ( filename[ filename_index ] <= 0x1f ) )
-		{
-			filename[ filename_index ] = '_';
-		}
-		else if( ( filename[ filename_index ] == '/' )
-		      || ( filename[ filename_index ] == '\\' ) )
-		{
-			filename[ filename_index ] = '_';
-		}
-		else if( ( filename[ filename_index ] == '!' )
-		      || ( filename[ filename_index ] == '$' )
-		      || ( filename[ filename_index ] == '%' )
-		      || ( filename[ filename_index ] == '&' )
-		      || ( filename[ filename_index ] == '*' )
-		      || ( filename[ filename_index ] == '+' )
-		      || ( filename[ filename_index ] == ':' )
-		      || ( filename[ filename_index ] == ';' )
-		      || ( filename[ filename_index ] == '<' )
-		      || ( filename[ filename_index ] == '>' )
-		      || ( filename[ filename_index ] == '?' )
-		      || ( filename[ filename_index ] == '@' )
-		      || ( filename[ filename_index ] == '|' )
-		      || ( filename[ filename_index ] == '~' )
-		      || ( filename[ filename_index ] == 0x7f ) )
-		{
-			filename[ filename_index ] = '_';
-		}
-	}
-	return( 1 );
-}
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
@@ -6156,11 +6214,13 @@ int libcpath_path_get_sanitized_filename_wide(
      size_t *sanitized_filename_size,
      libcerror_error_t **error )
 {
-	static char *function           = "libcpath_path_get_sanitized_filename_wide";
-	size_t filename_index           = 0;
-	size_t sanitized_filename_index = 0;
-	wchar_t lower_nibble            = 0;
-	wchar_t upper_nibble            = 0;
+	wchar_t *safe_sanitized_filename    = NULL;
+	static char *function               = "libcpath_path_get_sanitized_filename_wide";
+	size_t filename_index               = 0;
+	size_t safe_sanitized_filename_size = 0;
+	size_t sanitized_filename_index     = 0;
+	wchar_t lower_nibble                = 0;
+	wchar_t upper_nibble                = 0;
 
 	if( filename == NULL )
 	{
@@ -6228,7 +6288,7 @@ int libcpath_path_get_sanitized_filename_wide(
 
 		return( -1 );
 	}
-	*sanitized_filename_size = 1;
+	safe_sanitized_filename_size = 1;
 
 	for( filename_index = 0;
 	     filename_index < filename_length;
@@ -6237,7 +6297,7 @@ int libcpath_path_get_sanitized_filename_wide(
 		if( ( filename[ filename_index ] >= 0x00 )
 		 && ( filename[ filename_index ] <= 0x1f ) )
 		{
-			*sanitized_filename_size += 4;
+			safe_sanitized_filename_size += 4;
 		}
 #if defined( WINAPI )
 		else if( filename[ filename_index ] == (wchar_t) '^' )
@@ -6245,9 +6305,10 @@ int libcpath_path_get_sanitized_filename_wide(
 		else if( filename[ filename_index ] == (wchar_t) '\\' )
 #endif
 		{
-			*sanitized_filename_size += 2;
+			safe_sanitized_filename_size += 2;
 		}
 		else if( ( filename[ filename_index ] == (wchar_t) '/' )
+		      || ( filename[ filename_index ] == (wchar_t) '\\' )
 		      || ( filename[ filename_index ] == (wchar_t) '!' )
 		      || ( filename[ filename_index ] == (wchar_t) '$' )
 		      || ( filename[ filename_index ] == (wchar_t) '%' )
@@ -6264,14 +6325,14 @@ int libcpath_path_get_sanitized_filename_wide(
 		      || ( filename[ filename_index ] == (wchar_t) '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
 		{
-			*sanitized_filename_size += 4;
+			safe_sanitized_filename_size += 4;
 		}
 		else
 		{
-			*sanitized_filename_size += 1;
+			safe_sanitized_filename_size += 1;
 		}
 	}
-	if( *sanitized_filename_size > (size_t) ( SSIZE_MAX - 1 ) )
+	if( safe_sanitized_filename_size > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
 		 error,
@@ -6282,10 +6343,10 @@ int libcpath_path_get_sanitized_filename_wide(
 
 		goto on_error;
 	}
-	*sanitized_filename = (wchar_t *) memory_allocate(
-	                                   sizeof( wchar_t ) * *sanitized_filename_size );
+	safe_sanitized_filename = wide_string_allocate(
+	                           safe_sanitized_filename_size );
 
-	if( *sanitized_filename == NULL )
+	if( safe_sanitized_filename == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -6323,22 +6384,22 @@ int libcpath_path_get_sanitized_filename_wide(
 				upper_nibble += (wchar_t) '0';
 			}
 #if defined( WINAPI )
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
 #else
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
 #endif
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) 'x';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = upper_nibble;
-			( *sanitized_filename )[ sanitized_filename_index++ ] = lower_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) 'x';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
 		}
 		else if( filename[ filename_index ] == (wchar_t) '\\' )
 		{
 #if defined( WINAPI )
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '^';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
 #else
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '\\';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
 #endif
 		}
 		else if( ( filename[ filename_index ] == (wchar_t) '/' )
@@ -6379,33 +6440,32 @@ int libcpath_path_get_sanitized_filename_wide(
 				upper_nibble += (wchar_t) '0';
 			}
 #if defined( WINAPI )
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '^';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
 #else
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) '\\';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
 #endif
-			( *sanitized_filename )[ sanitized_filename_index++ ] = (wchar_t) 'x';
-			( *sanitized_filename )[ sanitized_filename_index++ ] = upper_nibble;
-			( *sanitized_filename )[ sanitized_filename_index++ ] = lower_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) 'x';
+			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
+			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
 		}
 		else
 		{
-			( *sanitized_filename )[ sanitized_filename_index++ ] = filename[ filename_index ];
+			safe_sanitized_filename[ sanitized_filename_index++ ] = filename[ filename_index ];
 		}
 	}
-	( *sanitized_filename )[ sanitized_filename_index ] = 0;
+	safe_sanitized_filename[ sanitized_filename_index ] = 0;
+
+	*sanitized_filename      = safe_sanitized_filename;
+	*sanitized_filename_size = safe_sanitized_filename_size;
 
 	return( 1 );
 
 on_error:
-	if( *sanitized_filename != NULL )
+	if( safe_sanitized_filename != NULL )
 	{
 		memory_free(
-		 *sanitized_filename );
-
-		*sanitized_filename = NULL;
+		 safe_sanitized_filename );
 	}
-	*sanitized_filename_size = 0;
-
 	return( -1 );
 }
 
@@ -6419,8 +6479,48 @@ int libcpath_path_get_sanitized_path_wide(
      size_t *sanitized_path_size,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_path_get_sanitized_path_wide";
+	wchar_t *safe_sanitized_path             = NULL;
+	static char *function                    = "libcpath_path_get_sanitized_path_wide";
+	size_t last_path_segment_seperator_index = 0;
+	size_t path_index                        = 0;
+	size_t safe_sanitized_path_size          = 0;
+	size_t sanitized_path_index              = 0;
+	wchar_t lower_nibble                     = 0;
+	wchar_t upper_nibble                     = 0;
 
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
+		 "%s: invalid path length is zero.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid path length value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
 	if( sanitized_path == NULL )
 	{
 		libcerror_error_set(
@@ -6454,7 +6554,243 @@ int libcpath_path_get_sanitized_path_wide(
 
 		return( -1 );
 	}
-/* TODO implement */
+	safe_sanitized_path_size = 1;
+
+	for( path_index = 0;
+	     path_index < path_length;
+	     path_index++ )
+	{
+		if( ( path[ path_index ] >= 0x00 )
+		 && ( path[ path_index ] <= 0x1f ) )
+		{
+			safe_sanitized_path_size += 4;
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == (wchar_t) '^' )
+#else
+		else if( path[ path_index ] == (wchar_t) '\\' )
+#endif
+		{
+			safe_sanitized_path_size += 2;
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == (wchar_t) '/' )
+#else
+		else if( path[ path_index ] == (wchar_t) '\\' )
+#endif
+		{
+			safe_sanitized_path_size += 4;
+		}
+		else if( ( path[ path_index ] == (wchar_t) '!' )
+		      || ( path[ path_index ] == (wchar_t) '$' )
+		      || ( path[ path_index ] == (wchar_t) '%' )
+		      || ( path[ path_index ] == (wchar_t) '&' )
+		      || ( path[ path_index ] == (wchar_t) '*' )
+		      || ( path[ path_index ] == (wchar_t) '+' )
+		      || ( path[ path_index ] == (wchar_t) ':' )
+		      || ( path[ path_index ] == (wchar_t) ';' )
+		      || ( path[ path_index ] == (wchar_t) '<' )
+		      || ( path[ path_index ] == (wchar_t) '>' )
+		      || ( path[ path_index ] == (wchar_t) '?' )
+		      || ( path[ path_index ] == (wchar_t) '@' )
+		      || ( path[ path_index ] == (wchar_t) '|' )
+		      || ( path[ path_index ] == (wchar_t) '~' )
+		      || ( path[ path_index ] == 0x7f ) )
+		{
+			safe_sanitized_path_size += 4;
+		}
+		else
+		{
+			if( path[ path_index ] == LIBCPATH_SEPARATOR )
+			{
+				last_path_segment_seperator_index = path_index;
+			}
+			safe_sanitized_path_size += 1;
+		}
+	}
+	if( safe_sanitized_path_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid sanitized path size value exceeds maximum.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( WINAPI )
+	if( last_path_segment_seperator_index > 32767 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: last path segment separator value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	if( safe_sanitized_path_size > 32767 )
+	{
+		safe_sanitized_path_size = 32767;
+	}
+#endif
+	safe_sanitized_path = wide_string_allocate(
+	                       safe_sanitized_path_size );
+
+	if( safe_sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create sanitized path.",
+		 function );
+
+		goto on_error;
+	}
+	for( path_index = 0;
+	     path_index < path_length;
+	     path_index++ )
+	{
+		if( ( path[ path_index ] >= 0x00 )
+		 && ( path[ path_index ] <= 0x1f ) )
+		{
+			lower_nibble = path[ path_index ] & 0x0f;
+			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+
+			if( lower_nibble > 10 )
+			{
+				lower_nibble += (wchar_t) 'a';
+			}
+			else
+			{
+				lower_nibble += (wchar_t) '0';
+			}
+			if( upper_nibble > 10 )
+			{
+				upper_nibble += (wchar_t) 'a';
+			}
+			else
+			{
+				upper_nibble += (wchar_t) '0';
+			}
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
+#endif
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) 'x';
+			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
+			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+		}
+		else if( path[ path_index ] == (wchar_t) '\\' )
+		{
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
+#endif
+		}
+#if defined( WINAPI )
+		else if( path[ path_index ] == (wchar_t) '/' )
+#else
+		else if( path[ path_index ] == (wchar_t) '\\' )
+#endif
+		{
+			lower_nibble = path[ path_index ] & 0x0f;
+			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+
+			if( lower_nibble > 10 )
+			{
+				lower_nibble += (wchar_t) 'a';
+			}
+			else
+			{
+				lower_nibble += (wchar_t) '0';
+			}
+			if( upper_nibble > 10 )
+			{
+				upper_nibble += (wchar_t) 'a';
+			}
+			else
+			{
+				upper_nibble += (wchar_t) '0';
+			}
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
+#endif
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) 'x';
+			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
+			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+		}
+		else if( ( path[ path_index ] == (wchar_t) '!' )
+		      || ( path[ path_index ] == (wchar_t) '$' )
+		      || ( path[ path_index ] == (wchar_t) '%' )
+		      || ( path[ path_index ] == (wchar_t) '&' )
+		      || ( path[ path_index ] == (wchar_t) '*' )
+		      || ( path[ path_index ] == (wchar_t) '+' )
+		      || ( path[ path_index ] == (wchar_t) ':' )
+		      || ( path[ path_index ] == (wchar_t) ';' )
+		      || ( path[ path_index ] == (wchar_t) '<' )
+		      || ( path[ path_index ] == (wchar_t) '>' )
+		      || ( path[ path_index ] == (wchar_t) '?' )
+		      || ( path[ path_index ] == (wchar_t) '@' )
+		      || ( path[ path_index ] == (wchar_t) '|' )
+		      || ( path[ path_index ] == (wchar_t) '~' )
+		      || ( path[ path_index ] == 0x7f ) )
+		{
+			lower_nibble = path[ path_index ] & 0x0f;
+			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+
+			if( lower_nibble > 10 )
+			{
+				lower_nibble += (wchar_t) 'a';
+			}
+			else
+			{
+				lower_nibble += (wchar_t) '0';
+			}
+			if( upper_nibble > 10 )
+			{
+				upper_nibble += (wchar_t) 'a';
+			}
+			else
+			{
+				upper_nibble += (wchar_t) '0';
+			}
+#if defined( WINAPI )
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
+#else
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
+#endif
+			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) 'x';
+			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
+			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+		}
+		else
+		{
+			safe_sanitized_path[ sanitized_path_index++ ] = path[ path_index ];
+		}
+	}
+	safe_sanitized_path[ sanitized_path_index ] = 0;
+
+	*sanitized_path      = safe_sanitized_path;
+	*sanitized_path_size = safe_sanitized_path_size;
+
+	return( 1 );
+
+on_error:
+	if( safe_sanitized_path != NULL )
+	{
+		memory_free(
+		 safe_sanitized_path );
+	}
 	return( -1 );
 }
 
@@ -6853,193 +7189,6 @@ on_error:
 #else
 #error Missing make directory function
 #endif
-
-/* Sanitizes the path
- * Returns 1 if successful or -1 on error
- */
-int libcpath_path_sanitize_wide(
-     wchar_t *path,
-     size_t *path_size,
-     libcerror_error_t **error )
-{
-	static char *function = "libcpath_path_sanitize_wide";
-	size_t path_index     = 0;
-
-	if( path == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_size == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path size.",
-		 function );
-
-		return( -1 );
-	}
-	if( *path_size > (size_t) SSIZE_MAX )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( WINAPI ) || defined( __CYGWIN__ )
-	if( *path_size > 32767 )
-	{
-		path[ 32766 ] = 0;
-
-		*path_size = 32767;
-	}
-#endif
-	for( path_index = 0;
-	     path_index < *path_size;
-	     path_index++ )
-	{
-		if( path[ path_index ] == 0x00 )
-		{
-			break;
-		}
-		else if( ( path[ path_index ] >= 0x01 )
-		      && ( path[ path_index ] <= 0x1f ) )
-		{
-			path[ path_index ] = (wchar_t) '_';
-		}
-#if defined( WINAPI )
-		else if( path[ path_index ] == (wchar_t) '/' )
-#else
-		else if( path[ path_index ] == (wchar_t) '\\' )
-#endif
-		{
-			path[ path_index ] = (wchar_t) '_';
-		}
-		else if( ( path[ path_index ] == (wchar_t) '!' )
-		      || ( path[ path_index ] == (wchar_t) '$' )
-		      || ( path[ path_index ] == (wchar_t) '%' )
-		      || ( path[ path_index ] == (wchar_t) '&' )
-		      || ( path[ path_index ] == (wchar_t) '*' )
-		      || ( path[ path_index ] == (wchar_t) '+' )
-		      || ( path[ path_index ] == (wchar_t) ':' )
-		      || ( path[ path_index ] == (wchar_t) ';' )
-		      || ( path[ path_index ] == (wchar_t) '<' )
-		      || ( path[ path_index ] == (wchar_t) '>' )
-		      || ( path[ path_index ] == (wchar_t) '?' )
-		      || ( path[ path_index ] == (wchar_t) '@' )
-		      || ( path[ path_index ] == (wchar_t) '|' )
-		      || ( path[ path_index ] == (wchar_t) '~' )
-		      || ( path[ path_index ] == 0x7f ) )
-		{
-			path[ path_index ] = (wchar_t) '_';
-		}
-	}
-	return( 1 );
-}
-
-/* Sanitizes the filename
- * Returns 1 if successful or -1 on error
- */
-int libcpath_path_sanitize_filename_wide(
-     wchar_t *filename,
-     size_t *filename_size,
-     libcerror_error_t **error )
-{
-	static char *function = "libcpath_path_sanitize_filename_wide";
-	size_t filename_index = 0;
-
-	if( filename == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid filename.",
-		 function );
-
-		return( -1 );
-	}
-	if( filename_size == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid filename size.",
-		 function );
-
-		return( -1 );
-	}
-	if( *filename_size > (size_t) SSIZE_MAX )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid filename size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( WINAPI ) || defined( __CYGWIN__ )
-	if( *filename_size > 256 )
-	{
-		filename[ 255 ] = 0;
-
-		*filename_size = 256;
-	}
-#endif
-	for( filename_index = 0;
-	     filename_index < *filename_size;
-	     filename_index++ )
-	{
-		if( filename[ filename_index ] == 0x00 )
-		{
-			break;
-		}
-		else if( ( filename[ filename_index ] >= 0x01 )
-		      && ( filename[ filename_index ] <= 0x1f ) )
-		{
-			filename[ filename_index ] = (wchar_t) '_';
-		}
-		else if( ( filename[ filename_index ] == (wchar_t) '/' )
-		      || ( filename[ filename_index ] == (wchar_t) '\\' ) )
-		{
-			filename[ filename_index ] = (wchar_t) '_';
-		}
-		else if( ( filename[ filename_index ] == (wchar_t) '!' )
-		      || ( filename[ filename_index ] == (wchar_t) '$' )
-		      || ( filename[ filename_index ] == (wchar_t) '%' )
-		      || ( filename[ filename_index ] == (wchar_t) '&' )
-		      || ( filename[ filename_index ] == (wchar_t) '*' )
-		      || ( filename[ filename_index ] == (wchar_t) '+' )
-		      || ( filename[ filename_index ] == (wchar_t) ':' )
-		      || ( filename[ filename_index ] == (wchar_t) ';' )
-		      || ( filename[ filename_index ] == (wchar_t) '<' )
-		      || ( filename[ filename_index ] == (wchar_t) '>' )
-		      || ( filename[ filename_index ] == (wchar_t) '?' )
-		      || ( filename[ filename_index ] == (wchar_t) '@' )
-		      || ( filename[ filename_index ] == (wchar_t) '|' )
-		      || ( filename[ filename_index ] == (wchar_t) '~' )
-		      || ( filename[ filename_index ] == 0x7f ) )
-		{
-			filename[ filename_index ] = (wchar_t) '_';
-		}
-	}
-	return( 1 );
-}
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 

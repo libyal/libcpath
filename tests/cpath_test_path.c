@@ -261,6 +261,8 @@ int cpath_test_path_get_current_working_directory(
 	          &current_working_directory_size,
 	          &error );
 
+	current_working_directory = NULL;
+
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -272,8 +274,6 @@ int cpath_test_path_get_current_working_directory(
 
 	libcerror_error_free(
 	 &error );
-
-	current_working_directory = NULL;
 
 	result = libcpath_path_get_current_working_directory(
 	          &current_working_directory,
@@ -766,6 +766,8 @@ int cpath_test_path_get_full_path(
 	          &full_path_size,
 	          &error );
 
+	full_path = NULL;
+
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -777,8 +779,6 @@ int cpath_test_path_get_full_path(
 
 	libcerror_error_free(
 	 &error );
-
-	full_path = NULL;
 
 	result = libcpath_path_get_full_path(
 	          "test.txt",
@@ -940,8 +940,8 @@ int cpath_test_path_get_sanitized_filename(
 #endif
 
 	result = libcpath_path_get_sanitized_filename(
-	          "t\x00sT!.t\\t",
-	          9,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
@@ -982,9 +982,14 @@ int cpath_test_path_get_sanitized_filename(
 
 	/* Test error cases
 	 */
+	test_filename          = "test.txt";
+	test_filename_length   = 8;
+	expected_filename      = "test.txt";
+	expected_filename_size = 9;
+
 	result = libcpath_path_get_sanitized_filename(
 	          NULL,
-	          8,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
@@ -1002,7 +1007,7 @@ int cpath_test_path_get_sanitized_filename(
 	 &error );
 
 	result = libcpath_path_get_sanitized_filename(
-	          "test.txt",
+	          test_filename,
 	          (size_t) -1,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
@@ -1021,8 +1026,8 @@ int cpath_test_path_get_sanitized_filename(
 	 &error );
 
 	result = libcpath_path_get_sanitized_filename(
-	          "test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          NULL,
 	          &sanitized_filename_size,
 	          &error );
@@ -1042,11 +1047,13 @@ int cpath_test_path_get_sanitized_filename(
 	sanitized_filename = (char *) 0x12345678UL;
 
 	result = libcpath_path_get_sanitized_filename(
-	          "test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
+
+	sanitized_filename = NULL;
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -1060,11 +1067,9 @@ int cpath_test_path_get_sanitized_filename(
 	libcerror_error_free(
 	 &error );
 
-	sanitized_filename = NULL;
-
 	result = libcpath_path_get_sanitized_filename(
-	          "test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          NULL,
 	          &error );
@@ -1088,8 +1093,8 @@ int cpath_test_path_get_sanitized_filename(
 	cpath_test_malloc_attempts_before_fail = 0;
 
 	result = libcpath_path_get_sanitized_filename(
-	          "test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
@@ -1154,18 +1159,35 @@ int cpath_test_path_get_sanitized_path(
      void )
 {
 	libcerror_error_t *error   = NULL;
+	char *expected_path        = NULL;
 	char *sanitized_path       = NULL;
+	char *test_path            = NULL;
+	size_t expected_path_size  = 0;
 	size_t sanitized_path_size = 0;
+	size_t test_path_length    = 0;
 	int result                 = 0;
 
+	/* Test libcpath_path_get_sanitized_path without replacement characters
+	 */
+#if defined( WINAPI )
+	test_path          = "test\\test.txt";
+	test_path_length   = 13;
+	expected_path      = "test\\test.txt";
+	expected_path_size = 14;
+#else
+	test_path          = "test/test.txt";
+	test_path_length   = 13;
+	expected_path      = "test/test.txt";
+	expected_path_size = 14;
+#endif
+
 	result = libcpath_path_get_sanitized_path(
-	          "test.txt",
-	          8,
+	          test_path,
+	          test_path_length,
 	          &sanitized_path,
 	          &sanitized_path_size,
 	          &error );
 
-/* TODO
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -1175,21 +1197,103 @@ int cpath_test_path_get_sanitized_path(
 	 "sanitized_path",
 	 sanitized_path );
 
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_size",
+	 sanitized_path_size,
+	 expected_path_size );
+
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
+	result = narrow_string_compare(
+	          sanitized_path,
+	          expected_path,
+	          expected_path_size );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
 	memory_free(
 	 sanitized_path );
 
-	sanitized_path = NULL;
-*/
+	sanitized_path      = NULL;
+	sanitized_path_size = 0;
+
+	/* Test libcpath_path_get_sanitized_path with replacement characters
+	 */
+#if defined( WINAPI )
+	test_path          = "test\\t\x00sT!.t^t";
+	test_path_length   = 13;
+	expected_path      = "test\\t^x00sT^x21.t^^t";
+	expected_path_size = 22;
+#else
+	test_path          = "test/t\x00sT!.t\\t";
+	test_path_length   = 14;
+	expected_path      = "test/t\\x00sT\\x21.t\\\\t";
+	expected_path_size = 22;
+#endif
+
+	result = libcpath_path_get_sanitized_path(
+	          test_path,
+	          test_path_length,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "sanitized_path",
+	 sanitized_path );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_size",
+	 sanitized_path_size,
+	 expected_path_size );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          sanitized_path,
+	          expected_path,
+	          expected_path_size );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 sanitized_path );
+
+	sanitized_path      = NULL;
+	sanitized_path_size = 0;
 
 	/* Test error cases
 	 */
+#if defined( WINAPI )
+	test_path          = "test\\test.txt";
+	test_path_length   = 13;
+	expected_path      = "test\\test.txt";
+	expected_path_size = 14;
+#else
+	test_path          = "test/test.txt";
+	test_path_length   = 13;
+	expected_path      = "test/test.txt";
+	expected_path_size = 14;
+#endif
+
 	result = libcpath_path_get_sanitized_path(
 	          NULL,
-	          8,
+	          test_path_length,
 	          &sanitized_path,
 	          &sanitized_path_size,
 	          &error );
@@ -1207,7 +1311,7 @@ int cpath_test_path_get_sanitized_path(
 	 &error );
 
 	result = libcpath_path_get_sanitized_path(
-	          "test.txt",
+	          test_path,
 	          (size_t) -1,
 	          &sanitized_path,
 	          &sanitized_path_size,
@@ -1226,8 +1330,8 @@ int cpath_test_path_get_sanitized_path(
 	 &error );
 
 	result = libcpath_path_get_sanitized_path(
-	          "test.txt",
-	          8,
+	          test_path,
+	          test_path_length,
 	          NULL,
 	          &sanitized_path_size,
 	          &error );
@@ -1247,11 +1351,13 @@ int cpath_test_path_get_sanitized_path(
 	sanitized_path = (char *) 0x12345678UL;
 
 	result = libcpath_path_get_sanitized_path(
-	          "test.txt",
-	          8,
+	          test_path,
+	          test_path_length,
 	          &sanitized_path,
 	          &sanitized_path_size,
 	          &error );
+
+	sanitized_path = NULL;
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -1265,11 +1371,9 @@ int cpath_test_path_get_sanitized_path(
 	libcerror_error_free(
 	 &error );
 
-	sanitized_path = NULL;
-
 	result = libcpath_path_get_sanitized_path(
-	          "test.txt",
-	          8,
+	          test_path,
+	          test_path_length,
 	          &sanitized_path,
 	          NULL,
 	          &error );
@@ -1285,6 +1389,56 @@ int cpath_test_path_get_sanitized_path(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_get_sanitized_path with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_get_sanitized_path(
+	          test_path,
+	          test_path_length,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( sanitized_path != NULL )
+		{
+			memory_free(
+			 sanitized_path );
+
+			sanitized_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "sanitized_path",
+		 sanitized_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "sanitized_path_size",
+		 sanitized_path_size,
+		 (size_t) 0 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
 
 	return( 1 );
 
@@ -1480,6 +1634,8 @@ int cpath_test_path_join(
 	          12,
 	          &error );
 
+	path = NULL;
+
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -1491,8 +1647,6 @@ int cpath_test_path_join(
 
 	libcerror_error_free(
 	 &error );
-
-	path = NULL;
 
 	result = libcpath_path_join(
 	          &path,
@@ -1766,6 +1920,8 @@ int cpath_test_path_get_current_working_directory_wide(
 	          &current_working_directory_size,
 	          &error );
 
+	current_working_directory = NULL;
+
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -1777,8 +1933,6 @@ int cpath_test_path_get_current_working_directory_wide(
 
 	libcerror_error_free(
 	 &error );
-
-	current_working_directory = NULL;
 
 	result = libcpath_path_get_current_working_directory_wide(
 	          &current_working_directory,
@@ -1910,7 +2064,7 @@ int cpath_test_path_get_sanitized_filename_wide(
 	size_t test_filename_length    = 0;
 	int result                     = 0;
 
-	/* Test libcpath_path_get_sanitized_filename_wide without replacement characters
+	/* Test libcpath_path_get_sanitized_filename without replacement characters
 	 */
 	test_filename          = L"test.txt";
 	test_filename_length   = 8;
@@ -1958,7 +2112,7 @@ int cpath_test_path_get_sanitized_filename_wide(
 	sanitized_filename      = NULL;
 	sanitized_filename_size = 0;
 
-	/* Test libcpath_path_get_sanitized_filename_wide with replacement characters
+	/* Test libcpath_path_get_sanitized_filename with replacement characters
 	 */
 #if defined( WINAPI )
 	test_filename          = L"t\x00sT!.t^t";
@@ -1973,8 +2127,8 @@ int cpath_test_path_get_sanitized_filename_wide(
 #endif
 
 	result = libcpath_path_get_sanitized_filename_wide(
-	          L"t\x00sT!.t\\t",
-	          9,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
@@ -2015,9 +2169,14 @@ int cpath_test_path_get_sanitized_filename_wide(
 
 	/* Test error cases
 	 */
+	test_filename          = L"test.txt";
+	test_filename_length   = 8;
+	expected_filename      = L"test.txt";
+	expected_filename_size = 9;
+
 	result = libcpath_path_get_sanitized_filename_wide(
 	          NULL,
-	          8,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
@@ -2035,7 +2194,7 @@ int cpath_test_path_get_sanitized_filename_wide(
 	 &error );
 
 	result = libcpath_path_get_sanitized_filename_wide(
-	          L"test.txt",
+	          test_filename,
 	          (size_t) -1,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
@@ -2054,8 +2213,8 @@ int cpath_test_path_get_sanitized_filename_wide(
 	 &error );
 
 	result = libcpath_path_get_sanitized_filename_wide(
-	          L"test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          NULL,
 	          &sanitized_filename_size,
 	          &error );
@@ -2075,11 +2234,13 @@ int cpath_test_path_get_sanitized_filename_wide(
 	sanitized_filename = (wchar_t *) 0x12345678UL;
 
 	result = libcpath_path_get_sanitized_filename_wide(
-	          L"test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
+
+	sanitized_filename = NULL;
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -2093,11 +2254,9 @@ int cpath_test_path_get_sanitized_filename_wide(
 	libcerror_error_free(
 	 &error );
 
-	sanitized_filename = NULL;
-
 	result = libcpath_path_get_sanitized_filename_wide(
-	          L"test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          NULL,
 	          &error );
@@ -2116,13 +2275,13 @@ int cpath_test_path_get_sanitized_filename_wide(
 
 #if defined( HAVE_CPATH_TEST_MEMORY )
 
-	/* Test libcpath_path_get_sanitized_filename_wide with malloc failing
+	/* Test libcpath_path_get_sanitized_filename with malloc failing
 	 */
 	cpath_test_malloc_attempts_before_fail = 0;
 
 	result = libcpath_path_get_sanitized_filename_wide(
-	          L"test.txt",
-	          8,
+	          test_filename,
+	          test_filename_length,
 	          &sanitized_filename,
 	          &sanitized_filename_size,
 	          &error );
@@ -2180,21 +2339,229 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libcpath_path_get_sanitized_path_wide function
+/* Tests the libcpath_path_get_sanitized_path function
  * Returns 1 if successful or 0 if not
  */
 int cpath_test_path_get_sanitized_path_wide(
      void )
 {
-	libcerror_error_t *error = NULL;
-	int result               = 0;
+	libcerror_error_t *error   = NULL;
+	wchar_t *expected_path     = NULL;
+	wchar_t *sanitized_path    = NULL;
+	wchar_t *test_path         = NULL;
+	size_t expected_path_size  = 0;
+	size_t sanitized_path_size = 0;
+	size_t test_path_length    = 0;
+	int result                 = 0;
+
+	/* Test libcpath_path_get_sanitized_path without replacement characters
+	 */
+#if defined( WINAPI )
+	test_path          = L"test\\test.txt";
+	test_path_length   = 13;
+	expected_path      = L"test\\test.txt";
+	expected_path_size = 14;
+#else
+	test_path          = L"test/test.txt";
+	test_path_length   = 13;
+	expected_path      = L"test/test.txt";
+	expected_path_size = 14;
+#endif
+
+	result = libcpath_path_get_sanitized_path_wide(
+	          test_path,
+	          test_path_length,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "sanitized_path",
+	 sanitized_path );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_size",
+	 sanitized_path_size,
+	 expected_path_size );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          sanitized_path,
+	          expected_path,
+	          expected_path_size );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 sanitized_path );
+
+	sanitized_path      = NULL;
+	sanitized_path_size = 0;
+
+	/* Test libcpath_path_get_sanitized_path with replacement characters
+	 */
+#if defined( WINAPI )
+	test_path          = L"test\\t\x00sT!.t^t";
+	test_path_length   = 13;
+	expected_path      = L"test\\t^x00sT^x21.t^^t";
+	expected_path_size = 22;
+#else
+	test_path          = L"test/t\x00sT!.t\\t";
+	test_path_length   = 14;
+	expected_path      = L"test/t\\x00sT\\x21.t\\\\t";
+	expected_path_size = 22;
+#endif
+
+	result = libcpath_path_get_sanitized_path_wide(
+	          test_path,
+	          test_path_length,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "sanitized_path",
+	 sanitized_path );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_size",
+	 sanitized_path_size,
+	 expected_path_size );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          sanitized_path,
+	          expected_path,
+	          expected_path_size );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 sanitized_path );
+
+	sanitized_path      = NULL;
+	sanitized_path_size = 0;
 
 	/* Test error cases
 	 */
+#if defined( WINAPI )
+	test_path          = L"test\\test.txt";
+	test_path_length   = 13;
+	expected_path      = L"test\\test.txt";
+	expected_path_size = 14;
+#else
+	test_path          = L"test/test.txt";
+	test_path_length   = 13;
+	expected_path      = L"test/test.txt";
+	expected_path_size = 14;
+#endif
+
 	result = libcpath_path_get_sanitized_path_wide(
 	          NULL,
-	          0,
+	          test_path_length,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_sanitized_path_wide(
+	          test_path,
+	          (size_t) -1,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_sanitized_path_wide(
+	          test_path,
+	          test_path_length,
 	          NULL,
+	          &sanitized_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	sanitized_path = (wchar_t *) 0x12345678UL;
+
+	result = libcpath_path_get_sanitized_path_wide(
+	          test_path,
+	          test_path_length,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	sanitized_path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_sanitized_path_wide(
+	          test_path,
+	          test_path_length,
+	          &sanitized_path,
 	          NULL,
 	          &error );
 
@@ -2210,9 +2577,64 @@ int cpath_test_path_get_sanitized_path_wide(
 	libcerror_error_free(
 	 &error );
 
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_get_sanitized_path with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_get_sanitized_path_wide(
+	          test_path,
+	          test_path_length,
+	          &sanitized_path,
+	          &sanitized_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( sanitized_path != NULL )
+		{
+			memory_free(
+			 sanitized_path );
+
+			sanitized_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "sanitized_path",
+		 sanitized_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "sanitized_path_size",
+		 sanitized_path_size,
+		 (size_t) 0 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
+
 	return( 1 );
 
 on_error:
+	if( sanitized_path != NULL )
+	{
+		memory_free(
+		 sanitized_path );
+	}
 	if( error != NULL )
 	{
 		libcerror_error_free(
@@ -2399,6 +2821,8 @@ int cpath_test_path_join_wide(
 	          12,
 	          &error );
 
+	path = NULL;
+
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -2410,8 +2834,6 @@ int cpath_test_path_join_wide(
 
 	libcerror_error_free(
 	 &error );
-
-	path = NULL;
 
 	result = libcpath_path_join_wide(
 	          &path,

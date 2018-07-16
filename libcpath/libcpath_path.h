@@ -111,13 +111,6 @@ int libcpath_path_sanitize(
      size_t *path_size,
      libcerror_error_t **error );
 
-/* TODO: deprecated remove */
-LIBCPATH_EXTERN \
-int libcpath_path_sanitize_filename(
-     char *filename,
-     size_t *filename_size,
-     libcerror_error_t **error );
-
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
@@ -192,13 +185,6 @@ LIBCPATH_EXTERN \
 int libcpath_path_sanitize_wide(
      wchar_t *path,
      size_t *path_size,
-     libcerror_error_t **error );
-
-/* TODO: deprecated remove */
-LIBCPATH_EXTERN \
-int libcpath_path_sanitize_filename_wide(
-     wchar_t *filename,
-     size_t *filename_size,
      libcerror_error_t **error );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
