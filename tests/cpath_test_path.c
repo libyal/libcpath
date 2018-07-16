@@ -928,15 +928,15 @@ int cpath_test_path_get_sanitized_filename(
 	/* Test libcpath_path_get_sanitized_filename with replacement characters
 	 */
 #if defined( WINAPI )
-	test_filename          = "t\x00sT!.t^t";
+	test_filename          = "t\x00sT!.t^|";
 	test_filename_length   = 8;
-	expected_filename      = "t^x00sT^x21.t^^t";
-	expected_filename_size = 17;
+	expected_filename      = "t^x00sT^x21.t^^^x7c";
+	expected_filename_size = 20;
 #else
-	test_filename          = "t\x00sT!.t\\t";
+	test_filename          = "t\x00sT!.t\\|";
 	test_filename_length   = 9;
-	expected_filename      = "t\\x00sT\\x21.t\\\\t";
-	expected_filename_size = 17;
+	expected_filename      = "t\\x00sT\\x21.t\\\\\\x7c";
+	expected_filename_size = 20;
 #endif
 
 	result = libcpath_path_get_sanitized_filename(
@@ -1225,15 +1225,15 @@ int cpath_test_path_get_sanitized_path(
 	/* Test libcpath_path_get_sanitized_path with replacement characters
 	 */
 #if defined( WINAPI )
-	test_path          = "test\\t\x00sT!.t^t";
+	test_path          = "test\\t\x00sT!.t^|";
 	test_path_length   = 13;
-	expected_path      = "test\\t^x00sT^x21.t^^t";
-	expected_path_size = 22;
+	expected_path      = "test\\t^x00sT^x21.t^^^x7c";
+	expected_path_size = 25;
 #else
-	test_path          = "test/t\x00sT!.t\\t";
+	test_path          = "test/t\x00sT!.t\\|";
 	test_path_length   = 14;
-	expected_path      = "test/t\\x00sT\\x21.t\\\\t";
-	expected_path_size = 22;
+	expected_path      = "test/t\\x00sT\\x21.t\\\\\\x7c";
+	expected_path_size = 25;
 #endif
 
 	result = libcpath_path_get_sanitized_path(
@@ -2115,15 +2115,15 @@ int cpath_test_path_get_sanitized_filename_wide(
 	/* Test libcpath_path_get_sanitized_filename with replacement characters
 	 */
 #if defined( WINAPI )
-	test_filename          = L"t\x00sT!.t^t";
+	test_filename          = L"t\x00sT!.t^|";
 	test_filename_length   = 8;
-	expected_filename      = L"t^x00sT^x21.t^^t";
-	expected_filename_size = 17;
+	expected_filename      = L"t^x00sT^x21.t^^^x7c";
+	expected_filename_size = 20;
 #else
-	test_filename          = L"t\x00sT!.t\\t";
+	test_filename          = L"t\x00sT!.t\\|";
 	test_filename_length   = 9;
-	expected_filename      = L"t\\x00sT\\x21.t\\\\t";
-	expected_filename_size = 17;
+	expected_filename      = L"t\\x00sT\\x21.t\\\\\\x7c";
+	expected_filename_size = 20;
 #endif
 
 	result = libcpath_path_get_sanitized_filename_wide(
@@ -2412,15 +2412,15 @@ int cpath_test_path_get_sanitized_path_wide(
 	/* Test libcpath_path_get_sanitized_path with replacement characters
 	 */
 #if defined( WINAPI )
-	test_path          = L"test\\t\x00sT!.t^t";
+	test_path          = L"test\\t\x00sT!.t^|";
 	test_path_length   = 13;
-	expected_path      = L"test\\t^x00sT^x21.t^^t";
-	expected_path_size = 22;
+	expected_path      = L"test\\t^x00sT^x21.t^^^x7c";
+	expected_path_size = 25;
 #else
-	test_path          = L"test/t\x00sT!.t\\t";
+	test_path          = L"test/t\x00sT!.t\\|";
 	test_path_length   = 14;
-	expected_path      = L"test/t\\x00sT\\x21.t\\\\t";
-	expected_path_size = 22;
+	expected_path      = L"test/t\\x00sT\\x21.t\\\\\\x7c";
+	expected_path_size = 25;
 #endif
 
 	result = libcpath_path_get_sanitized_path_wide(

@@ -2755,7 +2755,6 @@ int libcpath_path_get_sanitized_filename(
 		      || ( filename[ filename_index ] == '<' )
 		      || ( filename[ filename_index ] == '>' )
 		      || ( filename[ filename_index ] == '?' )
-		      || ( filename[ filename_index ] == '@' )
 		      || ( filename[ filename_index ] == '|' )
 		      || ( filename[ filename_index ] == '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
@@ -2804,7 +2803,7 @@ int libcpath_path_get_sanitized_filename(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += 'a';
+				lower_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -2812,7 +2811,7 @@ int libcpath_path_get_sanitized_filename(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += 'a';
+				upper_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -2850,7 +2849,6 @@ int libcpath_path_get_sanitized_filename(
 		      || ( filename[ filename_index ] == '<' )
 		      || ( filename[ filename_index ] == '>' )
 		      || ( filename[ filename_index ] == '?' )
-		      || ( filename[ filename_index ] == '@' )
 		      || ( filename[ filename_index ] == '|' )
 		      || ( filename[ filename_index ] == '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
@@ -2860,7 +2858,7 @@ int libcpath_path_get_sanitized_filename(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += 'a';
+				lower_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -2868,7 +2866,7 @@ int libcpath_path_get_sanitized_filename(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += 'a';
+				upper_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -3027,7 +3025,6 @@ int libcpath_path_get_sanitized_path(
 		      || ( path[ path_index ] == '<' )
 		      || ( path[ path_index ] == '>' )
 		      || ( path[ path_index ] == '?' )
-		      || ( path[ path_index ] == '@' )
 		      || ( path[ path_index ] == '|' )
 		      || ( path[ path_index ] == '~' )
 		      || ( path[ path_index ] == 0x7f ) )
@@ -3097,7 +3094,7 @@ int libcpath_path_get_sanitized_path(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += 'a';
+				lower_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -3105,7 +3102,7 @@ int libcpath_path_get_sanitized_path(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += 'a';
+				upper_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -3141,7 +3138,7 @@ int libcpath_path_get_sanitized_path(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += 'a';
+				lower_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -3149,7 +3146,7 @@ int libcpath_path_get_sanitized_path(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += 'a';
+				upper_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -3175,7 +3172,6 @@ int libcpath_path_get_sanitized_path(
 		      || ( path[ path_index ] == '<' )
 		      || ( path[ path_index ] == '>' )
 		      || ( path[ path_index ] == '?' )
-		      || ( path[ path_index ] == '@' )
 		      || ( path[ path_index ] == '|' )
 		      || ( path[ path_index ] == '~' )
 		      || ( path[ path_index ] == 0x7f ) )
@@ -3185,7 +3181,7 @@ int libcpath_path_get_sanitized_path(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += 'a';
+				lower_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -3193,7 +3189,7 @@ int libcpath_path_get_sanitized_path(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += 'a';
+				upper_nibble += 'a' - 10;
 			}
 			else
 			{
@@ -6320,7 +6316,6 @@ int libcpath_path_get_sanitized_filename_wide(
 		      || ( filename[ filename_index ] == (wchar_t) '<' )
 		      || ( filename[ filename_index ] == (wchar_t) '>' )
 		      || ( filename[ filename_index ] == (wchar_t) '?' )
-		      || ( filename[ filename_index ] == (wchar_t) '@' )
 		      || ( filename[ filename_index ] == (wchar_t) '|' )
 		      || ( filename[ filename_index ] == (wchar_t) '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
@@ -6369,7 +6364,7 @@ int libcpath_path_get_sanitized_filename_wide(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += (wchar_t) 'a';
+				lower_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6377,7 +6372,7 @@ int libcpath_path_get_sanitized_filename_wide(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += (wchar_t) 'a';
+				upper_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6415,7 +6410,6 @@ int libcpath_path_get_sanitized_filename_wide(
 		      || ( filename[ filename_index ] == (wchar_t) '<' )
 		      || ( filename[ filename_index ] == (wchar_t) '>' )
 		      || ( filename[ filename_index ] == (wchar_t) '?' )
-		      || ( filename[ filename_index ] == (wchar_t) '@' )
 		      || ( filename[ filename_index ] == (wchar_t) '|' )
 		      || ( filename[ filename_index ] == (wchar_t) '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
@@ -6425,7 +6419,7 @@ int libcpath_path_get_sanitized_filename_wide(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += (wchar_t) 'a';
+				lower_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6433,7 +6427,7 @@ int libcpath_path_get_sanitized_filename_wide(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += (wchar_t) 'a';
+				upper_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6592,7 +6586,6 @@ int libcpath_path_get_sanitized_path_wide(
 		      || ( path[ path_index ] == (wchar_t) '<' )
 		      || ( path[ path_index ] == (wchar_t) '>' )
 		      || ( path[ path_index ] == (wchar_t) '?' )
-		      || ( path[ path_index ] == (wchar_t) '@' )
 		      || ( path[ path_index ] == (wchar_t) '|' )
 		      || ( path[ path_index ] == (wchar_t) '~' )
 		      || ( path[ path_index ] == 0x7f ) )
@@ -6662,7 +6655,7 @@ int libcpath_path_get_sanitized_path_wide(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += (wchar_t) 'a';
+				lower_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6670,7 +6663,7 @@ int libcpath_path_get_sanitized_path_wide(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += (wchar_t) 'a';
+				upper_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6706,7 +6699,7 @@ int libcpath_path_get_sanitized_path_wide(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += (wchar_t) 'a';
+				lower_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6714,7 +6707,7 @@ int libcpath_path_get_sanitized_path_wide(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += (wchar_t) 'a';
+				upper_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6740,7 +6733,6 @@ int libcpath_path_get_sanitized_path_wide(
 		      || ( path[ path_index ] == (wchar_t) '<' )
 		      || ( path[ path_index ] == (wchar_t) '>' )
 		      || ( path[ path_index ] == (wchar_t) '?' )
-		      || ( path[ path_index ] == (wchar_t) '@' )
 		      || ( path[ path_index ] == (wchar_t) '|' )
 		      || ( path[ path_index ] == (wchar_t) '~' )
 		      || ( path[ path_index ] == 0x7f ) )
@@ -6750,7 +6742,7 @@ int libcpath_path_get_sanitized_path_wide(
 
 			if( lower_nibble > 10 )
 			{
-				lower_nibble += (wchar_t) 'a';
+				lower_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
@@ -6758,7 +6750,7 @@ int libcpath_path_get_sanitized_path_wide(
 			}
 			if( upper_nibble > 10 )
 			{
-				upper_nibble += (wchar_t) 'a';
+				upper_nibble += (wchar_t) 'a' - 10;
 			}
 			else
 			{
