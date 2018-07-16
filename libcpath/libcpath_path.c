@@ -2756,7 +2756,6 @@ int libcpath_path_get_sanitized_filename(
 		      || ( filename[ filename_index ] == '>' )
 		      || ( filename[ filename_index ] == '?' )
 		      || ( filename[ filename_index ] == '|' )
-		      || ( filename[ filename_index ] == '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
 		{
 			safe_sanitized_filename_size += 4;
@@ -2850,7 +2849,6 @@ int libcpath_path_get_sanitized_filename(
 		      || ( filename[ filename_index ] == '>' )
 		      || ( filename[ filename_index ] == '?' )
 		      || ( filename[ filename_index ] == '|' )
-		      || ( filename[ filename_index ] == '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
 		{
 			lower_nibble = filename[ filename_index ] & 0x0f;
@@ -2914,12 +2912,15 @@ int libcpath_path_get_sanitized_path(
 {
 	static char *function                    = "libcpath_path_get_sanitized_path";
 	char *safe_sanitized_path                = NULL;
-	size_t last_path_segment_seperator_index = 0;
 	size_t path_index                        = 0;
 	size_t safe_sanitized_path_size          = 0;
 	size_t sanitized_path_index              = 0;
 	char lower_nibble                        = 0;
 	char upper_nibble                        = 0;
+
+#if defined( WINAPI )
+	size_t last_path_segment_seperator_index = 0;
+#endif
 
 	if( path == NULL )
 	{
@@ -3026,17 +3027,18 @@ int libcpath_path_get_sanitized_path(
 		      || ( path[ path_index ] == '>' )
 		      || ( path[ path_index ] == '?' )
 		      || ( path[ path_index ] == '|' )
-		      || ( path[ path_index ] == '~' )
 		      || ( path[ path_index ] == 0x7f ) )
 		{
 			safe_sanitized_path_size += 4;
 		}
 		else
 		{
+#if defined( WINAPI )
 			if( path[ path_index ] == LIBCPATH_SEPARATOR )
 			{
 				last_path_segment_seperator_index = path_index;
 			}
+#endif
 			safe_sanitized_path_size += 1;
 		}
 	}
@@ -3173,7 +3175,6 @@ int libcpath_path_get_sanitized_path(
 		      || ( path[ path_index ] == '>' )
 		      || ( path[ path_index ] == '?' )
 		      || ( path[ path_index ] == '|' )
-		      || ( path[ path_index ] == '~' )
 		      || ( path[ path_index ] == 0x7f ) )
 		{
 			lower_nibble = path[ path_index ] & 0x0f;
@@ -6317,7 +6318,6 @@ int libcpath_path_get_sanitized_filename_wide(
 		      || ( filename[ filename_index ] == (wchar_t) '>' )
 		      || ( filename[ filename_index ] == (wchar_t) '?' )
 		      || ( filename[ filename_index ] == (wchar_t) '|' )
-		      || ( filename[ filename_index ] == (wchar_t) '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
 		{
 			safe_sanitized_filename_size += 4;
@@ -6411,7 +6411,6 @@ int libcpath_path_get_sanitized_filename_wide(
 		      || ( filename[ filename_index ] == (wchar_t) '>' )
 		      || ( filename[ filename_index ] == (wchar_t) '?' )
 		      || ( filename[ filename_index ] == (wchar_t) '|' )
-		      || ( filename[ filename_index ] == (wchar_t) '~' )
 		      || ( filename[ filename_index ] == 0x7f ) )
 		{
 			lower_nibble = filename[ filename_index ] & 0x0f;
@@ -6475,12 +6474,15 @@ int libcpath_path_get_sanitized_path_wide(
 {
 	wchar_t *safe_sanitized_path             = NULL;
 	static char *function                    = "libcpath_path_get_sanitized_path_wide";
-	size_t last_path_segment_seperator_index = 0;
 	size_t path_index                        = 0;
 	size_t safe_sanitized_path_size          = 0;
 	size_t sanitized_path_index              = 0;
 	wchar_t lower_nibble                     = 0;
 	wchar_t upper_nibble                     = 0;
+
+#if defined( WINAPI )
+	size_t last_path_segment_seperator_index = 0;
+#endif
 
 	if( path == NULL )
 	{
@@ -6587,17 +6589,18 @@ int libcpath_path_get_sanitized_path_wide(
 		      || ( path[ path_index ] == (wchar_t) '>' )
 		      || ( path[ path_index ] == (wchar_t) '?' )
 		      || ( path[ path_index ] == (wchar_t) '|' )
-		      || ( path[ path_index ] == (wchar_t) '~' )
 		      || ( path[ path_index ] == 0x7f ) )
 		{
 			safe_sanitized_path_size += 4;
 		}
 		else
 		{
+#if defined( WINAPI )
 			if( path[ path_index ] == LIBCPATH_SEPARATOR )
 			{
 				last_path_segment_seperator_index = path_index;
 			}
+#endif
 			safe_sanitized_path_size += 1;
 		}
 	}
@@ -6734,7 +6737,6 @@ int libcpath_path_get_sanitized_path_wide(
 		      || ( path[ path_index ] == (wchar_t) '>' )
 		      || ( path[ path_index ] == (wchar_t) '?' )
 		      || ( path[ path_index ] == (wchar_t) '|' )
-		      || ( path[ path_index ] == (wchar_t) '~' )
 		      || ( path[ path_index ] == 0x7f ) )
 		{
 			lower_nibble = path[ path_index ] & 0x0f;
