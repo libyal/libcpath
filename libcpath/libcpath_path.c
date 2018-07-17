@@ -2716,17 +2716,6 @@ int libcpath_path_get_sanitized_character(
 	char lower_nibble                = 0;
 	char upper_nibble                = 0;
 
-	if( sanitized_path == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid sanitized path.",
-		 function );
-
-		return( -1 );
-	}
 	if( ( sanitized_character_size != 1 )
 	 && ( sanitized_character_size != 2 )
 	 && ( sanitized_character_size != 4 ) )
@@ -2736,6 +2725,17 @@ int libcpath_path_get_sanitized_character(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: invalid sanitized character size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
 		 function );
 
 		return( -1 );
@@ -6279,17 +6279,6 @@ int libcpath_path_get_sanitized_character_wide(
 	wchar_t lower_nibble             = 0;
 	wchar_t upper_nibble             = 0;
 
-	if( sanitized_path == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid sanitized path.",
-		 function );
-
-		return( -1 );
-	}
 	if( ( sanitized_character_size != 1 )
 	 && ( sanitized_character_size != 2 )
 	 && ( sanitized_character_size != 4 ) )
@@ -6299,6 +6288,17 @@ int libcpath_path_get_sanitized_character_wide(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: invalid sanitized character size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
 		 function );
 
 		return( -1 );
