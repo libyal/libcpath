@@ -51,5 +51,13 @@
 
 #endif /* !defined( HAVE_LOCAL_LIBCPATH ) */
 
+#if defined( WINAPI )
+#define LIBCPATH_ESCAPE_CHARACTER		'^'
+
+#else
+#define LIBCPATH_ESCAPE_CHARACTER		'\\'
+
 #endif
+
+#endif /* !defined( LIBCPATH_INTERNAL_DEFINITIONS_H ) */
 

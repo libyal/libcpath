@@ -3023,6 +3023,10 @@ int main(
 	 "libcpath_path_get_full_path",
 	 cpath_test_path_get_full_path );
 
+	/* TODO: add tests for libcpath_path_get_sanitized_character_size */
+
+	/* TODO: add tests for libcpath_path_get_sanitized_character */
+
 	CPATH_TEST_RUN(
 	 "libcpath_path_get_sanitized_filename",
 	 cpath_test_path_get_sanitized_filename );
@@ -3050,6 +3054,10 @@ int main(
 	 cpath_test_path_get_current_working_directory_wide );
 
 	/* TODO: add tests for libcpath_path_get_full_path_wide */
+
+	/* TODO: add tests for libcpath_path_get_sanitized_character_size_wide */
+
+	/* TODO: add tests for libcpath_path_get_sanitized_character_wide */
 
 	CPATH_TEST_RUN(
 	 "libcpath_path_get_sanitized_filename_wide",

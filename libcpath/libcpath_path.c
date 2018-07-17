@@ -2639,6 +2639,194 @@ on_error:
 
 #endif /* defined( WINAPI ) */
 
+/* Retrieves the size of a sanitized version of the path character
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_character_size(
+     char character,
+     size_t *sanitized_character_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_path_get_sanitized_character_size";
+
+	if( sanitized_character_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized character size.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( character >= 0x00 )
+	 && ( character <= 0x1f ) )
+	{
+		*sanitized_character_size = 4;
+	}
+	else if( character == LIBCPATH_ESCAPE_CHARACTER )
+	{
+		*sanitized_character_size = 2;
+	}
+#if defined( WINAPI )
+	else if( character == '/' )
+#else
+	else if( character == '\\' )
+#endif
+	{
+		*sanitized_character_size = 4;
+	}
+	else if( ( character == '!' )
+	      || ( character == '$' )
+	      || ( character == '%' )
+	      || ( character == '&' )
+	      || ( character == '*' )
+	      || ( character == '+' )
+	      || ( character == ':' )
+	      || ( character == ';' )
+	      || ( character == '<' )
+	      || ( character == '>' )
+	      || ( character == '?' )
+	      || ( character == '|' )
+	      || ( character == 0x7f ) )
+	{
+		*sanitized_character_size = 4;
+	}
+	else
+	{
+		*sanitized_character_size = 1;
+	}
+	return( 1 );
+}
+
+/* Retrieves a sanitized version of the path character
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_character(
+     char character,
+     size_t sanitized_character_size,
+     char *sanitized_path,
+     size_t sanitized_path_size,
+     size_t *sanitized_path_index,
+     libcerror_error_t **error )
+{
+	static char *function            = "libcpath_path_get_sanitized_character";
+	size_t safe_sanitized_path_index = 0;
+	char lower_nibble                = 0;
+	char upper_nibble                = 0;
+
+	if( sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( sanitized_character_size != 1 )
+	 && ( sanitized_character_size != 2 )
+	 && ( sanitized_character_size != 4 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid sanitized character size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid sanitized path size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path_index == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path index.",
+		 function );
+
+		return( -1 );
+	}
+	safe_sanitized_path_index = *sanitized_path_index;
+
+	if( safe_sanitized_path_index > sanitized_path_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid sanitized path index value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( sanitized_character_size > sanitized_path_size )
+	 || ( safe_sanitized_path_index > ( sanitized_path_size - sanitized_character_size ) ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid sanitized path size value too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_character_size == 1 )
+	{
+		sanitized_path[ safe_sanitized_path_index++ ] = character;
+	}
+	else if( sanitized_character_size == 2 )
+	{
+		sanitized_path[ safe_sanitized_path_index++ ] = LIBCPATH_ESCAPE_CHARACTER;
+		sanitized_path[ safe_sanitized_path_index++ ] = LIBCPATH_ESCAPE_CHARACTER;
+	}
+	else if( sanitized_character_size == 4 )
+	{
+		lower_nibble = character & 0x0f;
+		upper_nibble = ( character >> 4 ) & 0x0f;
+
+		if( lower_nibble > 10 )
+		{
+			lower_nibble += 'a' - 10;
+		}
+		else
+		{
+			lower_nibble += '0';
+		}
+		if( upper_nibble > 10 )
+		{
+			upper_nibble += 'a' - 10;
+		}
+		else
+		{
+			upper_nibble += '0';
+		}
+		sanitized_path[ safe_sanitized_path_index++ ] = LIBCPATH_ESCAPE_CHARACTER;
+		sanitized_path[ safe_sanitized_path_index++ ] = 'x';
+		sanitized_path[ safe_sanitized_path_index++ ] = upper_nibble;
+		sanitized_path[ safe_sanitized_path_index++ ] = lower_nibble;
+	}
+	*sanitized_path_index = safe_sanitized_path_index;
+
+	return( 1 );
+}
+
 /* Retrieves a sanitized version of the filename
  * Returns 1 if successful or -1 on error
  */
@@ -2652,10 +2840,9 @@ int libcpath_path_get_sanitized_filename(
 	static char *function               = "libcpath_path_get_sanitized_filename";
 	char *safe_sanitized_filename       = NULL;
 	size_t filename_index               = 0;
+	size_t sanitized_character_size     = 0;
 	size_t safe_sanitized_filename_size = 0;
 	size_t sanitized_filename_index     = 0;
-	char lower_nibble                   = 0;
-	char upper_nibble                   = 0;
 
 	if( filename == NULL )
 	{
@@ -2729,41 +2916,25 @@ int libcpath_path_get_sanitized_filename(
 	     filename_index < filename_length;
 	     filename_index++ )
 	{
-		if( ( filename[ filename_index ] >= 0x00 )
-		 && ( filename[ filename_index ] <= 0x1f ) )
+		if( filename[ filename_index ] == LIBCPATH_SEPARATOR )
 		{
-			safe_sanitized_filename_size += 4;
+			sanitized_character_size = 4;
 		}
-#if defined( WINAPI )
-		else if( filename[ filename_index ] == '^' )
-#else
-		else if( filename[ filename_index ] == '\\' )
-#endif
+		else if( libcpath_path_get_sanitized_character_size(
+		          filename[ filename_index ],
+		          &sanitized_character_size,
+		          error ) != 1 )
 		{
-			safe_sanitized_filename_size += 2;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
+
+			goto on_error;
 		}
-		else if( ( filename[ filename_index ] == '/' )
-		      || ( filename[ filename_index ] == '\\' )
-		      || ( filename[ filename_index ] == '!' )
-		      || ( filename[ filename_index ] == '$' )
-		      || ( filename[ filename_index ] == '%' )
-		      || ( filename[ filename_index ] == '&' )
-		      || ( filename[ filename_index ] == '*' )
-		      || ( filename[ filename_index ] == '+' )
-		      || ( filename[ filename_index ] == ':' )
-		      || ( filename[ filename_index ] == ';' )
-		      || ( filename[ filename_index ] == '<' )
-		      || ( filename[ filename_index ] == '>' )
-		      || ( filename[ filename_index ] == '?' )
-		      || ( filename[ filename_index ] == '|' )
-		      || ( filename[ filename_index ] == 0x7f ) )
-		{
-			safe_sanitized_filename_size += 4;
-		}
-		else
-		{
-			safe_sanitized_filename_size += 1;
-		}
+		safe_sanitized_filename_size += sanitized_character_size;
 	}
 	if( safe_sanitized_filename_size > (size_t) SSIZE_MAX )
 	{
@@ -2794,94 +2965,40 @@ int libcpath_path_get_sanitized_filename(
 	     filename_index < filename_length;
 	     filename_index++ )
 	{
-		if( ( filename[ filename_index ] >= 0x00 )
-		 && ( filename[ filename_index ] <= 0x1f ) )
+		if( filename[ filename_index ] == LIBCPATH_SEPARATOR )
 		{
-			lower_nibble = filename[ filename_index ] & 0x0f;
-			upper_nibble = ( filename[ filename_index ] >> 4 ) & 0x0f;
+			sanitized_character_size = 4;
+		}
+		else if( libcpath_path_get_sanitized_character_size(
+		          filename[ filename_index ],
+		          &sanitized_character_size,
+		          error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
-#else
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
-#endif
-			safe_sanitized_filename[ sanitized_filename_index++ ] = 'x';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
-			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
+			goto on_error;
 		}
-		else if( filename[ filename_index ] == '\\' )
+		if( libcpath_path_get_sanitized_character(
+		     filename[ filename_index ],
+		     sanitized_character_size,
+		     safe_sanitized_filename,
+		     safe_sanitized_filename_size,
+		     &sanitized_filename_index,
+		     error ) != 1 )
 		{
-#if defined( WINAPI )
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
-#else
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
-#endif
-		}
-		else if( ( filename[ filename_index ] == '/' )
-		      || ( filename[ filename_index ] == '\\' )
-		      || ( filename[ filename_index ] == '!' )
-		      || ( filename[ filename_index ] == '$' )
-		      || ( filename[ filename_index ] == '%' )
-		      || ( filename[ filename_index ] == '&' )
-		      || ( filename[ filename_index ] == '*' )
-		      || ( filename[ filename_index ] == '+' )
-		      || ( filename[ filename_index ] == ':' )
-		      || ( filename[ filename_index ] == ';' )
-		      || ( filename[ filename_index ] == '<' )
-		      || ( filename[ filename_index ] == '>' )
-		      || ( filename[ filename_index ] == '?' )
-		      || ( filename[ filename_index ] == '|' )
-		      || ( filename[ filename_index ] == 0x7f ) )
-		{
-			lower_nibble = filename[ filename_index ] & 0x0f;
-			upper_nibble = ( filename[ filename_index ] >> 4 ) & 0x0f;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '^';
-#else
-			safe_sanitized_filename[ sanitized_filename_index++ ] = '\\';
-#endif
-			safe_sanitized_filename[ sanitized_filename_index++ ] = 'x';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
-			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
-		}
-		else
-		{
-			safe_sanitized_filename[ sanitized_filename_index++ ] = filename[ filename_index ];
+			goto on_error;
 		}
 	}
 	safe_sanitized_filename[ sanitized_filename_index ] = 0;
@@ -2914,9 +3031,8 @@ int libcpath_path_get_sanitized_path(
 	char *safe_sanitized_path                = NULL;
 	size_t path_index                        = 0;
 	size_t safe_sanitized_path_size          = 0;
+	size_t sanitized_character_size          = 0;
 	size_t sanitized_path_index              = 0;
-	char lower_nibble                        = 0;
-	char upper_nibble                        = 0;
 
 #if defined( WINAPI )
 	size_t last_path_segment_seperator_index = 0;
@@ -2994,53 +3110,28 @@ int libcpath_path_get_sanitized_path(
 	     path_index < path_length;
 	     path_index++ )
 	{
-		if( ( path[ path_index ] >= 0x00 )
-		 && ( path[ path_index ] <= 0x1f ) )
+		if( libcpath_path_get_sanitized_character_size(
+		     path[ path_index ],
+		     &sanitized_character_size,
+		     error ) != 1 )
 		{
-			safe_sanitized_path_size += 4;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
+
+			goto on_error;
 		}
+		safe_sanitized_path_size += sanitized_character_size;
+
 #if defined( WINAPI )
-		else if( path[ path_index ] == '^' )
-#else
-		else if( path[ path_index ] == '\\' )
+		if( path[ path_index ] == LIBCPATH_SEPARATOR )
+		{
+			last_path_segment_seperator_index = path_index;
+		}
 #endif
-		{
-			safe_sanitized_path_size += 2;
-		}
-#if defined( WINAPI )
-		else if( path[ path_index ] == '/' )
-#else
-		else if( path[ path_index ] == '\\' )
-#endif
-		{
-			safe_sanitized_path_size += 4;
-		}
-		else if( ( path[ path_index ] == '!' )
-		      || ( path[ path_index ] == '$' )
-		      || ( path[ path_index ] == '%' )
-		      || ( path[ path_index ] == '&' )
-		      || ( path[ path_index ] == '*' )
-		      || ( path[ path_index ] == '+' )
-		      || ( path[ path_index ] == ':' )
-		      || ( path[ path_index ] == ';' )
-		      || ( path[ path_index ] == '<' )
-		      || ( path[ path_index ] == '>' )
-		      || ( path[ path_index ] == '?' )
-		      || ( path[ path_index ] == '|' )
-		      || ( path[ path_index ] == 0x7f ) )
-		{
-			safe_sanitized_path_size += 4;
-		}
-		else
-		{
-#if defined( WINAPI )
-			if( path[ path_index ] == LIBCPATH_SEPARATOR )
-			{
-				last_path_segment_seperator_index = path_index;
-			}
-#endif
-			safe_sanitized_path_size += 1;
-		}
 	}
 	if( safe_sanitized_path_size > (size_t) SSIZE_MAX )
 	{
@@ -3088,126 +3179,36 @@ int libcpath_path_get_sanitized_path(
 	     path_index < path_length;
 	     path_index++ )
 	{
-		if( ( path[ path_index ] >= 0x00 )
-		 && ( path[ path_index ] <= 0x1f ) )
+		if( libcpath_path_get_sanitized_character_size(
+		     path[ path_index ],
+		     &sanitized_character_size,
+		     error ) != 1 )
 		{
-			lower_nibble = path[ path_index ] & 0x0f;
-			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
-#endif
-			safe_sanitized_path[ sanitized_path_index++ ] = 'x';
-			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
-			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+			goto on_error;
 		}
-		else if( path[ path_index ] == '\\' )
+		if( libcpath_path_get_sanitized_character(
+		     path[ path_index ],
+		     sanitized_character_size,
+		     safe_sanitized_path,
+		     safe_sanitized_path_size,
+		     &sanitized_path_index,
+		     error ) != 1 )
 		{
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = '^';
-			safe_sanitized_path[ sanitized_path_index++ ] = '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
-			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
-#endif
-		}
-#if defined( WINAPI )
-		else if( path[ path_index ] == '/' )
-#else
-		else if( path[ path_index ] == '\\' )
-#endif
-		{
-			lower_nibble = path[ path_index ] & 0x0f;
-			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
-#endif
-			safe_sanitized_path[ sanitized_path_index++ ] = 'x';
-			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
-			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
-		}
-		else if( ( path[ path_index ] == '!' )
-		      || ( path[ path_index ] == '$' )
-		      || ( path[ path_index ] == '%' )
-		      || ( path[ path_index ] == '&' )
-		      || ( path[ path_index ] == '*' )
-		      || ( path[ path_index ] == '+' )
-		      || ( path[ path_index ] == ':' )
-		      || ( path[ path_index ] == ';' )
-		      || ( path[ path_index ] == '<' )
-		      || ( path[ path_index ] == '>' )
-		      || ( path[ path_index ] == '?' )
-		      || ( path[ path_index ] == '|' )
-		      || ( path[ path_index ] == 0x7f ) )
-		{
-			lower_nibble = path[ path_index ] & 0x0f;
-			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
-
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = '\\';
-#endif
-			safe_sanitized_path[ sanitized_path_index++ ] = 'x';
-			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
-			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
-		}
-		else
-		{
-			safe_sanitized_path[ sanitized_path_index++ ] = path[ path_index ];
+			goto on_error;
 		}
 	}
 	safe_sanitized_path[ sanitized_path_index ] = 0;
@@ -6201,6 +6202,194 @@ on_error:
 
 #endif /* defined( WINAPI ) */
 
+/* Retrieves the size of a sanitized version of the path character
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_character_size_wide(
+     wchar_t character,
+     size_t *sanitized_character_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libcpath_path_get_sanitized_character_size_wide";
+
+	if( sanitized_character_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized character size.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( character >= 0x00 )
+	 && ( character <= 0x1f ) )
+	{
+		*sanitized_character_size = 4;
+	}
+	else if( character == (wchar_t) LIBCPATH_ESCAPE_CHARACTER )
+	{
+		*sanitized_character_size = 2;
+	}
+#if defined( WINAPI )
+	else if( character == (wchar_t) '/' )
+#else
+	else if( character == (wchar_t) '\\' )
+#endif
+	{
+		*sanitized_character_size = 4;
+	}
+	else if( ( character == (wchar_t) '!' )
+	      || ( character == (wchar_t) '$' )
+	      || ( character == (wchar_t) '%' )
+	      || ( character == (wchar_t) '&' )
+	      || ( character == (wchar_t) '*' )
+	      || ( character == (wchar_t) '+' )
+	      || ( character == (wchar_t) ':' )
+	      || ( character == (wchar_t) ';' )
+	      || ( character == (wchar_t) '<' )
+	      || ( character == (wchar_t) '>' )
+	      || ( character == (wchar_t) '?' )
+	      || ( character == (wchar_t) '|' )
+	      || ( character == 0x7f ) )
+	{
+		*sanitized_character_size = 4;
+	}
+	else
+	{
+		*sanitized_character_size = 1;
+	}
+	return( 1 );
+}
+
+/* Retrieves a sanitized version of the path character
+ * Returns 1 if successful or -1 on error
+ */
+int libcpath_path_get_sanitized_character_wide(
+     wchar_t character,
+     size_t sanitized_character_size,
+     wchar_t *sanitized_path,
+     size_t sanitized_path_size,
+     size_t *sanitized_path_index,
+     libcerror_error_t **error )
+{
+	static char *function            = "libcpath_path_get_sanitized_character_wide";
+	size_t safe_sanitized_path_index = 0;
+	wchar_t lower_nibble             = 0;
+	wchar_t upper_nibble             = 0;
+
+	if( sanitized_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( sanitized_character_size != 1 )
+	 && ( sanitized_character_size != 2 )
+	 && ( sanitized_character_size != 4 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid sanitized character size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid sanitized path size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_path_index == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sanitized path index.",
+		 function );
+
+		return( -1 );
+	}
+	safe_sanitized_path_index = *sanitized_path_index;
+
+	if( safe_sanitized_path_index > sanitized_path_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid sanitized path index value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( sanitized_character_size > sanitized_path_size )
+	 || ( safe_sanitized_path_index > ( sanitized_path_size - sanitized_character_size ) ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid sanitized path size value too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( sanitized_character_size == 1 )
+	{
+		sanitized_path[ safe_sanitized_path_index++ ] = character;
+	}
+	else if( sanitized_character_size == 2 )
+	{
+		sanitized_path[ safe_sanitized_path_index++ ] = (wchar_t) LIBCPATH_ESCAPE_CHARACTER;
+		sanitized_path[ safe_sanitized_path_index++ ] = (wchar_t) LIBCPATH_ESCAPE_CHARACTER;
+	}
+	else if( sanitized_character_size == 4 )
+	{
+		lower_nibble = character & 0x0f;
+		upper_nibble = ( character >> 4 ) & 0x0f;
+
+		if( lower_nibble > 10 )
+		{
+			lower_nibble += (wchar_t) 'a' - 10;
+		}
+		else
+		{
+			lower_nibble += '0';
+		}
+		if( upper_nibble > 10 )
+		{
+			upper_nibble += (wchar_t) 'a' - 10;
+		}
+		else
+		{
+			upper_nibble += '0';
+		}
+		sanitized_path[ safe_sanitized_path_index++ ] = (wchar_t) LIBCPATH_ESCAPE_CHARACTER;
+		sanitized_path[ safe_sanitized_path_index++ ] = (wchar_t) 'x';
+		sanitized_path[ safe_sanitized_path_index++ ] = upper_nibble;
+		sanitized_path[ safe_sanitized_path_index++ ] = lower_nibble;
+	}
+	*sanitized_path_index = safe_sanitized_path_index;
+
+	return( 1 );
+}
+
 /* Retrieves a sanitized version of the filename
  * Returns 1 if successful or -1 on error
  */
@@ -6211,13 +6400,12 @@ int libcpath_path_get_sanitized_filename_wide(
      size_t *sanitized_filename_size,
      libcerror_error_t **error )
 {
-	wchar_t *safe_sanitized_filename    = NULL;
 	static char *function               = "libcpath_path_get_sanitized_filename_wide";
+	wchar_t *safe_sanitized_filename    = NULL;
 	size_t filename_index               = 0;
+	size_t sanitized_character_size     = 0;
 	size_t safe_sanitized_filename_size = 0;
 	size_t sanitized_filename_index     = 0;
-	wchar_t lower_nibble                = 0;
-	wchar_t upper_nibble                = 0;
 
 	if( filename == NULL )
 	{
@@ -6291,41 +6479,25 @@ int libcpath_path_get_sanitized_filename_wide(
 	     filename_index < filename_length;
 	     filename_index++ )
 	{
-		if( ( filename[ filename_index ] >= 0x00 )
-		 && ( filename[ filename_index ] <= 0x1f ) )
+		if( filename[ filename_index ] == LIBCPATH_SEPARATOR )
 		{
-			safe_sanitized_filename_size += 4;
+			sanitized_character_size = 4;
 		}
-#if defined( WINAPI )
-		else if( filename[ filename_index ] == (wchar_t) '^' )
-#else
-		else if( filename[ filename_index ] == (wchar_t) '\\' )
-#endif
+		else if( libcpath_path_get_sanitized_character_size_wide(
+		          filename[ filename_index ],
+		          &sanitized_character_size,
+		          error ) != 1 )
 		{
-			safe_sanitized_filename_size += 2;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
+
+			goto on_error;
 		}
-		else if( ( filename[ filename_index ] == (wchar_t) '/' )
-		      || ( filename[ filename_index ] == (wchar_t) '\\' )
-		      || ( filename[ filename_index ] == (wchar_t) '!' )
-		      || ( filename[ filename_index ] == (wchar_t) '$' )
-		      || ( filename[ filename_index ] == (wchar_t) '%' )
-		      || ( filename[ filename_index ] == (wchar_t) '&' )
-		      || ( filename[ filename_index ] == (wchar_t) '*' )
-		      || ( filename[ filename_index ] == (wchar_t) '+' )
-		      || ( filename[ filename_index ] == (wchar_t) ':' )
-		      || ( filename[ filename_index ] == (wchar_t) ';' )
-		      || ( filename[ filename_index ] == (wchar_t) '<' )
-		      || ( filename[ filename_index ] == (wchar_t) '>' )
-		      || ( filename[ filename_index ] == (wchar_t) '?' )
-		      || ( filename[ filename_index ] == (wchar_t) '|' )
-		      || ( filename[ filename_index ] == 0x7f ) )
-		{
-			safe_sanitized_filename_size += 4;
-		}
-		else
-		{
-			safe_sanitized_filename_size += 1;
-		}
+		safe_sanitized_filename_size += sanitized_character_size;
 	}
 	if( safe_sanitized_filename_size > (size_t) SSIZE_MAX )
 	{
@@ -6356,94 +6528,40 @@ int libcpath_path_get_sanitized_filename_wide(
 	     filename_index < filename_length;
 	     filename_index++ )
 	{
-		if( ( filename[ filename_index ] >= 0x00 )
-		 && ( filename[ filename_index ] <= 0x1f ) )
+		if( filename[ filename_index ] == LIBCPATH_SEPARATOR )
 		{
-			lower_nibble = filename[ filename_index ] & 0x0f;
-			upper_nibble = ( filename[ filename_index ] >> 4 ) & 0x0f;
+			sanitized_character_size = 4;
+		}
+		else if( libcpath_path_get_sanitized_character_size_wide(
+		          filename[ filename_index ],
+		          &sanitized_character_size,
+		          error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += (wchar_t) '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += (wchar_t) '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
-#else
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
-#endif
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) 'x';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
-			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
+			goto on_error;
 		}
-		else if( filename[ filename_index ] == (wchar_t) '\\' )
+		if( libcpath_path_get_sanitized_character_wide(
+		     filename[ filename_index ],
+		     sanitized_character_size,
+		     safe_sanitized_filename,
+		     safe_sanitized_filename_size,
+		     &sanitized_filename_index,
+		     error ) != 1 )
 		{
-#if defined( WINAPI )
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
-#else
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
-#endif
-		}
-		else if( ( filename[ filename_index ] == (wchar_t) '/' )
-		      || ( filename[ filename_index ] == (wchar_t) '\\' )
-		      || ( filename[ filename_index ] == (wchar_t) '!' )
-		      || ( filename[ filename_index ] == (wchar_t) '$' )
-		      || ( filename[ filename_index ] == (wchar_t) '%' )
-		      || ( filename[ filename_index ] == (wchar_t) '&' )
-		      || ( filename[ filename_index ] == (wchar_t) '*' )
-		      || ( filename[ filename_index ] == (wchar_t) '+' )
-		      || ( filename[ filename_index ] == (wchar_t) ':' )
-		      || ( filename[ filename_index ] == (wchar_t) ';' )
-		      || ( filename[ filename_index ] == (wchar_t) '<' )
-		      || ( filename[ filename_index ] == (wchar_t) '>' )
-		      || ( filename[ filename_index ] == (wchar_t) '?' )
-		      || ( filename[ filename_index ] == (wchar_t) '|' )
-		      || ( filename[ filename_index ] == 0x7f ) )
-		{
-			lower_nibble = filename[ filename_index ] & 0x0f;
-			upper_nibble = ( filename[ filename_index ] >> 4 ) & 0x0f;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += (wchar_t) '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += (wchar_t) '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '^';
-#else
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) '\\';
-#endif
-			safe_sanitized_filename[ sanitized_filename_index++ ] = (wchar_t) 'x';
-			safe_sanitized_filename[ sanitized_filename_index++ ] = upper_nibble;
-			safe_sanitized_filename[ sanitized_filename_index++ ] = lower_nibble;
-		}
-		else
-		{
-			safe_sanitized_filename[ sanitized_filename_index++ ] = filename[ filename_index ];
+			goto on_error;
 		}
 	}
 	safe_sanitized_filename[ sanitized_filename_index ] = 0;
@@ -6472,13 +6590,12 @@ int libcpath_path_get_sanitized_path_wide(
      size_t *sanitized_path_size,
      libcerror_error_t **error )
 {
-	wchar_t *safe_sanitized_path             = NULL;
 	static char *function                    = "libcpath_path_get_sanitized_path_wide";
+	wchar_t *safe_sanitized_path             = NULL;
 	size_t path_index                        = 0;
 	size_t safe_sanitized_path_size          = 0;
+	size_t sanitized_character_size          = 0;
 	size_t sanitized_path_index              = 0;
-	wchar_t lower_nibble                     = 0;
-	wchar_t upper_nibble                     = 0;
 
 #if defined( WINAPI )
 	size_t last_path_segment_seperator_index = 0;
@@ -6556,53 +6673,28 @@ int libcpath_path_get_sanitized_path_wide(
 	     path_index < path_length;
 	     path_index++ )
 	{
-		if( ( path[ path_index ] >= 0x00 )
-		 && ( path[ path_index ] <= 0x1f ) )
+		if( libcpath_path_get_sanitized_character_size_wide(
+		     path[ path_index ],
+		     &sanitized_character_size,
+		     error ) != 1 )
 		{
-			safe_sanitized_path_size += 4;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
+
+			goto on_error;
 		}
+		safe_sanitized_path_size += sanitized_character_size;
+
 #if defined( WINAPI )
-		else if( path[ path_index ] == (wchar_t) '^' )
-#else
-		else if( path[ path_index ] == (wchar_t) '\\' )
+		if( path[ path_index ] == LIBCPATH_SEPARATOR )
+		{
+			last_path_segment_seperator_index = path_index;
+		}
 #endif
-		{
-			safe_sanitized_path_size += 2;
-		}
-#if defined( WINAPI )
-		else if( path[ path_index ] == (wchar_t) '/' )
-#else
-		else if( path[ path_index ] == (wchar_t) '\\' )
-#endif
-		{
-			safe_sanitized_path_size += 4;
-		}
-		else if( ( path[ path_index ] == (wchar_t) '!' )
-		      || ( path[ path_index ] == (wchar_t) '$' )
-		      || ( path[ path_index ] == (wchar_t) '%' )
-		      || ( path[ path_index ] == (wchar_t) '&' )
-		      || ( path[ path_index ] == (wchar_t) '*' )
-		      || ( path[ path_index ] == (wchar_t) '+' )
-		      || ( path[ path_index ] == (wchar_t) ':' )
-		      || ( path[ path_index ] == (wchar_t) ';' )
-		      || ( path[ path_index ] == (wchar_t) '<' )
-		      || ( path[ path_index ] == (wchar_t) '>' )
-		      || ( path[ path_index ] == (wchar_t) '?' )
-		      || ( path[ path_index ] == (wchar_t) '|' )
-		      || ( path[ path_index ] == 0x7f ) )
-		{
-			safe_sanitized_path_size += 4;
-		}
-		else
-		{
-#if defined( WINAPI )
-			if( path[ path_index ] == LIBCPATH_SEPARATOR )
-			{
-				last_path_segment_seperator_index = path_index;
-			}
-#endif
-			safe_sanitized_path_size += 1;
-		}
 	}
 	if( safe_sanitized_path_size > (size_t) SSIZE_MAX )
 	{
@@ -6650,126 +6742,36 @@ int libcpath_path_get_sanitized_path_wide(
 	     path_index < path_length;
 	     path_index++ )
 	{
-		if( ( path[ path_index ] >= 0x00 )
-		 && ( path[ path_index ] <= 0x1f ) )
+		if( libcpath_path_get_sanitized_character_size_wide(
+		     path[ path_index ],
+		     &sanitized_character_size,
+		     error ) != 1 )
 		{
-			lower_nibble = path[ path_index ] & 0x0f;
-			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += (wchar_t) '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += (wchar_t) '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
-#endif
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) 'x';
-			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
-			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
+			goto on_error;
 		}
-		else if( path[ path_index ] == (wchar_t) '\\' )
+		if( libcpath_path_get_sanitized_character_wide(
+		     path[ path_index ],
+		     sanitized_character_size,
+		     safe_sanitized_path,
+		     safe_sanitized_path_size,
+		     &sanitized_path_index,
+		     error ) != 1 )
 		{
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
-#endif
-		}
-#if defined( WINAPI )
-		else if( path[ path_index ] == (wchar_t) '/' )
-#else
-		else if( path[ path_index ] == (wchar_t) '\\' )
-#endif
-		{
-			lower_nibble = path[ path_index ] & 0x0f;
-			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sanitize character size.",
+			 function );
 
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += (wchar_t) '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += (wchar_t) '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
-#endif
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) 'x';
-			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
-			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
-		}
-		else if( ( path[ path_index ] == (wchar_t) '!' )
-		      || ( path[ path_index ] == (wchar_t) '$' )
-		      || ( path[ path_index ] == (wchar_t) '%' )
-		      || ( path[ path_index ] == (wchar_t) '&' )
-		      || ( path[ path_index ] == (wchar_t) '*' )
-		      || ( path[ path_index ] == (wchar_t) '+' )
-		      || ( path[ path_index ] == (wchar_t) ':' )
-		      || ( path[ path_index ] == (wchar_t) ';' )
-		      || ( path[ path_index ] == (wchar_t) '<' )
-		      || ( path[ path_index ] == (wchar_t) '>' )
-		      || ( path[ path_index ] == (wchar_t) '?' )
-		      || ( path[ path_index ] == (wchar_t) '|' )
-		      || ( path[ path_index ] == 0x7f ) )
-		{
-			lower_nibble = path[ path_index ] & 0x0f;
-			upper_nibble = ( path[ path_index ] >> 4 ) & 0x0f;
-
-			if( lower_nibble > 10 )
-			{
-				lower_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				lower_nibble += (wchar_t) '0';
-			}
-			if( upper_nibble > 10 )
-			{
-				upper_nibble += (wchar_t) 'a' - 10;
-			}
-			else
-			{
-				upper_nibble += (wchar_t) '0';
-			}
-#if defined( WINAPI )
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '^';
-#else
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) '\\';
-#endif
-			safe_sanitized_path[ sanitized_path_index++ ] = (wchar_t) 'x';
-			safe_sanitized_path[ sanitized_path_index++ ] = upper_nibble;
-			safe_sanitized_path[ sanitized_path_index++ ] = lower_nibble;
-		}
-		else
-		{
-			safe_sanitized_path[ sanitized_path_index++ ] = path[ path_index ];
+			goto on_error;
 		}
 	}
 	safe_sanitized_path[ sanitized_path_index ] = 0;

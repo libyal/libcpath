@@ -67,6 +67,19 @@ int libcpath_path_get_full_path(
      size_t *full_path_size,
      libcerror_error_t **error );
 
+int libcpath_path_get_sanitized_character_size(
+     char character,
+     size_t *sanitized_character_size,
+     libcerror_error_t **error );
+
+int libcpath_path_get_sanitized_character(
+     char character,
+     size_t sanitized_character_size,
+     char *sanitized_path,
+     size_t sanitized_path_size,
+     size_t *sanitized_path_index,
+     libcerror_error_t **error );
+
 LIBCPATH_EXTERN \
 int libcpath_path_get_sanitized_filename(
      const char *filename,
@@ -104,13 +117,6 @@ int libcpath_path_make_directory(
      const char *directory_name,
      libcerror_error_t **error );
 
-/* TODO: deprecated remove */
-LIBCPATH_EXTERN \
-int libcpath_path_sanitize(
-     char *path,
-     size_t *path_size,
-     libcerror_error_t **error );
-
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
@@ -141,6 +147,19 @@ int libcpath_path_get_full_path_wide(
      size_t path_length,
      wchar_t **full_path,
      size_t *full_path_size,
+     libcerror_error_t **error );
+
+int libcpath_path_get_sanitized_character_size_wide(
+     wchar_t character,
+     size_t *sanitized_character_size,
+     libcerror_error_t **error );
+
+int libcpath_path_get_sanitized_character_wide(
+     wchar_t character,
+     size_t sanitized_character_size,
+     wchar_t *sanitized_path,
+     size_t sanitized_path_size,
+     size_t *sanitized_path_index,
      libcerror_error_t **error );
 
 LIBCPATH_EXTERN \
@@ -178,13 +197,6 @@ BOOL libcpath_CreateDirectoryW(
 LIBCPATH_EXTERN \
 int libcpath_path_make_directory_wide(
      const wchar_t *directory_name,
-     libcerror_error_t **error );
-
-/* TODO: deprecated remove */
-LIBCPATH_EXTERN \
-int libcpath_path_sanitize_wide(
-     wchar_t *path,
-     size_t *path_size,
      libcerror_error_t **error );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
