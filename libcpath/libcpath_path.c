@@ -2671,12 +2671,10 @@ int libcpath_path_get_sanitized_character_size(
 	}
 #if defined( WINAPI )
 	else if( character == '/' )
-#else
-	else if( character == '\\' )
-#endif
 	{
 		*sanitized_character_size = 4;
 	}
+#endif
 	else if( ( character == '!' )
 	      || ( character == '$' )
 	      || ( character == '%' )
@@ -6234,12 +6232,10 @@ int libcpath_path_get_sanitized_character_size_wide(
 	}
 #if defined( WINAPI )
 	else if( character == (wchar_t) '/' )
-#else
-	else if( character == (wchar_t) '\\' )
-#endif
 	{
 		*sanitized_character_size = 4;
 	}
+#endif
 	else if( ( character == (wchar_t) '!' )
 	      || ( character == (wchar_t) '$' )
 	      || ( character == (wchar_t) '%' )
