@@ -123,6 +123,73 @@ char *getcwd(
 
 #endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
 
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Tests the libcpath_CloseHandle function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_CloseHandle(
+     void )
+{
+	HANDLE file_handle = NULL;
+	BOOL result        = 0;
+
+	/* Test regular cases
+	 */
+/* TODO implement create temporary file? */
+
+	/* Test error cases
+	 */
+	result = libcpath_CloseHandle(
+	          NULL );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	return( 1 );
+
+on_error:
+	return( 0 );
+}
+
+/* Tests the libcpath_SetCurrentDirectoryA function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_SetCurrentDirectoryA(
+     void )
+{
+	BOOL result = 0;
+
+	/* Test regular cases
+	 */
+	result = libcpath_SetCurrentDirectoryA(
+	          "." );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	/* Test error cases
+	 */
+	result = libcpath_SetCurrentDirectoryA(
+	          NULL );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	return( 1 );
+
+on_error:
+	return( 0 );
+}
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
 /* Tests the libcpath_path_change_directory function
  * Returns 1 if successful or 0 if not
  */
@@ -132,6 +199,8 @@ int cpath_test_path_change_directory(
 	libcerror_error_t *error = NULL;
 	int result               = 0;
 
+	/* Test regular cases
+	 */
 	result = libcpath_path_change_directory(
 	          ".",
 	          &error );
@@ -203,6 +272,48 @@ on_error:
 	}
 	return( 0 );
 }
+
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Tests the libcpath_GetCurrentDirectoryA function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_GetCurrentDirectoryA(
+     void )
+{
+	char buffer[ 256 ];
+
+	BOOL result = 0;
+
+	/* Test regular cases
+	 */
+	result = libcpath_GetCurrentDirectoryA(
+	          256,
+	          buffer );
+
+	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	/* Test error cases
+	 */
+	result = libcpath_GetCurrentDirectoryA(
+	          256,
+	          NULL );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	return( 1 );
+
+on_error:
+	return( 0 );
+}
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
 
 /* Tests the libcpath_path_get_current_working_directory function
  * Returns 1 if successful or 0 if not
@@ -429,6 +540,444 @@ on_error:
 	}
 	return( 0 );
 }
+
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI )
+
+/* Tests the libcpath_path_get_volume_name_and_path_type function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_volume_name_and_path_type(
+     void )
+{
+	libcerror_error_t *error    = NULL;
+	char *volume_name           = NULL;
+	size_t directory_name_index = 0;
+	size_t volume_name_length   = 0;
+	uint8_t path_type           = 0;
+	int result                  = 0;
+
+	/* Test regular cases
+	 */
+	result = libcpath_path_get_volume_name_and_path_type(
+	          ".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_volume_name_and_path_type(
+	          NULL,
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          ".",
+	          (size_t) SSIZE_MAX + 1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          ".",
+	          1,
+	          NULL,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          ".",
+	          1,
+	          &volume_name,
+	          NULL,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          ".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          NULL,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          ".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_get_current_working_directory_by_volume function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_current_working_directory_by_volume(
+     void )
+{
+	libcerror_error_t *error              = NULL;
+	char *current_working_directory       = NULL;
+	size_t current_working_directory_size = 0;
+	int result                            = 0;
+
+	/* Test regular cases
+	 */
+	result = libcpath_path_get_current_working_directory_by_volume(
+	          "C:",
+	          2,
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_current_working_directory_by_volume(
+	          NULL,
+	          2,
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_current_working_directory_by_volume(
+	          "C:",
+	          (size_t) SSIZE_MAX + 1,
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_current_working_directory_by_volume(
+	          "C:",
+	          2,
+	          NULL,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_current_working_directory_by_volume(
+	          "C:",
+	          2,
+	          &current_working_directory,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libcpath_path_get_volume_name function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_volume_name(
+     void )
+{
+	libcerror_error_t *error    = NULL;
+	char *volume_name           = NULL;
+	size_t directory_name_index = 0;
+	size_t volume_name_length   = 0;
+	int result                  = 0;
+
+	/* Test regular cases
+	 */
+	result = libcpath_path_get_volume_name(
+	          "C:\\Windows",
+	          10,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_volume_name(
+	          NULL,
+	          10,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name(
+	          "C:\\Windows",
+	          (size_t) SSIZE_MAX + 1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name(
+	          "C:\\Windows",
+	          10,
+	          NULL,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name(
+	          "C:\\Windows",
+	          10,
+	          &volume_name,
+	          NULL,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name(
+	          "C:\\Windows",
+	          10,
+	          &volume_name,
+	          &volume_name_length,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) */
 
 /* Tests the libcpath_path_get_full_path function
  * Returns 1 if successful or 0 if not
@@ -3790,27 +4339,49 @@ int main(
 	CPATH_TEST_UNREFERENCED_PARAMETER( argc )
 	CPATH_TEST_UNREFERENCED_PARAMETER( argv )
 
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+	CPATH_TEST_RUN(
+	 "libcpath_CloseHandle",
+	 cpath_test_CloseHandle );
+
+	CPATH_TEST_RUN(
+	 "libcpath_SetCurrentDirectoryA",
+	 cpath_test_SetCurrentDirectoryA );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
 	CPATH_TEST_RUN(
 	 "libcpath_path_change_directory",
 	 cpath_test_path_change_directory );
+
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+	CPATH_TEST_RUN(
+	 "libcpath_GetCurrentDirectoryA",
+	 cpath_test_GetCurrentDirectoryA );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
 
 	CPATH_TEST_RUN(
 	 "libcpath_path_get_current_working_directory",
 	 cpath_test_path_get_current_working_directory );
 
-#if defined( WINAPI )
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI )
 
-#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT )
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_volume_name_and_path_type",
+	 cpath_test_path_get_volume_name_and_path_type );
 
-	/* TODO: add tests for libcpath_path_get_volume_name_and_path_type */
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_current_working_directory_by_volume",
+	 cpath_test_path_get_current_working_directory_by_volume );
 
-	/* TODO: add tests for libcpath_path_get_current_working_directory_by_volume */
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_volume_name",
+	 cpath_test_path_get_volume_name );
 
-	/* TODO: add tests for libcpath_path_get_volume_name */
-
-#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) */
-
-#endif /* defined( WINAPI ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) */
 
 	CPATH_TEST_RUN(
 	 "libcpath_path_get_full_path",
@@ -3840,23 +4411,39 @@ int main(
 	 "libcpath_path_join",
 	 cpath_test_path_join );
 
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+	/* TODO: add tests for libcpath_CreateDirectoryA */
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
 	CPATH_TEST_RUN(
 	 "libcpath_path_make_directory",
 	 cpath_test_path_make_directory );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+	/* TODO: add tests for libcpath_SetCurrentDirectoryW */
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
 	CPATH_TEST_RUN(
 	 "libcpath_path_change_directory_wide",
 	 cpath_test_path_change_directory_wide );
+
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+	/* TODO: add tests for libcpath_GetCurrentDirectoryW */
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
 
 	CPATH_TEST_RUN(
 	 "libcpath_path_get_current_working_directory_wide",
 	 cpath_test_path_get_current_working_directory_wide );
 
-#if defined( WINAPI )
-
-#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT )
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI )
 
 	/* TODO: add tests for libcpath_path_get_volume_name_and_path_type_wide */
 
@@ -3864,9 +4451,7 @@ int main(
 
 	/* TODO: add tests for libcpath_path_get_volume_name_wide */
 
-#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) */
-
-#endif /* defined( WINAPI ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) */
 
 	/* TODO: add tests for libcpath_path_get_full_path_wide */
 
@@ -3893,6 +4478,12 @@ int main(
 	CPATH_TEST_RUN(
 	 "libcpath_path_join_wide",
 	 cpath_test_path_join_wide );
+
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+	/* TODO: add tests for libcpath_CreateDirectoryW */
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) && ( WINVER <= 0x0500 ) */
 
 	CPATH_TEST_RUN(
 	 "libcpath_path_make_directory_wide",
