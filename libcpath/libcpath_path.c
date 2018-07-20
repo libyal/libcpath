@@ -919,6 +919,17 @@ int libcpath_path_get_current_working_directory_by_volume(
 	 */
 	if( volume_name != NULL )
 	{
+		if( volume_name_length > (size_t) ( SSIZE_MAX - 1 ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid volume name length value exceeds maximum.",
+			 function );
+
+			goto on_error;
+		}
 		if( libcpath_path_get_current_working_directory(
 		     &current_volume_working_directory,
 		     &current_volume_working_directory_size,
@@ -2086,10 +2097,12 @@ int libcpath_path_get_full_path(
 
 			goto on_error;
 		}
-		safe_full_path_size = current_directory_size - 1;
+		/* We need to use the length here since current_directory_size will be PATH_MAX
+		 */
+		safe_full_path_size = current_directory_length;
 
-		if( ( current_directory_size >= 2 )
-		 && ( current_directory[ current_directory_size - 2 ] != '/' ) )
+		if( ( current_directory_length >= 1 )
+		 && ( current_directory[ current_directory_length - 1 ] != '/' ) )
 		{
 			safe_full_path_size++;
 		}
@@ -4470,6 +4483,17 @@ int libcpath_path_get_current_working_directory_by_volume_wide(
 	 */
 	if( volume_name != NULL )
 	{
+		if( volume_name_length > (size_t) ( SSIZE_MAX - 1 ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid volume name length value exceeds maximum.",
+			 function );
+
+			goto on_error;
+		}
 		if( libcpath_path_get_current_working_directory_wide(
 		     &current_volume_working_directory,
 		     &current_volume_working_directory_size,
@@ -5634,10 +5658,12 @@ int libcpath_path_get_full_path_wide(
 
 			goto on_error;
 		}
-		safe_full_path_size = current_directory_size - 1;
+		/* We need to use the length here since current_directory_size will be PATH_MAX
+		 */
+		safe_full_path_size = current_directory_length;
 
-		if( ( current_directory_size >= 2 )
-		 && ( current_directory[ current_directory_size - 2 ] != (wchar_t) '/' ) )
+		if( ( current_directory_length >= 1 )
+		 && ( current_directory[ current_directory_length - 1 ] != (wchar_t) '/' ) )
 		{
 			safe_full_path_size++;
 		}

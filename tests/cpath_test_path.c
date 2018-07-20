@@ -1490,25 +1490,6 @@ int cpath_test_path_get_current_working_directory_by_volume(
 	/* Test error cases
 	 */
 	result = libcpath_path_get_current_working_directory_by_volume(
-	          NULL,
-	          2,
-	          &current_working_directory,
-	          &current_working_directory_size,
-	          &error );
-
-	CPATH_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	CPATH_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libcpath_path_get_current_working_directory_by_volume(
 	          "C:",
 	          (size_t) SSIZE_MAX + 1,
 	          &current_working_directory,
@@ -1630,8 +1611,8 @@ int cpath_test_path_get_full_path(
 	size_t full_path_size                   = 0;
 	size_t path_length                      = 0;
 	int path_index                          = 0;
-	int string_index                        = 0;
 	int result                              = 0;
+	int string_index                        = 0;
 
 	/* Initialize test
 	 */
@@ -1786,12 +1767,10 @@ int cpath_test_path_get_full_path(
 		 full_path_length,
 		 string_index + current_working_directory_length + expected_path_length );
 
-/* TODO fix fails on CygWin
 		CPATH_TEST_ASSERT_EQUAL_SIZE(
 		 "full_path_size",
 		 full_path_size,
 		 full_path_length + 1 );
-*/
 
 #if defined( WINAPI )
 		result = narrow_string_compare_no_case(
@@ -4614,9 +4593,541 @@ on_error:
 	return( 0 );
 }
 
-	/* TODO: add tests for libcpath_path_get_current_working_directory_by_volume_wide */
+/* Tests the libcpath_path_get_current_working_directory_by_volume_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_current_working_directory_by_volume_wide(
+     void )
+{
+	libcerror_error_t *error              = NULL;
+	wchar_t *current_working_directory    = NULL;
+	size_t current_working_directory_size = 0;
+	int result                            = 0;
+
+	/* Test regular cases
+	 */
+	result = libcpath_path_get_current_working_directory_by_volume_wide(
+	          L"C:",
+	          2,
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_current_working_directory_by_volume_wide(
+	          L"C:",
+	          (size_t) SSIZE_MAX + 1,
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_current_working_directory_by_volume_wide(
+	          L"C:",
+	          2,
+	          NULL,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_current_working_directory_by_volume_wide(
+	          L"C:",
+	          2,
+	          &current_working_directory,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
 
 #endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) */
+
+/* Tests the libcpath_path_get_full_path_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_full_path_wide(
+     void )
+{
+#if defined( WINAPI )
+	wchar_t *absolute_paths[] = {
+		L"\\home\\user\\test.txt",
+		L"c:\\home\\user\\test.txt",
+		L"c:\\home\\user\\\\test.txt",
+		L"c:\\home\\username\\..\\user\\test.txt",
+		L"c:\\..\\home\\user\\test.txt",
+		L"c:\\..\\home\\username\\..\\user\\test.txt",
+	};
+	wchar_t *relative_paths[] = {
+		L"user\\test.txt",
+		L"username\\..\\user\\test.txt",
+	};
+	wchar_t *special_paths[] = {
+		L"\\\\.\\PhysicalDrive0",
+		L"\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}"
+	};
+	wchar_t *unc_paths[] = {
+		L"\\\\172.0.0.1\\C$\\test.txt",
+		L"\\\\?\\UNC\\172.0.0.1\\C$\\test.txt",
+	};
+#else
+	wchar_t *absolute_paths[] = {
+		L"/home/user/test.txt",
+		L"/home/user//test.txt",
+		L"/../home/user/test.txt",
+		L"/../home/username/../user/test.txt",
+	};
+	wchar_t *relative_paths[] = {
+		L"user/test.txt",
+		L"username/../user/test.txt",
+	};
+#endif /* defined( WINAPI ) */
+
+	libcerror_error_t *error                = NULL;
+	wchar_t *current_working_directory      = NULL;
+	wchar_t *expected_path                  = NULL;
+	wchar_t *full_path                      = NULL;
+	wchar_t *path                           = NULL;
+	size_t current_working_directory_length = 0;
+	size_t current_working_directory_size   = 0;
+	size_t expected_path_length             = 0;
+	size_t full_path_length                 = 0;
+	size_t full_path_size                   = 0;
+	size_t path_length                      = 0;
+	int path_index                          = 0;
+	int result                              = 0;
+	int string_index                        = 0;
+
+	/* Initialize test
+	 */
+	result = libcpath_path_get_current_working_directory_wide(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "current_working_directory",
+	 current_working_directory );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	current_working_directory_length = wide_string_length(
+	                                    current_working_directory );
+
+	/* Test get full path
+	 */
+#if defined( WINAPI )
+	expected_path = L"\\\\?\\C:\\home\\user\\test.txt";
+#else
+	expected_path = L"/home/user/test.txt";
+#endif
+	expected_path_length = wide_string_length(
+	                        expected_path );
+
+	for( path_index = 0;
+	     path_index < 4;
+	     path_index++ )
+	{
+		path = absolute_paths[ path_index ];
+
+		path_length = wide_string_length(
+		               path );
+
+		result = libcpath_path_get_full_path_wide(
+		          path,
+		          path_length,
+		          &full_path,
+		          &full_path_size,
+		          &error );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		full_path_length = wide_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 full_path_length + 1 );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 expected_path_length + 1 );
+
+#if defined( WINAPI )
+		result = wide_string_compare_no_case(
+		          full_path,
+		          expected_path,
+		          expected_path_length );
+#else
+		result = wide_string_compare(
+		          full_path,
+		          expected_path,
+		          expected_path_length );
+#endif
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		memory_free(
+		 full_path );
+
+		full_path = NULL;
+	}
+#if defined( WINAPI )
+	expected_path = L"\\user\\test.txt";
+#else
+	expected_path = L"/user/test.txt";
+#endif
+	expected_path_length = wide_string_length(
+	                        expected_path );
+
+	for( path_index = 0;
+	     path_index < 2;
+	     path_index++ )
+	{
+		path = relative_paths[ path_index ];
+
+		path_length = wide_string_length(
+		               path );
+
+		result = libcpath_path_get_full_path_wide(
+		          path,
+		          path_length,
+		          &full_path,
+		          &full_path_size,
+		          &error );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		full_path_length = wide_string_length(
+		                    full_path );
+
+		/* A full path on Windows is prefixed with \\?\ while
+		 * the current working directory is not.
+		 */
+		if( ( full_path_length >= 4 ) 
+		 && ( full_path[ 0 ] == (wchar_t) '\\' )
+		 && ( full_path[ 1 ] == (wchar_t) '\\' )
+		 && ( full_path[ 2 ] == (wchar_t) '?' )
+		 && ( full_path[ 3 ] == (wchar_t) '\\' ) )
+		{
+			string_index = 4;
+		}
+		else
+		{
+			string_index = 0;
+		}
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 string_index + current_working_directory_length + expected_path_length );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 full_path_length + 1 );
+
+#if defined( WINAPI )
+		result = wide_string_compare_no_case(
+		          &( full_path[ string_index ] ),
+		          current_working_directory,
+		          current_working_directory_length );
+#else
+		result = wide_string_compare(
+		          &( full_path[ string_index ] ),
+		          current_working_directory,
+		          current_working_directory_length );
+#endif
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+#if defined( WINAPI )
+		result = wide_string_compare_no_case(
+		          &( full_path[ string_index + current_working_directory_length ] ),
+		          expected_path,
+		          expected_path_length );
+#else
+		result = wide_string_compare(
+		          &( full_path[ string_index + current_working_directory_length ] ),
+		          expected_path,
+		          expected_path_length );
+#endif
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		memory_free(
+		 full_path );
+
+		full_path = NULL;
+	}
+	/* Test error cases
+	 */
+	result = libcpath_path_get_full_path_wide(
+	          NULL,
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          0,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          (size_t) -1,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          NULL,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	full_path = (wchar_t *) 0x12345678UL;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	full_path = NULL;
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+
+	/* Test libcpath_path_change_directory with getcwd failing
+	 */
+	cpath_test_getcwd_attempts_before_fail = 0;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_getcwd_attempts_before_fail != -1 )
+	{
+		cpath_test_getcwd_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ ) */
+
+	/* Clean up
+	 */
+	memory_free(
+	 current_working_directory );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( full_path != NULL )
+	{
+		memory_free(
+		 full_path );
+	}
+	if( current_working_directory != NULL )
+	{
+		memory_free(
+		 current_working_directory );
+	}
+	return( 0 );
+}
 
 #if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT )
 
@@ -6126,11 +6637,15 @@ int main(
 	 "libcpath_path_get_volume_name_wide",
 	 cpath_test_path_get_volume_name_wide );
 
-	/* TODO: add tests for libcpath_path_get_current_working_directory_by_volume_wide */
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_current_working_directory_by_volume_wide",
+	 cpath_test_path_get_current_working_directory_by_volume_wide );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI ) */
 
-	/* TODO: add tests for libcpath_path_get_full_path_wide */
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_full_path_wide",
+	 cpath_test_path_get_full_path_wide );
 
 #if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT )
 
