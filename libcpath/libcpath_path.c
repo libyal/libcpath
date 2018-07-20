@@ -52,25 +52,6 @@
 #include "libcpath_path.h"
 #include "libcpath_system_string.h"
 
-#if defined( WINAPI )
-enum LIBCPATH_TYPES
-{
-	LIBCPATH_TYPE_ABSOLUTE,
-	LIBCPATH_TYPE_DEVICE,
-	LIBCPATH_TYPE_EXTENDED_LENGTH,
-	LIBCPATH_TYPE_RELATIVE,
-	LIBCPATH_TYPE_UNC
-};
-
-#else
-enum LIBCPATH_TYPES
-{
-	LIBCPATH_TYPE_ABSOLUTE,
-	LIBCPATH_TYPE_RELATIVE
-};
-
-#endif /* defined( WINAPI ) */
-
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
 
 /* Cross Windows safe version of CloseHandle
@@ -268,10 +249,6 @@ DWORD libcpath_GetCurrentDirectoryA(
 	HMODULE library_handle = NULL;
 	DWORD result           = 0;
 
-	if( buffer == NULL )
-	{
-		return( 0 );
-	}
 	library_handle = LoadLibrary(
 	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
@@ -354,10 +331,15 @@ int libcpath_path_get_current_working_directory(
 
 		return( -1 );
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	safe_current_working_directory_size = libcpath_GetCurrentDirectoryA(
+	                                       0,
+	                                       NULL );
+#else
 	safe_current_working_directory_size = GetCurrentDirectoryA(
 	                                       0,
 	                                       NULL );
-
+#endif
 	if( safe_current_working_directory_size == 0 )
 	{
 		libcerror_error_set(
@@ -978,113 +960,101 @@ int libcpath_path_get_volume_name(
 
 		return( -1 );
 	}
-/* TODO clean up code */
-	if( path_size >= 3 )
+	*volume_name          = NULL;
+	*volume_name_length   = 0;
+	*directory_name_index = 0;
+
+	if( path_size < 2 )
 	{
-		if( path == NULL )
+		return( 1 );
+	}
+	/* Check if the path starts with a volume letter
+	 */
+	if( ( path[ 1 ] == ':' )
+	 && ( ( ( path[ 0 ] >= 'A' )
+	   && ( path[ 0 ] <= 'Z' ) )
+	  || ( ( path[ 0 ] >= 'a' )
+	   && ( path[ 0 ] <= 'z' ) ) ) )
+	{
+		path_index = 2;
+
+		if( ( path_size >= 3 )
+		 && ( path[ 2 ] == '\\' ) )
+		{
+			path_index++;
+		}
+		*volume_name          = (char *) path;
+		*volume_name_length   = 2;
+		*directory_name_index = path_index;
+	}
+	/* Check for special paths
+	 * paths with prefix: \\
+	 */
+	else if( ( path[ 0 ] == '\\' )
+	      && ( path[ 1 ] == '\\' ) )
+	{
+		/* Ignore the following special paths
+		 * device path prefix:          \\.\
+		 * extended length prefix:      \\?\
+		 */
+		if( ( path_size >= 4 )
+		 && ( ( path[ 2 ] == '.' )
+		  ||  ( path[ 2 ] == '?' ) )
+		 && ( path[ 3 ] == '\\' ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+			 "%s: unsupported path.",
+			 function );
+
+			return( -1 );
+		}
+		/* Determine the volume in an UNC path
+		 * \\server\share
+		 */
+		for( share_name_index = 2;
+		     share_name_index < path_size;
+		     share_name_index++ )
+		{
+			if( path[ share_name_index ] == '\\' )
+			{
+				share_name_index++;
+
+				break;
+			}
+		}
+		if( share_name_index >= path_size )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing path.",
+			 "%s: invalid path - missing share name.",
 			 function );
 
 			return( -1 );
 		}
-		/* Check if the path starts with a volume letter
-		 */
-		if( ( path[ 1 ] == ':' )
-		 && ( ( ( path[ 0 ] >= 'A' )
-		   && ( path[ 0 ] <= 'Z' ) )
-		  || ( ( path[ 0 ] >= 'a' )
-		   && ( path[ 0 ] <= 'z' ) ) ) )
+		for( path_index = share_name_index;
+		     path_index < path_size;
+		     path_index++ )
 		{
-			if( *volume_name == NULL )
-			{
-				*volume_name        = (char *) path;
-				*volume_name_length = 2;
-			}
-			path_index = 2;
-
-			if( path[ 2 ] == '\\' )
+			if( path[ path_index ] == '\\' )
 			{
 				path_index++;
+
+				break;
 			}
-			*directory_name_index = path_index;
 		}
-		/* Check for special paths
-		 * paths with prefix: \\
-		 */
-		else if( ( path[ 0 ] == '\\' )
-		      && ( path[ 1 ] == '\\' ) )
+		*volume_name        = (char *) &( path[ 2 ] );
+		*volume_name_length = path_index - 2;
+
+		if( path[ path_index - 1 ] == '\\' )
 		{
-			/* Ignore the following special paths
-			 * device path prefix:          \\.\
-			 */
-			if( ( path_size >= 4 )
-			 && ( path[ 2 ] == '.' )
-			 && ( path[ 3 ] == '\\' ) )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-				 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-				 "%s: unsupported path.",
-				 function );
-
-				return( -1 );
-			}
-			else
-			{
-				/* Determine the volume in an UNC path
-				 * \\server\share
-				 */
-				for( share_name_index = 2;
-				     share_name_index < path_size;
-				     share_name_index++ )
-				{
-					if( path[ share_name_index ] == '\\' )
-					{
-						break;
-					}
-				}
-				if( share_name_index >= path_size )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: invalid path - missing share name.",
-					 function );
-
-					return( -1 );
-				}
-				for( path_index = share_name_index + 1;
-				     path_index < path_size;
-				     path_index++ )
-				{
-					if( path[ path_index ] == '\\' )
-					{
-						break;
-					}
-				}
-				if( *volume_name == NULL )
-				{
-					*volume_name = (char *) &( path[ 2 ] );
-
-					if( path_index == path_size )
-					{
-						*volume_name_length = path_index - 3;
-					}
-					else
-					{
-						*volume_name_length = path_index - 2;
-					}
-				}
-				*directory_name_index = path_index;
-			}
+			*volume_name_length -= 1;
 		}
+		*directory_name_index = path_index;
 	}
 	return( 1 );
 }
@@ -3776,10 +3746,6 @@ DWORD libcpath_GetCurrentDirectoryW(
 	HMODULE library_handle = NULL;
 	DWORD result           = 0;
 
-	if( buffer == NULL )
-	{
-		return( 0 );
-	}
 	library_handle = LoadLibrary(
 	                  _SYSTEM_STRING( "kernel32.dll" ) );
 
@@ -3862,10 +3828,15 @@ int libcpath_path_get_current_working_directory_wide(
 
 		return( -1 );
 	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	safe_current_working_directory_size = libcpath_GetCurrentDirectoryW(
+	                                       0,
+	                                       NULL );
+#else
 	safe_current_working_directory_size = GetCurrentDirectoryW(
 	                                       0,
 	                                       NULL );
-
+#endif
 	if( safe_current_working_directory_size == 0 )
 	{
 		libcerror_error_set(
@@ -4542,113 +4513,101 @@ int libcpath_path_get_volume_name_wide(
 
 		return( -1 );
 	}
-/* TODO clean up code */
-	if( path_size >= 3 )
+	*volume_name          = NULL;
+	*volume_name_length   = 0;
+	*directory_name_index = 0;
+
+	if( path_size < 2 )
 	{
-		if( path == NULL )
+		return( 1 );
+	}
+	/* Check if the path starts with a volume letter
+	 */
+	if( ( path[ 1 ] == (wchar_t) ':' )
+	 && ( ( ( path[ 0 ] >= (wchar_t) 'A' )
+	   && ( path[ 0 ] <= (wchar_t) 'Z' ) )
+	  || ( ( path[ 0 ] >= (wchar_t) 'a' )
+	   && ( path[ 0 ] <= (wchar_t) 'z' ) ) ) )
+	{
+		path_index = 2;
+
+		if( ( path_size >= 3 )
+		 && ( path[ 2 ] == (wchar_t) '\\' ) )
+		{
+			path_index++;
+		}
+		*volume_name          = (wchar_t *) path;
+		*volume_name_length   = 2;
+		*directory_name_index = path_index;
+	}
+	/* Check for special paths
+	 * paths with prefix: \\
+	 */
+	else if( ( path[ 0 ] == (wchar_t) '\\' )
+	      && ( path[ 1 ] == (wchar_t) '\\' ) )
+	{
+		/* Ignore the following special paths
+		 * device path prefix:          \\.\
+		 * extended length prefix:      \\?\
+		 */
+		if( ( path_size >= 4 )
+		 && ( ( path[ 2 ] == (wchar_t) '.' )
+		  ||  ( path[ 2 ] == (wchar_t) '?' ) )
+		 && ( path[ 3 ] == (wchar_t) '\\' ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+			 "%s: unsupported path.",
+			 function );
+
+			return( -1 );
+		}
+		/* Determine the volume in an UNC path
+		 * \\server\share
+		 */
+		for( share_name_index = 2;
+		     share_name_index < path_size;
+		     share_name_index++ )
+		{
+			if( path[ share_name_index ] == (wchar_t) '\\' )
+			{
+				share_name_index++;
+
+				break;
+			}
+		}
+		if( share_name_index >= path_size )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing path.",
+			 "%s: invalid path - missing share name.",
 			 function );
 
 			return( -1 );
 		}
-		/* Check if the path starts with a volume letter
-		 */
-		if( ( path[ 1 ] == (wchar_t) ':' )
-		 && ( ( ( path[ 0 ] >= (wchar_t) 'A' )
-		   && ( path[ 0 ] <= (wchar_t) 'Z' ) )
-		  || ( ( path[ 0 ] >= (wchar_t) 'a' )
-		   && ( path[ 0 ] <= (wchar_t) 'z' ) ) ) )
+		for( path_index = share_name_index;
+		     path_index < path_size;
+		     path_index++ )
 		{
-			if( *volume_name == NULL )
-			{
-				*volume_name        = (wchar_t *) path;
-				*volume_name_length = 2;
-			}
-			path_index = 2;
-
-			if( path[ 2 ] == (wchar_t) '\\' )
+			if( path[ path_index ] == (wchar_t) '\\' )
 			{
 				path_index++;
+
+				break;
 			}
-			*directory_name_index = path_index;
 		}
-		/* Check for special paths
-		 * paths with prefix: \\
-		 */
-		else if( ( path[ 0 ] == (wchar_t) '\\' )
-		      && ( path[ 1 ] == (wchar_t) '\\' ) )
+		*volume_name        = (wchar_t *) &( path[ 2 ] );
+		*volume_name_length = path_index - 2;
+
+		if( path[ path_index - 1 ] == (wchar_t) '\\' )
 		{
-			/* Ignore the following special paths
-			 * device path prefix:          \\.\
-			 */
-			if( ( path_size >= 4 )
-			 && ( path[ 2 ] == (wchar_t) '.' )
-			 && ( path[ 3 ] == (wchar_t) '\\' ) )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-				 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-				 "%s: unsupported path.",
-				 function );
-
-				return( -1 );
-			}
-			else
-			{
-				/* Determine the volume in an UNC path
-				 * \\server\share
-				 */
-				for( share_name_index = 2;
-				     share_name_index < path_size;
-				     share_name_index++ )
-				{
-					if( path[ share_name_index ] == (wchar_t) '\\' )
-					{
-						break;
-					}
-				}
-				if( share_name_index >= path_size )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: invalid path - missing share name.",
-					 function );
-
-					return( -1 );
-				}
-				for( path_index = share_name_index + 1;
-				     path_index < path_size;
-				     path_index++ )
-				{
-					if( path[ path_index ] == (wchar_t) '\\' )
-					{
-						break;
-					}
-				}
-				if( *volume_name == NULL )
-				{
-					*volume_name = (wchar_t *) &( path[ 2 ] );
-
-					if( path_index == path_size )
-					{
-						*volume_name_length = path_index - 3;
-					}
-					else
-					{
-						*volume_name_length = path_index - 2;
-					}
-				}
-				*directory_name_index = path_index;
-			}
+			*volume_name_length -= 1;
 		}
+		*directory_name_index = path_index;
 	}
 	return( 1 );
 }
