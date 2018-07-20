@@ -67,20 +67,10 @@ int libcpath_path_get_current_working_directory(
 
 #if defined( WINAPI )
 
-int libcpath_path_get_volume_name_and_path_type(
+int libcpath_path_get_path_type(
      const char *path,
      size_t path_length,
-     char **volume_name,
-     size_t *volume_name_length,
-     size_t *directory_name_index,
      uint8_t *path_type,
-     libcerror_error_t **error );
-
-int libcpath_path_get_current_working_directory_by_volume(
-     char *volume_name,
-     size_t volume_name_length,
-     char **current_working_directory,
-     size_t *current_working_directory_size,
      libcerror_error_t **error );
 
 int libcpath_path_get_volume_name(
@@ -89,6 +79,13 @@ int libcpath_path_get_volume_name(
      char **volume_name,
      size_t *volume_name_length,
      size_t *directory_name_index,
+     libcerror_error_t **error );
+
+int libcpath_path_get_current_working_directory_by_volume(
+     char *volume_name,
+     size_t volume_name_length,
+     char **current_working_directory,
+     size_t *current_working_directory_size,
      libcerror_error_t **error );
 
 #endif /* defined( WINAPI ) */
@@ -183,20 +180,10 @@ int libcpath_path_get_current_working_directory_wide(
 
 #if defined( WINAPI )
 
-int libcpath_path_get_volume_name_and_path_type_wide(
+int libcpath_path_get_path_type_wide(
      const wchar_t *path,
      size_t path_length,
-     wchar_t **volume_name,
-     size_t *volume_name_length,
-     size_t *directory_name_index,
      uint8_t *path_type,
-     libcerror_error_t **error );
-
-int libcpath_path_get_current_working_directory_by_volume_wide(
-     wchar_t *volume_name,
-     size_t volume_name_length,
-     wchar_t **current_working_directory,
-     size_t *current_working_directory_size,
      libcerror_error_t **error );
 
 int libcpath_path_get_volume_name_wide(
@@ -205,6 +192,13 @@ int libcpath_path_get_volume_name_wide(
      wchar_t **volume_name,
      size_t *volume_name_length,
      size_t *directory_name_index,
+     libcerror_error_t **error );
+
+int libcpath_path_get_current_working_directory_by_volume_wide(
+     wchar_t *volume_name,
+     size_t volume_name_length,
+     wchar_t **current_working_directory,
+     size_t *current_working_directory_size,
      libcerror_error_t **error );
 
 #endif /* defined( WINAPI ) */
