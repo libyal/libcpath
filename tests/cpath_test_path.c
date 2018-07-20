@@ -606,16 +606,239 @@ int cpath_test_path_get_volume_name_and_path_type(
 	 directory_name_index,
 	 0 );
 
-/* TODO
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "path_type",
 	 path_type,
 	 LIBCPATH_TYPE_RELATIVE );
-*/
 
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          "\\",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_ABSOLUTE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          "c:",
+	          2,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_RELATIVE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "c:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          "C:\\Windows",
+	          10,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 3 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_ABSOLUTE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          "\\\\server\\share\\directory",
+	          24,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 12 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 15 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_UNC );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "server\\share",
+	          12 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          "\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}",
+	          48,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 44 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 48 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_EXTENDED_LENGTH );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}",
+	          44 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
 
 	result = libcpath_path_get_volume_name_and_path_type(
 	          "\\\\.\\PhysicalDrive0",
@@ -631,17 +854,19 @@ int cpath_test_path_get_volume_name_and_path_type(
 	 result,
 	 1 );
 
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "volume_name_length",
 	 volume_name_length,
-	 0 );
+	 14 );
 
-/* TODO
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "directory_name_index",
 	 directory_name_index,
-	 0 );
-*/
+	 18 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "path_type",
@@ -651,6 +876,110 @@ int cpath_test_path_get_volume_name_and_path_type(
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "PhysicalDrive0",
+	          14 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          "\\\\.\\C:",
+	          6,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 6 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_DEVICE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          "\\\\.\\C:\\",
+	          7,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 7 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_DEVICE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
 
 	result = libcpath_path_get_volume_name_and_path_type(
 	          "\\\\?\\C:\\Windows",
@@ -666,19 +995,19 @@ int cpath_test_path_get_volume_name_and_path_type(
 	 result,
 	 1 );
 
-/* TODO
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "volume_name_length",
 	 volume_name_length,
-	 1 );
-*/
+	 2 );
 
-/* TODO
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "directory_name_index",
 	 directory_name_index,
-	 6 );
-*/
+	 7 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "path_type",
@@ -688,6 +1017,16 @@ int cpath_test_path_get_volume_name_and_path_type(
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
+
+	result = narrow_string_compare(
+	          volume_name,
+	          "C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
 
 	result = libcpath_path_get_volume_name_and_path_type(
 	          "\\\\?\\UNC\\server\\share\\directory",
@@ -703,19 +1042,19 @@ int cpath_test_path_get_volume_name_and_path_type(
 	 result,
 	 1 );
 
-/* TODO
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "volume_name_length",
 	 volume_name_length,
 	 12 );
-*/
 
-/* TODO
 	CPATH_TEST_ASSERT_EQUAL_SIZE(
 	 "directory_name_index",
 	 directory_name_index,
 	 21 );
-*/
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "path_type",
@@ -726,11 +1065,42 @@ int cpath_test_path_get_volume_name_and_path_type(
 	 "error",
 	 error );
 
+	result = narrow_string_compare(
+	          volume_name,
+	          "server\\share",
+	          12 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
 	/* Test error cases
 	 */
 	result = libcpath_path_get_volume_name_and_path_type(
 	          NULL,
 	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type(
+	          ".",
+	          0,
 	          &volume_name,
 	          &volume_name_length,
 	          &directory_name_index,
@@ -998,6 +1368,37 @@ int cpath_test_path_get_volume_name(
 	/* Test regular cases
 	 */
 	result = libcpath_path_get_volume_name(
+	          ".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_path_get_volume_name(
 	          "\\",
 	          1,
 	          &volume_name,
@@ -1156,6 +1557,26 @@ int cpath_test_path_get_volume_name(
 	result = libcpath_path_get_volume_name(
 	          NULL,
 	          10,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name(
+	          "C:\\Windows",
+	          0,
 	          &volume_name,
 	          &volume_name_length,
 	          &directory_name_index,
@@ -3451,7 +3872,673 @@ on_error:
 
 #if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI )
 
-	/* TODO: add tests for libcpath_path_get_volume_name_and_path_type_wide */
+/* Tests the libcpath_path_get_volume_name_and_path_type_wide function
+ * Returns 1 if successful or 0 if not
+ */
+int cpath_test_path_get_volume_name_and_path_type_wide(
+     void )
+{
+	libcerror_error_t *error    = NULL;
+	wchar_t *volume_name        = NULL;
+	size_t directory_name_index = 0;
+	size_t volume_name_length   = 0;
+	uint8_t path_type           = 0;
+	int result                  = 0;
+
+	/* Test regular cases
+	 */
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_RELATIVE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_ABSOLUTE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"c:",
+	          2,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_RELATIVE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"c:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"C:\\Windows",
+	          10,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 3 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_ABSOLUTE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\\\server\\share\\directory",
+	          24,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 12 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 15 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_UNC );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"server\\share",
+	          12 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}",
+	          48,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 44 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 48 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_EXTENDED_LENGTH );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}",
+	          44 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\\\.\\PhysicalDrive0",
+	          18,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 14 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 18 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_DEVICE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"PhysicalDrive0",
+	          14 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\\\.\\C:",
+	          6,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 6 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_DEVICE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\\\.\\C:\\",
+	          7,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 7 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_DEVICE );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\\\?\\C:\\Windows",
+	          14,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 2 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 7 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_EXTENDED_LENGTH );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"C:",
+	          2 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L"\\\\?\\UNC\\server\\share\\directory",
+	          30,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 12 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 21 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "path_type",
+	 path_type,
+	 LIBCPATH_TYPE_EXTENDED_LENGTH );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
+	          volume_name,
+	          L"server\\share",
+	          12 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	/* Test error cases
+	 */
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          NULL,
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L".",
+	          0,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L".",
+	          (size_t) SSIZE_MAX + 1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L".",
+	          1,
+	          NULL,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L".",
+	          1,
+	          &volume_name,
+	          NULL,
+	          &directory_name_index,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          NULL,
+	          &path_type,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_and_path_type_wide(
+	          L".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          NULL,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
 
 	/* TODO: add tests for libcpath_path_get_current_working_directory_by_volume_wide */
 
@@ -3469,6 +4556,37 @@ int cpath_test_path_get_volume_name_wide(
 
 	/* Test regular cases
 	 */
+	result = libcpath_path_get_volume_name_wide(
+	          L".",
+	          1,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "volume_name",
+	 volume_name );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "volume_name_length",
+	 volume_name_length,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "directory_name_index",
+	 directory_name_index,
+	 (size_t) 0 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	result = libcpath_path_get_volume_name_wide(
 	          L"\\",
 	          1,
@@ -3628,6 +4746,26 @@ int cpath_test_path_get_volume_name_wide(
 	result = libcpath_path_get_volume_name_wide(
 	          NULL,
 	          10,
+	          &volume_name,
+	          &volume_name_length,
+	          &directory_name_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libcpath_path_get_volume_name_wide(
+	          L"C:\\Windows",
+	          0,
 	          &volume_name,
 	          &volume_name_length,
 	          &directory_name_index,
@@ -5278,7 +6416,9 @@ int main(
 
 #if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) && defined( WINAPI )
 
-	/* TODO: add tests for libcpath_path_get_volume_name_and_path_type_wide */
+	CPATH_TEST_RUN(
+	 "libcpath_path_get_volume_name_and_path_type_wide",
+	 cpath_test_path_get_volume_name_and_path_type_wide );
 
 	/* TODO: add tests for libcpath_path_get_current_working_directory_by_volume_wide */
 

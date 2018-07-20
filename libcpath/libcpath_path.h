@@ -85,7 +85,7 @@ int libcpath_path_get_current_working_directory_by_volume(
 
 int libcpath_path_get_volume_name(
      const char *path,
-     size_t path_size,
+     size_t path_length,
      char **volume_name,
      size_t *volume_name_length,
      size_t *directory_name_index,
@@ -201,7 +201,7 @@ int libcpath_path_get_current_working_directory_by_volume_wide(
 
 int libcpath_path_get_volume_name_wide(
      const wchar_t *path,
-     size_t path_size,
+     size_t path_length,
      wchar_t **volume_name,
      size_t *volume_name_length,
      size_t *directory_name_index,

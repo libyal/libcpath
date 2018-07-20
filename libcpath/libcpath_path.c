@@ -552,9 +552,10 @@ int libcpath_path_get_volume_name_and_path_type(
      uint8_t *path_type,
      libcerror_error_t **error )
 {
-	static char *function   = "libcpath_path_get_volume_name_and_path_type";
-	size_t path_index       = 0;
-	size_t share_name_index = 0;
+	static char *function    = "libcpath_path_get_volume_name_and_path_type";
+	size_t path_index        = 0;
+	size_t share_name_index  = 0;
+	size_t volume_name_index = 0;
 
 	if( path == NULL )
 	{
@@ -563,6 +564,17 @@ int libcpath_path_get_volume_name_and_path_type(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid path.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
+		 "%s: invalid path length is zero.",
 		 function );
 
 		return( -1 );
@@ -622,103 +634,155 @@ int libcpath_path_get_volume_name_and_path_type(
 
 		return( -1 );
 	}
-	if( ( path_length == 2 )
-	 && ( path[ 1 ] == '\\' ) )
+	*volume_name          = NULL;
+	*volume_name_length   = 0;
+	*directory_name_index = 0;
+	*path_type            = LIBCPATH_TYPE_RELATIVE;
+
+	/* Determine if the path is a special path
+	 * device path prefix:          \\.\
+	 * extended-length path prefix: \\?\
+	 */
+	if( ( path_length >= 4 )
+	 && ( path[ 0 ] == '\\' )
+	 && ( path[ 1 ] == '\\' )
+	 && ( ( path[ 2 ] == '.' )
+	  ||  ( path[ 2 ] == '?' ) )
+	 && ( path[ 3 ] == '\\' ) )
+	{
+		if( path[ 2 ] == '.' )
+		{
+			volume_name_index = 4;
+			*path_type        = LIBCPATH_TYPE_DEVICE;
+		}
+		/* Determine if the path in an extended-length UNC path
+		 * \\?\UNC\server\share
+		 */
+		else if( ( path_length >= 8 )
+		      && ( path[ 4 ] == 'U' )
+		      && ( path[ 5 ] == 'N' )
+		      && ( path[ 6 ] == 'C' )
+		      && ( path[ 7 ] == '\\' ) )
+		{
+			volume_name_index = 8;
+			*path_type        = LIBCPATH_TYPE_EXTENDED_LENGTH;
+		}
+		else
+		{
+			volume_name_index = 4;
+			*path_type        = LIBCPATH_TYPE_EXTENDED_LENGTH;
+		}
+	}
+	/* Determine if the path in an UNC path
+	 * \\server\share
+	 */
+	else if( ( path_length >= 2 )
+	      && ( path[ 0 ] == '\\' )
+	      && ( path[ 1 ] == '\\' ) )
+	{
+		volume_name_index = 2;
+		*path_type        = LIBCPATH_TYPE_UNC;
+	}
+	else if( path[ 0 ] == '\\' )
 	{
 		*path_type = LIBCPATH_TYPE_ABSOLUTE;
 	}
-	else if( path_length >= 2 )
+	/* Check if the path contains a volume letter
+	 */
+	if( ( path_length >= 2 )
+	 && ( volume_name_index <= ( path_length - 2 ) )
+	 && ( path[ volume_name_index + 1 ] == ':' )
+	 && ( ( ( path[ volume_name_index ] >= 'A' )
+	   &&   ( path[ volume_name_index ] <= 'Z' ) )
+	  ||  ( ( path[ volume_name_index ] >= 'a' )
+	   &&   ( path[ volume_name_index ] <= 'z' ) ) ) )
 	{
-		/* Check if the path starts with a volume letter
-		 */
-		if( ( path[ 1 ] == ':' )
-		 && ( ( ( path[ 0 ] >= 'A' )
-		   && ( path[ 0 ] <= 'Z' ) )
-		  || ( ( path[ 0 ] >= 'a' )
-		   && ( path[ 0 ] <= 'z' ) ) ) )
-		{
-			*volume_name          = (char *) path;
-			*volume_name_length   = 2;
-			*directory_name_index = 2;
+		path_index = volume_name_index + 2;
 
-			if( ( path_length >= 3 )
-			 && ( path[ 2 ] == '\\' ) )
-			{
-				*path_type             = LIBCPATH_TYPE_ABSOLUTE;
-				*directory_name_index += 1;
-			}
-		}
-		/* Check for special paths
-		 * paths with prefix: \\
-		 */
-		else if( ( path[ 0 ] == '\\' )
-		      && ( path[ 1 ] == '\\' ) )
+		if( ( path_index < path_length )
+		 && ( path[ path_index ] == '\\' ) )
 		{
-			/* Determine if the path is a special path
-			 * device path prefix:          \\.\
-			 * extended-length path prefix: \\?\
-			 */
-			if( ( path_length >= 4 )
-			 && ( ( path[ 2 ] == '.' )
-			   || ( path[ 2 ] == '?' ) )
-			 && ( path[ 3 ] == '\\' ) )
+			if( *path_type == LIBCPATH_TYPE_RELATIVE )
 			{
-				if( path[ 2 ] == '.' )
-				{
-					*path_type = LIBCPATH_TYPE_DEVICE;
-				}
-				else
-				{
-					*path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
-				}
-				*directory_name_index = 4;
+				*path_type = LIBCPATH_TYPE_ABSOLUTE;
 			}
-			else
-			{
-				/* Determine the volume in an UNC path
-				 * \\server\share
-				 */
-				for( share_name_index = 2;
-				     share_name_index <= path_length;
-				     share_name_index++ )
-				{
-					if( path[ share_name_index ] == '\\' )
-					{
-						break;
-					}
-				}
-				if( share_name_index > path_length )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: invalid path - missing share name.",
-					 function );
+			path_index++;
+		}
+		*volume_name        = (char *) &( path[ volume_name_index ] );
+		*volume_name_length = path_index - volume_name_index;
 
-					return( -1 );
-				}
-				for( path_index = share_name_index + 1;
-				     path_index <= path_length;
-				     path_index++ )
-				{
-					if( path[ path_index ] == '\\' )
-					{
-						break;
-					}
-				}
-				*path_type            = LIBCPATH_TYPE_UNC;
-				*volume_name          = (char *) &( path[ 2 ] );
-				*volume_name_length   = path_index - 2;
-				*directory_name_index = path_index;
+		if( path[ path_index - 1 ] == '\\' )
+		{
+			*volume_name_length -= 1;
+		}
+		*directory_name_index = path_index;
+	}
+	else if( volume_name_index == 4 )
+	{
+		for( path_index = volume_name_index;
+		     path_index < path_length;
+		     path_index++ )
+		{
+			if( path[ path_index ] == '\\' )
+			{
+				path_index++;
+
+				break;
 			}
 		}
-		/* Check for absolue paths
-		 */
-		else if( path[ 0 ] == '\\' )
+		*volume_name        = (char *) &( path[ 4 ] );
+		*volume_name_length = path_index - 4;
+
+		if( path[ path_index - 1 ] == '\\' )
 		{
-			*path_type = LIBCPATH_TYPE_ABSOLUTE;
+			*volume_name_length -= 1;
 		}
+		*directory_name_index = path_index;
+	}
+	else if( ( volume_name_index == 2 )
+	      || ( volume_name_index == 8 ) )
+	{
+		for( share_name_index = volume_name_index;
+		     share_name_index < path_length;
+		     share_name_index++ )
+		{
+			if( path[ share_name_index ] == '\\' )
+			{
+				share_name_index++;
+
+				break;
+			}
+		}
+		if( share_name_index > path_length )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid path - missing share name.",
+			 function );
+
+			return( -1 );
+		}
+		for( path_index = share_name_index;
+		     path_index < path_length;
+		     path_index++ )
+		{
+			if( path[ path_index ] == '\\' )
+			{
+				path_index++;
+
+				break;
+			}
+		}
+		*volume_name        = (char *) &( path[ volume_name_index ] );
+		*volume_name_length = path_index - volume_name_index;
+
+		if( path[ path_index - 1 ] == '\\' )
+		{
+			*volume_name_length -= 1;
+		}
+		*directory_name_index = path_index;
 	}
 	return( 1 );
 }
@@ -895,7 +959,7 @@ on_error:
  */
 int libcpath_path_get_volume_name(
      const char *path,
-     size_t path_size,
+     size_t path_length,
      char **volume_name,
      size_t *volume_name_length,
      size_t *directory_name_index,
@@ -916,13 +980,24 @@ int libcpath_path_get_volume_name(
 
 		return( -1 );
 	}
-	if( path_size > (size_t) SSIZE_MAX )
+	if( path_length == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
+		 "%s: invalid path length is zero.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path size value exceeds maximum.",
+		 "%s: invalid path length value exceeds maximum.",
 		 function );
 
 		return( -1 );
@@ -964,7 +1039,7 @@ int libcpath_path_get_volume_name(
 	*volume_name_length   = 0;
 	*directory_name_index = 0;
 
-	if( path_size < 2 )
+	if( path_length < 2 )
 	{
 		return( 1 );
 	}
@@ -972,13 +1047,13 @@ int libcpath_path_get_volume_name(
 	 */
 	if( ( path[ 1 ] == ':' )
 	 && ( ( ( path[ 0 ] >= 'A' )
-	   && ( path[ 0 ] <= 'Z' ) )
-	  || ( ( path[ 0 ] >= 'a' )
-	   && ( path[ 0 ] <= 'z' ) ) ) )
+	   &&   ( path[ 0 ] <= 'Z' ) )
+	  ||  ( ( path[ 0 ] >= 'a' )
+	   &&   ( path[ 0 ] <= 'z' ) ) ) )
 	{
 		path_index = 2;
 
-		if( ( path_size >= 3 )
+		if( ( path_length >= 3 )
 		 && ( path[ 2 ] == '\\' ) )
 		{
 			path_index++;
@@ -993,11 +1068,11 @@ int libcpath_path_get_volume_name(
 	else if( ( path[ 0 ] == '\\' )
 	      && ( path[ 1 ] == '\\' ) )
 	{
-		/* Ignore the following special paths
+		/* Determine if the path is a special path
 		 * device path prefix:          \\.\
-		 * extended length prefix:      \\?\
+		 * extended-length path prefix: \\?\
 		 */
-		if( ( path_size >= 4 )
+		if( ( path_length >= 4 )
 		 && ( ( path[ 2 ] == '.' )
 		  ||  ( path[ 2 ] == '?' ) )
 		 && ( path[ 3 ] == '\\' ) )
@@ -1015,7 +1090,7 @@ int libcpath_path_get_volume_name(
 		 * \\server\share
 		 */
 		for( share_name_index = 2;
-		     share_name_index < path_size;
+		     share_name_index < path_length;
 		     share_name_index++ )
 		{
 			if( path[ share_name_index ] == '\\' )
@@ -1025,7 +1100,7 @@ int libcpath_path_get_volume_name(
 				break;
 			}
 		}
-		if( share_name_index >= path_size )
+		if( share_name_index >= path_length )
 		{
 			libcerror_error_set(
 			 error,
@@ -1037,7 +1112,7 @@ int libcpath_path_get_volume_name(
 			return( -1 );
 		}
 		for( path_index = share_name_index;
-		     path_index < path_size;
+		     path_index < path_length;
 		     path_index++ )
 		{
 			if( path[ path_index ] == '\\' )
@@ -1232,7 +1307,7 @@ int libcpath_path_get_full_path(
 		 */
 		if( libcpath_path_get_volume_name(
 		     current_directory,
-		     current_directory_size,
+		     current_directory_size - 1,
 		     &volume_name,
 		     &volume_name_length,
 		     &current_directory_name_index,
@@ -4105,9 +4180,10 @@ int libcpath_path_get_volume_name_and_path_type_wide(
      uint8_t *path_type,
      libcerror_error_t **error )
 {
-	static char *function   = "libcpath_path_get_volume_name_and_path_type_wide";
-	size_t path_index       = 0;
-	size_t share_name_index = 0;
+	static char *function    = "libcpath_path_get_volume_name_and_path_type_wide";
+	size_t path_index        = 0;
+	size_t share_name_index  = 0;
+	size_t volume_name_index = 0;
 
 	if( path == NULL )
 	{
@@ -4116,6 +4192,17 @@ int libcpath_path_get_volume_name_and_path_type_wide(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid path.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
+		 "%s: invalid path length is zero.",
 		 function );
 
 		return( -1 );
@@ -4175,103 +4262,155 @@ int libcpath_path_get_volume_name_and_path_type_wide(
 
 		return( -1 );
 	}
-	if( ( path_length == 2 )
-	 && ( path[ 1 ] == (wchar_t) '\\' ) )
+	*volume_name          = NULL;
+	*volume_name_length   = 0;
+	*directory_name_index = 0;
+	*path_type            = LIBCPATH_TYPE_RELATIVE;
+
+	/* Determine if the path is a special path
+	 * device path prefix:          \\.\
+	 * extended-length path prefix: \\?\
+	 */
+	if( ( path_length >= 4 )
+	 && ( path[ 0 ] == (wchar_t) '\\' )
+	 && ( path[ 1 ] == (wchar_t) '\\' )
+	 && ( ( path[ 2 ] == (wchar_t) '.' )
+	  ||  ( path[ 2 ] == (wchar_t) '?' ) )
+	 && ( path[ 3 ] == (wchar_t) '\\' ) )
+	{
+		if( path[ 2 ] == (wchar_t) '.' )
+		{
+			volume_name_index = 4;
+			*path_type        = LIBCPATH_TYPE_DEVICE;
+		}
+		/* Determine if the path in an extended-length UNC path
+		 * \\?\UNC\server\share
+		 */
+		else if( ( path_length >= 8 )
+		      && ( path[ 4 ] == (wchar_t) 'U' )
+		      && ( path[ 5 ] == (wchar_t) 'N' )
+		      && ( path[ 6 ] == (wchar_t) 'C' )
+		      && ( path[ 7 ] == (wchar_t) '\\' ) )
+		{
+			volume_name_index = 8;
+			*path_type        = LIBCPATH_TYPE_EXTENDED_LENGTH;
+		}
+		else
+		{
+			volume_name_index = 4;
+			*path_type        = LIBCPATH_TYPE_EXTENDED_LENGTH;
+		}
+	}
+	/* Determine if the path in an UNC path
+	 * \\server\share
+	 */
+	else if( ( path_length >= 2 )
+	      && ( path[ 0 ] == (wchar_t) '\\' )
+	      && ( path[ 1 ] == (wchar_t) '\\' ) )
+	{
+		volume_name_index = 2;
+		*path_type        = LIBCPATH_TYPE_UNC;
+	}
+	else if( path[ 0 ] == (wchar_t) '\\' )
 	{
 		*path_type = LIBCPATH_TYPE_ABSOLUTE;
 	}
-	else if( path_length >= 2 )
+	/* Check if the path contains a volume letter
+	 */
+	if( ( path_length >= 2 )
+	 && ( volume_name_index <= ( path_length - 2 ) )
+	 && ( path[ volume_name_index + 1 ] == (wchar_t) ':' )
+	 && ( ( ( path[ volume_name_index ] >= (wchar_t) 'A' )
+	   &&   ( path[ volume_name_index ] <= (wchar_t) 'Z' ) )
+	  ||  ( ( path[ volume_name_index ] >= (wchar_t) 'a' )
+	   &&   ( path[ volume_name_index ] <= (wchar_t) 'z' ) ) ) )
 	{
-		/* Check if the path starts with a volume letter
-		 */
-		if( ( path[ 1 ] == (wchar_t) ':' )
-		 && ( ( ( path[ 0 ] >= (wchar_t) 'A' )
-		   && ( path[ 0 ] <= (wchar_t) 'Z' ) )
-		  || ( ( path[ 0 ] >= (wchar_t) 'a' )
-		   && ( path[ 0 ] <= (wchar_t) 'z' ) ) ) )
-		{
-			*volume_name          = (wchar_t *) path;
-			*volume_name_length   = 2;
-			*directory_name_index = 2;
+		path_index = volume_name_index + 2;
 
-			if( ( path_length >= 3 )
-			 && ( path[ 2 ] == (wchar_t) '\\' ) )
-			{
-				*path_type             = LIBCPATH_TYPE_ABSOLUTE;
-				*directory_name_index += 1;
-			}
-		}
-		/* Check for special paths
-		 * paths with prefix: \\
-		 */
-		else if( ( path[ 0 ] == (wchar_t) '\\' )
-		      && ( path[ 1 ] == (wchar_t) '\\' ) )
+		if( ( path_index < path_length )
+		 && ( path[ path_index ] == (wchar_t) '\\' ) )
 		{
-			/* Determine if the path is a special path
-			 * device path prefix:          \\.\
-			 * extended-length path prefix: \\?\
-			 */
-			if( ( path_length >= 4 )
-			 && ( ( path[ 2 ] == (wchar_t) '.' )
-			   || ( path[ 2 ] == (wchar_t) '?' ) )
-			 && ( path[ 3 ] == (wchar_t) '\\' ) )
+			if( *path_type == LIBCPATH_TYPE_RELATIVE )
 			{
-				if( path[ 2 ] == (wchar_t) '.' )
-				{
-					*path_type = LIBCPATH_TYPE_DEVICE;
-				}
-				else
-				{
-					*path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
-				}
-				*directory_name_index = 4;
+				*path_type = LIBCPATH_TYPE_ABSOLUTE;
 			}
-			else
-			{
-				/* Determine the volume in an UNC path
-				 * \\server\share
-				 */
-				for( share_name_index = 2;
-				     share_name_index <= path_length;
-				     share_name_index++ )
-				{
-					if( path[ share_name_index ] == (wchar_t) '\\' )
-					{
-						break;
-					}
-				}
-				if( share_name_index > path_length )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: invalid path - missing share name.",
-					 function );
+			path_index++;
+		}
+		*volume_name        = (wchar_t *) &( path[ volume_name_index ] );
+		*volume_name_length = path_index - volume_name_index;
 
-					return( -1 );
-				}
-				for( path_index = share_name_index + 1;
-				     path_index <= path_length;
-				     path_index++ )
-				{
-					if( path[ path_index ] == (wchar_t) '\\' )
-					{
-						break;
-					}
-				}
-				*path_type            = LIBCPATH_TYPE_UNC;
-				*volume_name          = (wchar_t *) &( path[ 2 ] );
-				*volume_name_length   = path_index - 2;
-				*directory_name_index = path_index;
+		if( path[ path_index - 1 ] == (wchar_t) '\\' )
+		{
+			*volume_name_length -= 1;
+		}
+		*directory_name_index = path_index;
+	}
+	else if( volume_name_index == 4 )
+	{
+		for( path_index = volume_name_index;
+		     path_index < path_length;
+		     path_index++ )
+		{
+			if( path[ path_index ] == (wchar_t) '\\' )
+			{
+				path_index++;
+
+				break;
 			}
 		}
-		/* Check for absolue paths
-		 */
-		else if( path[ 0 ] == (wchar_t) '\\' )
+		*volume_name        = (wchar_t *) &( path[ 4 ] );
+		*volume_name_length = path_index - 4;
+
+		if( path[ path_index - 1 ] == (wchar_t) '\\' )
 		{
-			*path_type = LIBCPATH_TYPE_ABSOLUTE;
+			*volume_name_length -= 1;
 		}
+		*directory_name_index = path_index;
+	}
+	else if( ( volume_name_index == 2 )
+	      || ( volume_name_index == 8 ) )
+	{
+		for( share_name_index = volume_name_index;
+		     share_name_index < path_length;
+		     share_name_index++ )
+		{
+			if( path[ share_name_index ] == (wchar_t) '\\' )
+			{
+				share_name_index++;
+
+				break;
+			}
+		}
+		if( share_name_index > path_length )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid path - missing share name.",
+			 function );
+
+			return( -1 );
+		}
+		for( path_index = share_name_index;
+		     path_index < path_length;
+		     path_index++ )
+		{
+			if( path[ path_index ] == (wchar_t) '\\' )
+			{
+				path_index++;
+
+				break;
+			}
+		}
+		*volume_name        = (wchar_t *) &( path[ volume_name_index ] );
+		*volume_name_length = path_index - volume_name_index;
+
+		if( path[ path_index - 1 ] == (wchar_t) '\\' )
+		{
+			*volume_name_length -= 1;
+		}
+		*directory_name_index = path_index;
 	}
 	return( 1 );
 }
@@ -4448,7 +4587,7 @@ on_error:
  */
 int libcpath_path_get_volume_name_wide(
      const wchar_t *path,
-     size_t path_size,
+     size_t path_length,
      wchar_t **volume_name,
      size_t *volume_name_length,
      size_t *directory_name_index,
@@ -4469,13 +4608,24 @@ int libcpath_path_get_volume_name_wide(
 
 		return( -1 );
 	}
-	if( path_size > (size_t) SSIZE_MAX )
+	if( path_length == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
+		 "%s: invalid path length is zero.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path size value exceeds maximum.",
+		 "%s: invalid path length value exceeds maximum.",
 		 function );
 
 		return( -1 );
@@ -4517,7 +4667,7 @@ int libcpath_path_get_volume_name_wide(
 	*volume_name_length   = 0;
 	*directory_name_index = 0;
 
-	if( path_size < 2 )
+	if( path_length < 2 )
 	{
 		return( 1 );
 	}
@@ -4525,13 +4675,13 @@ int libcpath_path_get_volume_name_wide(
 	 */
 	if( ( path[ 1 ] == (wchar_t) ':' )
 	 && ( ( ( path[ 0 ] >= (wchar_t) 'A' )
-	   && ( path[ 0 ] <= (wchar_t) 'Z' ) )
-	  || ( ( path[ 0 ] >= (wchar_t) 'a' )
-	   && ( path[ 0 ] <= (wchar_t) 'z' ) ) ) )
+	   &&   ( path[ 0 ] <= (wchar_t) 'Z' ) )
+	  ||  ( ( path[ 0 ] >= (wchar_t) 'a' )
+	   &&   ( path[ 0 ] <= (wchar_t) 'z' ) ) ) )
 	{
 		path_index = 2;
 
-		if( ( path_size >= 3 )
+		if( ( path_length >= 3 )
 		 && ( path[ 2 ] == (wchar_t) '\\' ) )
 		{
 			path_index++;
@@ -4546,11 +4696,11 @@ int libcpath_path_get_volume_name_wide(
 	else if( ( path[ 0 ] == (wchar_t) '\\' )
 	      && ( path[ 1 ] == (wchar_t) '\\' ) )
 	{
-		/* Ignore the following special paths
+		/* Determine if the path is a special path
 		 * device path prefix:          \\.\
-		 * extended length prefix:      \\?\
+		 * extended-length path prefix: \\?\
 		 */
-		if( ( path_size >= 4 )
+		if( ( path_length >= 4 )
 		 && ( ( path[ 2 ] == (wchar_t) '.' )
 		  ||  ( path[ 2 ] == (wchar_t) '?' ) )
 		 && ( path[ 3 ] == (wchar_t) '\\' ) )
@@ -4568,7 +4718,7 @@ int libcpath_path_get_volume_name_wide(
 		 * \\server\share
 		 */
 		for( share_name_index = 2;
-		     share_name_index < path_size;
+		     share_name_index < path_length;
 		     share_name_index++ )
 		{
 			if( path[ share_name_index ] == (wchar_t) '\\' )
@@ -4578,7 +4728,7 @@ int libcpath_path_get_volume_name_wide(
 				break;
 			}
 		}
-		if( share_name_index >= path_size )
+		if( share_name_index >= path_length )
 		{
 			libcerror_error_set(
 			 error,
@@ -4590,7 +4740,7 @@ int libcpath_path_get_volume_name_wide(
 			return( -1 );
 		}
 		for( path_index = share_name_index;
-		     path_index < path_size;
+		     path_index < path_length;
 		     path_index++ )
 		{
 			if( path[ path_index ] == (wchar_t) '\\' )
@@ -4780,7 +4930,7 @@ int libcpath_path_get_full_path_wide(
 		 */
 		if( libcpath_path_get_volume_name_wide(
 		     current_directory,
-		     current_directory_size,
+		     current_directory_size - 1,
 		     &volume_name,
 		     &volume_name_length,
 		     &current_directory_name_index,
