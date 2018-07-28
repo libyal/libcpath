@@ -24,13 +24,6 @@
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled and do not want to create static
- * executables set LIBCPATH_DLL_IMPORT before including libcpath.h
- */
-#if defined( _WIN32 ) && defined( DLL_EXPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define LIBCPATH_DLL_IMPORT
-#endif
-
 #include <libcpath.h>
 
 #endif /* !defined( _CPATH_TEST_LIBCPATH_H ) */

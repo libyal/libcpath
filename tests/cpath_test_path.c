@@ -94,7 +94,7 @@ int chdir(
 }
 
 /* Custom getcwd for testing error cases
- * Returns 0 if successful or an error value otherwise
+ * Returns the current working directory if successful or NULL otherwise
  */
 char *getcwd(
        char *buf,
@@ -136,7 +136,7 @@ int cpath_test_CloseHandle(
      void )
 {
 	HANDLE library_handle = NULL;
-	BOOL result           = 0;
+	BOOL result           = FALSE;
 
 	/* Test regular cases
 	 */
@@ -150,7 +150,7 @@ int cpath_test_CloseHandle(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 1 );
+	 TRUE );
 #endif
 
 	/* Test error cases
@@ -161,7 +161,7 @@ int cpath_test_CloseHandle(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	return( 1 );
 
@@ -175,7 +175,7 @@ on_error:
 int cpath_test_SetCurrentDirectoryA(
      void )
 {
-	BOOL result = 0;
+	BOOL result = FALSE;
 
 	/* Test regular cases
 	 */
@@ -185,7 +185,7 @@ int cpath_test_SetCurrentDirectoryA(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 1 );
+	 TRUE );
 
 	/* Test error cases
 	 */
@@ -195,7 +195,7 @@ int cpath_test_SetCurrentDirectoryA(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	result = libcpath_SetCurrentDirectoryA(
 	          "bogus" );
@@ -203,7 +203,7 @@ int cpath_test_SetCurrentDirectoryA(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	return( 1 );
 
@@ -306,7 +306,7 @@ int cpath_test_GetCurrentDirectoryA(
 {
 	char buffer[ 256 ];
 
-	BOOL result = 0;
+	BOOL result = FALSE;
 
 	/* Test regular cases
 	 */
@@ -314,19 +314,19 @@ int cpath_test_GetCurrentDirectoryA(
 	          256,
 	          buffer );
 
-	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 TRUE );
 
 	result = libcpath_GetCurrentDirectoryA(
 	          0,
 	          NULL );
 
-	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 TRUE );
 
 	/* Test error cases
 	 */
@@ -3294,7 +3294,7 @@ on_error:
 int cpath_test_CreateDirectoryA(
      void )
 {
-	BOOL result = 0;
+	BOOL result = FALSE;
 
 	/* Test regular cases
 	 */
@@ -3308,7 +3308,7 @@ int cpath_test_CreateDirectoryA(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	result = libcpath_CreateDirectoryA(
 	          ".",
@@ -3317,7 +3317,7 @@ int cpath_test_CreateDirectoryA(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	return( 1 );
 
@@ -3375,7 +3375,7 @@ on_error:
 int cpath_test_SetCurrentDirectoryW(
      void )
 {
-	BOOL result = 0;
+	BOOL result = FALSE;
 
 	/* Test regular cases
 	 */
@@ -3385,7 +3385,7 @@ int cpath_test_SetCurrentDirectoryW(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 1 );
+	 TRUE );
 
 	/* Test error cases
 	 */
@@ -3395,7 +3395,7 @@ int cpath_test_SetCurrentDirectoryW(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	result = libcpath_SetCurrentDirectoryW(
 	          L"bogus" );
@@ -3403,7 +3403,7 @@ int cpath_test_SetCurrentDirectoryW(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	return( 1 );
 
@@ -3476,7 +3476,7 @@ int cpath_test_GetCurrentDirectoryW(
 {
 	wchar_t buffer[ 256 ];
 
-	BOOL result = 0;
+	BOOL result = FALSE;
 
 	/* Test regular cases
 	 */
@@ -3484,19 +3484,19 @@ int cpath_test_GetCurrentDirectoryW(
 	          256,
 	          buffer );
 
-	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 TRUE );
 
 	result = libcpath_GetCurrentDirectoryW(
 	          0,
 	          NULL );
 
-	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
+	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 TRUE );
 
 	/* Test error cases
 	 */
@@ -6429,7 +6429,7 @@ on_error:
 int cpath_test_CreateDirectoryW(
      void )
 {
-	BOOL result = 0;
+	BOOL result = FALSE;
 
 	/* Test regular cases
 	 */
@@ -6443,7 +6443,7 @@ int cpath_test_CreateDirectoryW(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	result = libcpath_CreateDirectoryW(
 	          L".",
@@ -6452,7 +6452,7 @@ int cpath_test_CreateDirectoryW(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 FALSE );
 
 	return( 1 );
 

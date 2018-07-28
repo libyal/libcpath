@@ -28,13 +28,6 @@
  */
 #if !defined( HAVE_LOCAL_LIBCPATH )
 
-/* If libtool DLL support is enabled set LIBCPATH_DLL_EXPORT
- * before including libcpath/extern.h
- */
-#if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define LIBCPATH_DLL_EXPORT
-#endif
-
 #include <libcpath/extern.h>
 
 #define LIBCPATH_EXTERN_VARIABLE	LIBCPATH_EXTERN

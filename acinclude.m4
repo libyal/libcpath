@@ -1,6 +1,6 @@
 dnl Checks for required headers and functions
 dnl
-dnl Version: 20170903
+dnl Version: 20180716
 
 dnl Function to detect if mkdir is available
 dnl Also checks how to use mkdir
@@ -95,6 +95,5 @@ AC_DEFUN([AX_LIBCPATH_CHECK_LOCAL],
     ])
 
   AX_LIBCPATH_CHECK_FUNC_MKDIR
-
   ])
 
