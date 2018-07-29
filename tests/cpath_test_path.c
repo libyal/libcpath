@@ -306,7 +306,7 @@ int cpath_test_GetCurrentDirectoryA(
 {
 	char buffer[ 256 ];
 
-	BOOL result = FALSE;
+	DWORD result = 0;
 
 	/* Test regular cases
 	 */
@@ -314,19 +314,19 @@ int cpath_test_GetCurrentDirectoryA(
 	          256,
 	          buffer );
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
 	 "result",
 	 result,
-	 TRUE );
+	 0 );
 
 	result = libcpath_GetCurrentDirectoryA(
 	          0,
 	          NULL );
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
 	 "result",
 	 result,
-	 TRUE );
+	 0 );
 
 	/* Test error cases
 	 */
@@ -793,7 +793,7 @@ int cpath_test_path_get_path_type(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "path_type",
 	 path_type,
-	 LIBCPATH_TYPE_EXTENDED_LENGTH );
+	 LIBCPATH_TYPE_EXTENDED_LENGTH_UNC );
 
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -1606,6 +1606,7 @@ int cpath_test_path_get_full_path(
 	char *path                              = NULL;
 	size_t current_working_directory_length = 0;
 	size_t current_working_directory_size   = 0;
+	size_t expected_full_path_length        = 0;
 	size_t expected_path_length             = 0;
 	size_t full_path_length                 = 0;
 	size_t full_path_size                   = 0;
@@ -1637,7 +1638,7 @@ int cpath_test_path_get_full_path(
 	current_working_directory_length = narrow_string_length(
 	                                    current_working_directory );
 
-	/* Test get full path
+	/* Test regular cases
 	 */
 #if defined( WINAPI )
 	expected_path = "\\\\?\\C:\\home\\user\\test.txt";
@@ -1672,22 +1673,14 @@ int cpath_test_path_get_full_path(
 		 "full_path",
 		 full_path );
 
-		CPATH_TEST_ASSERT_IS_NULL(
-		 "error",
-		 error );
-
-		full_path_length = narrow_string_length(
-		                    full_path );
-
-		CPATH_TEST_ASSERT_EQUAL_SIZE(
-		 "full_path_size",
-		 full_path_size,
-		 full_path_length + 1 );
-
 		CPATH_TEST_ASSERT_EQUAL_SIZE(
 		 "full_path_size",
 		 full_path_size,
 		 expected_path_length + 1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 
 #if defined( WINAPI )
 		result = narrow_string_compare_no_case(
@@ -1706,6 +1699,14 @@ int cpath_test_path_get_full_path(
 		 result,
 		 0 );
 
+		full_path_length = narrow_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 full_path_length + 1 );
+
 		memory_free(
 		 full_path );
 
@@ -1718,6 +1719,12 @@ int cpath_test_path_get_full_path(
 #endif
 	expected_path_length = narrow_string_length(
 	                        expected_path );
+
+	expected_full_path_length = current_working_directory_length + expected_path_length;
+
+#if defined( WINAPI )
+	expected_full_path_length += 4;
+#endif
 
 	for( path_index = 0;
 	     path_index < 2;
@@ -1740,38 +1747,37 @@ int cpath_test_path_get_full_path(
 		 result,
 		 1 );
 
-		CPATH_TEST_ASSERT_IS_NULL(
-		 "error",
-		 error );
-
-		full_path_length = narrow_string_length(
-		                    full_path );
-
-		/* A full path on Windows is prefixed with \\?\ while
-		 * the current working directory is not.
-		 */
-		if( ( full_path_length >= 4 ) 
-		 && ( full_path[ 0 ] == '\\' )
-		 && ( full_path[ 1 ] == '\\' )
-		 && ( full_path[ 2 ] == '?' )
-		 && ( full_path[ 3 ] == '\\' ) )
-		{
-			string_index = 4;
-		}
-		else
-		{
-			string_index = 0;
-		}
-		CPATH_TEST_ASSERT_EQUAL_SIZE(
-		 "full_path_length",
-		 full_path_length,
-		 string_index + current_working_directory_length + expected_path_length );
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
 
 		CPATH_TEST_ASSERT_EQUAL_SIZE(
 		 "full_path_size",
 		 full_path_size,
-		 full_path_length + 1 );
+		 expected_full_path_length + 1 );
 
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+#if defined( WINAPI )
+		/* A full path on Windows is prefixed with \\?\ while
+		 * the current working directory is not.
+		 */
+		result = narrow_string_compare_no_case(
+		          full_path,
+		          "\\\\?\\",
+		          4 );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		string_index = 4;
+#else
+		string_index = 0;
+#endif
 #if defined( WINAPI )
 		result = narrow_string_compare_no_case(
 		          &( full_path[ string_index ] ),
@@ -1805,12 +1811,144 @@ int cpath_test_path_get_full_path(
 		 "result",
 		 result,
 		 0 );
+
+		full_path_length = narrow_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 expected_full_path_length );
 
 		memory_free(
 		 full_path );
 
 		full_path = NULL;
 	}
+#if defined( WINAPI )
+/* TODO make changes to have test pass
+	for( path_index = 0;
+	     path_index < 2;
+	     path_index++ )
+	{
+		path = special_paths[ path_index ];
+
+		path_length = narrow_string_length(
+		               path );
+
+		result = libcpath_path_get_full_path(
+		          path,
+		          path_length,
+		          &full_path,
+		          &full_path_size,
+		          &error );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 path_length + 1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		result = narrow_string_compare_no_case(
+		          full_path,
+		          expected_path,
+		          expected_path_length );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		full_path_length = narrow_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 path_length );
+
+		memory_free(
+		 full_path );
+
+		full_path = NULL;
+	}
+*/
+	expected_path = "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt";
+
+	expected_path_length = narrow_string_length(
+	                        expected_path );
+
+	for( path_index = 0;
+	     path_index < 2;
+	     path_index++ )
+	{
+		path = unc_paths[ path_index ];
+
+		path_length = narrow_string_length(
+		               path );
+
+		result = libcpath_path_get_full_path(
+		          path,
+		          path_length,
+		          &full_path,
+		          &full_path_size,
+		          &error );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 expected_path_length + 1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		result = narrow_string_compare_no_case(
+		          full_path,
+		          expected_path,
+		          expected_path_length );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		full_path_length = narrow_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 expected_path_length );
+
+		memory_free(
+		 full_path );
+
+		full_path = NULL;
+	}
+#endif /* defined( WINAPI ) */
+
 	/* Test error cases
 	 */
 	result = libcpath_path_get_full_path(
@@ -2392,6 +2530,8 @@ int cpath_test_path_get_sanitized_filename(
 	size_t test_filename_length    = 0;
 	int result                     = 0;
 
+	/* Test regular cases
+	 */
 	/* Test libcpath_path_get_sanitized_filename without replacement characters
 	 */
 	test_filename          = "test.txt";
@@ -2682,6 +2822,8 @@ int cpath_test_path_get_sanitized_path(
 	size_t test_path_length    = 0;
 	int result                 = 0;
 
+	/* Test regular cases
+	 */
 	/* Test libcpath_path_get_sanitized_path without replacement characters
 	 */
 #if defined( WINAPI )
@@ -3336,6 +3478,9 @@ int cpath_test_path_make_directory(
 	libcerror_error_t *error = NULL;
 	int result               = 0;
 
+	/* Test regular cases
+	 */
+
 	/* Test error cases
 	 */
 	result = libcpath_path_make_directory(
@@ -3476,7 +3621,7 @@ int cpath_test_GetCurrentDirectoryW(
 {
 	wchar_t buffer[ 256 ];
 
-	BOOL result = FALSE;
+	DWORD result = 0;
 
 	/* Test regular cases
 	 */
@@ -3484,19 +3629,19 @@ int cpath_test_GetCurrentDirectoryW(
 	          256,
 	          buffer );
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
 	 "result",
 	 result,
-	 TRUE );
+	 0 );
 
 	result = libcpath_GetCurrentDirectoryW(
 	          0,
 	          NULL );
 
-	CPATH_TEST_ASSERT_EQUAL_INT(
+	CPATH_TEST_ASSERT_NOT_EQUAL_INT(
 	 "result",
 	 result,
-	 TRUE );
+	 0 );
 
 	/* Test error cases
 	 */
@@ -3928,7 +4073,7 @@ int cpath_test_path_get_path_type_wide(
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "path_type",
 	 path_type,
-	 LIBCPATH_TYPE_EXTENDED_LENGTH );
+	 LIBCPATH_TYPE_EXTENDED_LENGTH_UNC );
 
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -4741,6 +4886,7 @@ int cpath_test_path_get_full_path_wide(
 	wchar_t *path                           = NULL;
 	size_t current_working_directory_length = 0;
 	size_t current_working_directory_size   = 0;
+	size_t expected_full_path_length        = 0;
 	size_t expected_path_length             = 0;
 	size_t full_path_length                 = 0;
 	size_t full_path_size                   = 0;
@@ -4772,7 +4918,7 @@ int cpath_test_path_get_full_path_wide(
 	current_working_directory_length = wide_string_length(
 	                                    current_working_directory );
 
-	/* Test get full path
+	/* Test regular cases
 	 */
 #if defined( WINAPI )
 	expected_path = L"\\\\?\\C:\\home\\user\\test.txt";
@@ -4807,6 +4953,11 @@ int cpath_test_path_get_full_path_wide(
 		 "full_path",
 		 full_path );
 
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 expected_path_length + 1 );
+
 		CPATH_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
@@ -4818,11 +4969,6 @@ int cpath_test_path_get_full_path_wide(
 		 "full_path_size",
 		 full_path_size,
 		 full_path_length + 1 );
-
-		CPATH_TEST_ASSERT_EQUAL_SIZE(
-		 "full_path_size",
-		 full_path_size,
-		 expected_path_length + 1 );
 
 #if defined( WINAPI )
 		result = wide_string_compare_no_case(
@@ -4854,6 +5000,12 @@ int cpath_test_path_get_full_path_wide(
 	expected_path_length = wide_string_length(
 	                        expected_path );
 
+	expected_full_path_length = current_working_directory_length + expected_path_length;
+
+#if defined( WINAPI )
+	expected_full_path_length += 4;
+#endif
+
 	for( path_index = 0;
 	     path_index < 2;
 	     path_index++ )
@@ -4875,38 +5027,37 @@ int cpath_test_path_get_full_path_wide(
 		 result,
 		 1 );
 
-		CPATH_TEST_ASSERT_IS_NULL(
-		 "error",
-		 error );
-
-		full_path_length = wide_string_length(
-		                    full_path );
-
-		/* A full path on Windows is prefixed with \\?\ while
-		 * the current working directory is not.
-		 */
-		if( ( full_path_length >= 4 ) 
-		 && ( full_path[ 0 ] == (wchar_t) '\\' )
-		 && ( full_path[ 1 ] == (wchar_t) '\\' )
-		 && ( full_path[ 2 ] == (wchar_t) '?' )
-		 && ( full_path[ 3 ] == (wchar_t) '\\' ) )
-		{
-			string_index = 4;
-		}
-		else
-		{
-			string_index = 0;
-		}
-		CPATH_TEST_ASSERT_EQUAL_SIZE(
-		 "full_path_length",
-		 full_path_length,
-		 string_index + current_working_directory_length + expected_path_length );
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
 
 		CPATH_TEST_ASSERT_EQUAL_SIZE(
 		 "full_path_size",
 		 full_path_size,
-		 full_path_length + 1 );
+		 expected_full_path_length + 1 );
 
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+#if defined( WINAPI )
+		/* A full path on Windows is prefixed with \\?\ while
+		 * the current working directory is not.
+		 */
+		result = wide_string_compare_no_case(
+		          full_path,
+		          L"\\\\?\\",
+		          4 );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		string_index = 4;
+#else
+		string_index = 0;
+#endif
 #if defined( WINAPI )
 		result = wide_string_compare_no_case(
 		          &( full_path[ string_index ] ),
@@ -4940,12 +5091,144 @@ int cpath_test_path_get_full_path_wide(
 		 "result",
 		 result,
 		 0 );
+
+		full_path_length = wide_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 expected_full_path_length );
 
 		memory_free(
 		 full_path );
 
 		full_path = NULL;
 	}
+#if defined( WINAPI )
+/* TODO make changes to have test pass
+	for( path_index = 0;
+	     path_index < 2;
+	     path_index++ )
+	{
+		path = special_paths[ path_index ];
+
+		path_length = wide_string_length(
+		               path );
+
+		result = libcpath_path_get_full_path_wide(
+		          path,
+		          path_length,
+		          &full_path,
+		          &full_path_size,
+		          &error );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 path_length + 1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		result = wide_string_compare_no_case(
+		          full_path,
+		          expected_path,
+		          expected_path_length );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		full_path_length = wide_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 path_length );
+
+		memory_free(
+		 full_path );
+
+		full_path = NULL;
+	}
+*/
+	expected_path = L"\\\\?\\UNC\\172.0.0.1\\C$\\test.txt";
+
+	expected_path_length = wide_string_length(
+	                        expected_path );
+
+	for( path_index = 0;
+	     path_index < 2;
+	     path_index++ )
+	{
+		path = unc_paths[ path_index ];
+
+		path_length = wide_string_length(
+		               path );
+
+		result = libcpath_path_get_full_path_wide(
+		          path,
+		          path_length,
+		          &full_path,
+		          &full_path_size,
+		          &error );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_size",
+		 full_path_size,
+		 expected_path_length + 1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		result = wide_string_compare_no_case(
+		          full_path,
+		          expected_path,
+		          expected_path_length );
+
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 0 );
+
+		full_path_length = wide_string_length(
+		                    full_path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "full_path_length",
+		 full_path_length,
+		 expected_path_length );
+
+		memory_free(
+		 full_path );
+
+		full_path = NULL;
+	}
+#endif /* defined( WINAPI ) */
+
 	/* Test error cases
 	 */
 	result = libcpath_path_get_full_path_wide(
@@ -5527,6 +5810,8 @@ int cpath_test_path_get_sanitized_filename_wide(
 	size_t test_filename_length    = 0;
 	int result                     = 0;
 
+	/* Test regular cases
+	 */
 	/* Test libcpath_path_get_sanitized_filename without replacement characters
 	 */
 	test_filename          = L"test.txt";
@@ -5817,6 +6102,8 @@ int cpath_test_path_get_sanitized_path_wide(
 	size_t test_path_length    = 0;
 	int result                 = 0;
 
+	/* Test regular cases
+	 */
 	/* Test libcpath_path_get_sanitized_path without replacement characters
 	 */
 #if defined( WINAPI )
@@ -6470,6 +6757,9 @@ int cpath_test_path_make_directory_wide(
 {
 	libcerror_error_t *error = NULL;
 	int result               = 0;
+
+	/* Test regular cases
+	 */
 
 	/* Test error cases
 	 */

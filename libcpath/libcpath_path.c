@@ -621,7 +621,7 @@ int libcpath_path_get_path_type(
 		      && ( path[ 6 ] == 'C' )
 		      && ( path[ 7 ] == '\\' ) )
 		{
-			*path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
+			*path_type = LIBCPATH_TYPE_EXTENDED_LENGTH_UNC;
 		}
 		else
 		{
@@ -1107,7 +1107,6 @@ int libcpath_path_get_full_path(
 	size_t path_directory_name_index                                = 0;
 	size_t path_string_segment_size                                 = 0;
 	size_t safe_full_path_size                                      = 0;
-	size_t share_name_index                                         = 0;
 	size_t volume_name_length                                       = 0;
 	uint8_t path_type                                               = LIBCPATH_TYPE_RELATIVE;
 	int current_directory_number_of_segments                        = 0;
@@ -1219,6 +1218,7 @@ int libcpath_path_get_full_path(
 	 */
 	if( ( path_type != LIBCPATH_TYPE_DEVICE )
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH )
+	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 && ( path_type != LIBCPATH_TYPE_UNC ) )
 	{
 		if( libcpath_path_get_current_working_directory_by_volume(
@@ -1312,7 +1312,8 @@ int libcpath_path_get_full_path(
 	/* If the path contains an UNC path
 	 * add the size of the UNC\ prefix
 	 */
-	if( share_name_index > 0 )
+	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
+	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
 		safe_full_path_size += 4;
 	}
@@ -1675,7 +1676,8 @@ int libcpath_path_get_full_path(
 
 	/* If there is a share name the path is an UNC path
 	 */
-	if( share_name_index > 0 )
+	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
+	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
 		if( narrow_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
@@ -4185,7 +4187,7 @@ int libcpath_path_get_path_type_wide(
 		      && ( path[ 6 ] == (wchar_t) 'C' )
 		      && ( path[ 7 ] == (wchar_t) '\\' ) )
 		{
-			*path_type = LIBCPATH_TYPE_EXTENDED_LENGTH;
+			*path_type = LIBCPATH_TYPE_EXTENDED_LENGTH_UNC;
 		}
 		else
 		{
@@ -4666,7 +4668,6 @@ int libcpath_path_get_full_path_wide(
 	size_t path_directory_name_index                              = 0;
 	size_t path_string_segment_size                               = 0;
 	size_t safe_full_path_size                                    = 0;
-	size_t share_name_index                                       = 0;
 	size_t volume_name_length                                     = 0;
 	uint8_t path_type                                             = LIBCPATH_TYPE_RELATIVE;
 	int current_directory_number_of_segments                      = 0;
@@ -4778,6 +4779,7 @@ int libcpath_path_get_full_path_wide(
 	 */
 	if( ( path_type != LIBCPATH_TYPE_DEVICE )
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH )
+	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 && ( path_type != LIBCPATH_TYPE_UNC ) )
 	{
 		if( libcpath_path_get_current_working_directory_by_volume_wide(
@@ -4873,7 +4875,8 @@ int libcpath_path_get_full_path_wide(
 	/* If the path contains an UNC path
 	 * add the size of the UNC\ prefix
 	 */
-	if( share_name_index > 0 )
+	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
+	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
 		safe_full_path_size += 4;
 	}
@@ -5236,7 +5239,8 @@ int libcpath_path_get_full_path_wide(
 
 	/* If there is a share name the path is an UNC path
 	 */
-	if( share_name_index > 0 )
+	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
+	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
 		if( wide_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
