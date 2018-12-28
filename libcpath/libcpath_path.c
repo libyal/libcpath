@@ -4080,6 +4080,9 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
+	memory_free(
+	 narrow_current_working_directory );
+
 	return( 1 );
 
 on_error:

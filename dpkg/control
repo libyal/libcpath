@@ -9,6 +9,8 @@ Homepage: https://github.com/libyal/libcpath
 Package: libcpath
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libcpath1
+Replaces: libcpath1
 Suggests: libcpath-dbg
 Description: Library to support cross-platform C path functions
  libcpath is a library to support cross-platform C path functions.
