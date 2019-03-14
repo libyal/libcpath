@@ -610,7 +610,15 @@ int libcpath_path_get_path_type(
 	{
 		if( path[ 2 ] == '.' )
 		{
-			*path_type = LIBCPATH_TYPE_DEVICE;
+			if( ( path_length == 7 )
+			 && ( path[ 5 ] == ':' ) )
+			{
+				*path_type = LIBCPATH_TYPE_DRIVE;
+			}
+			else
+			{
+				*path_type = LIBCPATH_TYPE_DEVICE;
+			}
 		}
 		/* Determine if the path in an extended-length UNC path
 		 * \\?\UNC\server\share
@@ -1076,7 +1084,6 @@ on_error:
  * UNC path:			\\server\share\directory\file.txt
  *
  * TODO handle:
- * Volume device path:		\\.\C:
  * Volume file system path:	\\.\C:\
  *
  * Returns 1 if succesful or -1 on error
@@ -1217,6 +1224,7 @@ int libcpath_path_get_full_path(
 	 * do not bother to lookup the current working directory
 	 */
 	if( ( path_type != LIBCPATH_TYPE_DEVICE )
+	 && ( path_type != LIBCPATH_TYPE_DRIVE )
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH )
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 && ( path_type != LIBCPATH_TYPE_UNC ) )
@@ -1280,21 +1288,24 @@ int libcpath_path_get_full_path(
 			goto on_error;
 		}
 	}
-	if( libcsplit_narrow_string_split(
-	     &( path[ path_directory_name_index ] ),
-	     path_length - path_directory_name_index + 1,
-	     '\\',
-	     &path_split_string,
-	     error ) != 1 )
+	if( path_type != LIBCPATH_TYPE_DRIVE )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to split path.",
-		 function );
+		if( libcsplit_narrow_string_split(
+			&( path[ path_directory_name_index ] ),
+			path_length - path_directory_name_index + 1,
+			'\\',
+			&path_split_string,
+			error ) != 1 )
+		{
+			libcerror_error_set(
+			error,
+			LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			"%s: unable to split path.",
+			function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 	/* The size of the full path consists of:
 	 * the size of the prefix (\\?\ or \\.\)
@@ -1350,19 +1361,22 @@ int libcpath_path_get_full_path(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_narrow_split_string_get_number_of_segments(
-	     path_split_string,
-	     &path_number_of_segments,
-	     error ) != 1 )
+	if( path_type != LIBCPATH_TYPE_DRIVE )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of path string segments.",
-		 function );
+		if( libcsplit_narrow_split_string_get_number_of_segments(
+			path_split_string,
+			&path_number_of_segments,
+			error ) != 1 )
+		{
+			libcerror_error_set(
+			error,
+			LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			"%s: unable to retrieve number of path string segments.",
+			function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 	for( path_segment_index = 0;
 	     path_segment_index < path_number_of_segments;
@@ -4179,7 +4193,15 @@ int libcpath_path_get_path_type_wide(
 	{
 		if( path[ 2 ] == (wchar_t) '.' )
 		{
-			*path_type = LIBCPATH_TYPE_DEVICE;
+			if( ( path_length == 7 )
+			 && ( path[ 5 ] == (wchar_t) ':' ) )
+			{
+				*path_type = LIBCPATH_TYPE_DRIVE;
+			}
+			else
+			{
+				*path_type = LIBCPATH_TYPE_DEVICE;
+			}
 		}
 		/* Determine if the path in an extended-length UNC path
 		 * \\?\UNC\server\share
@@ -4781,6 +4803,7 @@ int libcpath_path_get_full_path_wide(
 	 * do not bother to lookup the current working directory
 	 */
 	if( ( path_type != LIBCPATH_TYPE_DEVICE )
+	 && ( path_type != LIBCPATH_TYPE_DRIVE )
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH )
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 && ( path_type != LIBCPATH_TYPE_UNC ) )
@@ -4844,21 +4867,24 @@ int libcpath_path_get_full_path_wide(
 			goto on_error;
 		}
 	}
-	if( libcsplit_wide_string_split(
-	     &( path[ path_directory_name_index ] ),
-	     path_length - path_directory_name_index + 1,
-	     (wchar_t) '\\',
-	     &path_split_string,
-	     error ) != 1 )
+	if( path_type != LIBCPATH_TYPE_DRIVE )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to split path.",
-		 function );
+		if( libcsplit_wide_string_split(
+			&( path[ path_directory_name_index ] ),
+			path_length - path_directory_name_index + 1,
+			(wchar_t) '\\',
+			&path_split_string,
+			error ) != 1 )
+		{
+			libcerror_error_set(
+			error,
+			LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			"%s: unable to split path.",
+			function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 	/* The size of the full path consists of:
 	 * the size of the prefix (\\?\ or \\.\)
@@ -4916,19 +4942,22 @@ int libcpath_path_get_full_path_wide(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_wide_split_string_get_number_of_segments(
-	     path_split_string,
-	     &path_number_of_segments,
-	     error ) != 1 )
+	if( path_type != LIBCPATH_TYPE_DRIVE )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of path string segments.",
-		 function );
+		if( libcsplit_wide_split_string_get_number_of_segments(
+			path_split_string,
+			&path_number_of_segments,
+			error ) != 1 )
+		{
+			libcerror_error_set(
+			error,
+			LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			"%s: unable to retrieve number of path string segments.",
+			function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 	for( path_segment_index = 0;
 	     path_segment_index < path_number_of_segments;
