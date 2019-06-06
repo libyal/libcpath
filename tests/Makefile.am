@@ -8,8 +8,7 @@ AM_CPPFLAGS = \
 	@LIBCPATH_DLL_IMPORT@
 
 TESTS = \
-	test_library.sh \
-	test_manpage.sh
+	test_library.sh
 
 check_SCRIPTS = \
 	test_library.sh \
