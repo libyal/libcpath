@@ -1,6 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libclocale", "libclocale\libclocale.vcproj", "{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcerror", "libcerror\libcerror.vcproj", "{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libuna", "libuna\libuna.vcproj", "{BC27FF34-C859-4A1A-95D6-FC89952E1910}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcsplit", "libcsplit\libcsplit.vcproj", "{B86FB73A-4ACC-42DE-9545-586D93955B06}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpath_test_error", "cpath_test_error\cpath_test_error.vcproj", "{7868169F-E57D-4BEA-B746-899AE661B510}"
 	ProjectSection(ProjectDependencies) = postProject
 		{93141F18-C140-4CA7-AC29-5145B940E1F0} = {93141F18-C140-4CA7-AC29-5145B940E1F0}
@@ -24,11 +41,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpath_test_system_string", 
 		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libclocale", "libclocale\libclocale.vcproj", "{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}"
-	ProjectSection(ProjectDependencies) = postProject
-		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcpath", "libcpath\libcpath.vcproj", "{93141F18-C140-4CA7-AC29-5145B940E1F0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
@@ -37,24 +49,28 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcpath", "libcpath\libcpa
 		{BC27FF34-C859-4A1A-95D6-FC89952E1910} = {BC27FF34-C859-4A1A-95D6-FC89952E1910}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libuna", "libuna\libuna.vcproj", "{BC27FF34-C859-4A1A-95D6-FC89952E1910}"
-	ProjectSection(ProjectDependencies) = postProject
-		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcerror", "libcerror\libcerror.vcproj", "{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcsplit", "libcsplit\libcsplit.vcproj", "{B86FB73A-4ACC-42DE-9545-586D93955B06}"
-	ProjectSection(ProjectDependencies) = postProject
-		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C} = {BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|Win32 = Release|Win32
 		VSDebug|Win32 = VSDebug|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.Release|Win32.ActiveCfg = Release|Win32
+		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.Release|Win32.Build.0 = Release|Win32
+		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
+		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.VSDebug|Win32.Build.0 = VSDebug|Win32
+		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.Release|Win32.ActiveCfg = Release|Win32
+		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.Release|Win32.Build.0 = Release|Win32
+		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
+		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.VSDebug|Win32.Build.0 = VSDebug|Win32
+		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.Release|Win32.ActiveCfg = Release|Win32
+		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.Release|Win32.Build.0 = Release|Win32
+		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
+		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.VSDebug|Win32.Build.0 = VSDebug|Win32
+		{B86FB73A-4ACC-42DE-9545-586D93955B06}.Release|Win32.ActiveCfg = Release|Win32
+		{B86FB73A-4ACC-42DE-9545-586D93955B06}.Release|Win32.Build.0 = Release|Win32
+		{B86FB73A-4ACC-42DE-9545-586D93955B06}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
+		{B86FB73A-4ACC-42DE-9545-586D93955B06}.VSDebug|Win32.Build.0 = VSDebug|Win32
 		{7868169F-E57D-4BEA-B746-899AE661B510}.Release|Win32.ActiveCfg = Release|Win32
 		{7868169F-E57D-4BEA-B746-899AE661B510}.Release|Win32.Build.0 = Release|Win32
 		{7868169F-E57D-4BEA-B746-899AE661B510}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
@@ -71,26 +87,10 @@ Global
 		{F63BB2B9-2898-4845-A657-F62B98199E81}.Release|Win32.Build.0 = Release|Win32
 		{F63BB2B9-2898-4845-A657-F62B98199E81}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
 		{F63BB2B9-2898-4845-A657-F62B98199E81}.VSDebug|Win32.Build.0 = VSDebug|Win32
-		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.Release|Win32.ActiveCfg = Release|Win32
-		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.Release|Win32.Build.0 = Release|Win32
-		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
-		{CEDF8919-00B2-4D8A-88CC-84ADB2D2FF89}.VSDebug|Win32.Build.0 = VSDebug|Win32
 		{93141F18-C140-4CA7-AC29-5145B940E1F0}.Release|Win32.ActiveCfg = Release|Win32
 		{93141F18-C140-4CA7-AC29-5145B940E1F0}.Release|Win32.Build.0 = Release|Win32
 		{93141F18-C140-4CA7-AC29-5145B940E1F0}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
 		{93141F18-C140-4CA7-AC29-5145B940E1F0}.VSDebug|Win32.Build.0 = VSDebug|Win32
-		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.Release|Win32.ActiveCfg = Release|Win32
-		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.Release|Win32.Build.0 = Release|Win32
-		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
-		{BC27FF34-C859-4A1A-95D6-FC89952E1910}.VSDebug|Win32.Build.0 = VSDebug|Win32
-		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.Release|Win32.ActiveCfg = Release|Win32
-		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.Release|Win32.Build.0 = Release|Win32
-		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
-		{BD3A95FA-A3DE-4B79-A889-A7E5ECA4B69C}.VSDebug|Win32.Build.0 = VSDebug|Win32
-		{B86FB73A-4ACC-42DE-9545-586D93955B06}.Release|Win32.ActiveCfg = Release|Win32
-		{B86FB73A-4ACC-42DE-9545-586D93955B06}.Release|Win32.Build.0 = Release|Win32
-		{B86FB73A-4ACC-42DE-9545-586D93955B06}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
-		{B86FB73A-4ACC-42DE-9545-586D93955B06}.VSDebug|Win32.Build.0 = VSDebug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
