@@ -25,7 +25,7 @@ then
 
 		make install DESTDIR=${PWD}/osx-pkg;
 		mkdir -p ${PWD}/osx-pkg/usr/share/doc/libcpath;
-		cp AUTHORS COPYING NEWS README ${PWD}/osx-pkg/usr/share/doc/libcpath;
+		cp AUTHORS COPYING COPYING.LESSER NEWS README ${PWD}/osx-pkg/usr/share/doc/libcpath;
 
 		pkgbuild --root osx-pkg --identifier com.github.libyal.libcpath --version ${VERSION} --ownership recommended ../libcpath-${VERSION}.pkg;
 	fi
