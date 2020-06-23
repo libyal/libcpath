@@ -1,5 +1,5 @@
 /*
- * Library system string functions test program
+ * System string functions test program
  *
  * Copyright (C) 2008-2020, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -1038,7 +1038,11 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBCPATH_DLL_IMPORT ) */
 }
 
