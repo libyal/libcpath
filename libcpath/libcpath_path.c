@@ -3377,7 +3377,7 @@ on_error:
 	if( *path != NULL )
 	{
 		memory_free(
-		 path );
+		 *path );
 
 		*path = NULL;
 	}
@@ -6943,7 +6943,7 @@ on_error:
 	if( *path != NULL )
 	{
 		memory_free(
-		 path );
+		 *path );
 
 		*path = NULL;
 	}
