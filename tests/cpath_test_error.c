@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #endif
 
-#include "cpath_test_libcerror.h"
 #include "cpath_test_libcpath.h"
 #include "cpath_test_macros.h"
 #include "cpath_test_unused.h"
