@@ -1,7 +1,7 @@
 /*
  * The internal libcsplit header
  *
- * Copyright (C) 2008-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2008-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -46,7 +46,7 @@
 
 #include <libcsplit.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBCSPLIT ) */
 
-#endif
+#endif /* !defined( _LIBCPATH_LIBCSPLIT_H ) */
 
