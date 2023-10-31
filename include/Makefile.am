@@ -19,9 +19,9 @@ MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
-	/bin/rm -f libcpath.h
-	/bin/rm -f libcpath/definitions.h
-	/bin/rm -f libcpath/features.h
-	/bin/rm -f libcpath/types.h
-	/bin/rm -f Makefile
+	-rm -f libcpath.h
+	-rm -f libcpath/definitions.h
+	-rm -f libcpath/features.h
+	-rm -f libcpath/types.h
+	-rm -f Makefile
 
