@@ -3450,6 +3450,13 @@ int libcpath_path_make_directory(
 	static char *function = "libcpath_path_make_directory";
 	DWORD error_code      = 0;
 
+#if defined( WINAPI ) && ( WINVER > 0x0500 )
+	size_t bytesNeeded            = 0;
+	wchar_t* directory_name_UTF16 = NULL;
+	int converted                 = 0;
+	int createdFolder             = 0;
+#endif
+
 	if( directory_name == NULL )
 	{
 		libcerror_error_set(
@@ -3466,9 +3473,67 @@ int libcpath_path_make_directory(
 	     directory_name,
 	     NULL ) == 0 )
 #else
-	if( CreateDirectoryA(
+	// Allocate buffer to store UTF-16
+	bytesNeeded = 2 * MultiByteToWideChar(
+		CP_UTF8,
+		0,
 	     directory_name,
-	     NULL ) == 0 )
+		-1,
+		NULL,
+		0);
+	if( bytesNeeded == 0 ) {
+		libcerror_error_set(
+			error,
+			LIBCERROR_ERROR_DOMAIN_CONVERSION,
+			LIBCERROR_IO_ERROR_INVALID_RESOURCE,
+			"%s: invalid UTF-8 string: %" PRIs_SYSTEM ".",
+			function,
+			directory_name);
+		return(-1);
+	}
+	directory_name_UTF16 = malloc(bytesNeeded);
+	if (directory_name_UTF16 == NULL) {
+		libcerror_error_set(
+			error,
+			LIBCERROR_ERROR_DOMAIN_MEMORY,
+			LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			"%s: failed to allocate memory for: %" PRIs_SYSTEM ".",
+			function,
+			directory_name);
+		return(-1);
+	}
+
+	// Convert filename to UTF-16
+	// Calling MultiByteToWideChar with "-1" for arg #4 ensures that the value returned by MultiByteToWideChar
+	// includes the terminating character
+	converted = MultiByteToWideChar(
+		CP_UTF8,
+		0,
+		directory_name,
+		-1,
+		directory_name_UTF16,
+		bytesNeeded);
+	if (converted == 0) {
+		libcerror_error_set(
+			error,
+			LIBCERROR_ERROR_DOMAIN_CONVERSION,
+			LIBCERROR_IO_ERROR_INVALID_RESOURCE,
+			"%s: invalid UTF-8 string: %" PRIs_SYSTEM ".",
+			function,
+			directory_name_UTF16);
+		free(directory_name_UTF16);
+		return(-1);
+	}
+
+	// Create the folder
+	createdFolder = CreateDirectoryW(
+		directory_name_UTF16,
+		NULL);
+
+	// Free buffer
+	free(directory_name_UTF16);
+
+	if (createdFolder == 0)
 #endif
 	{
 		error_code = GetLastError();
