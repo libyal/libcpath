@@ -1350,7 +1350,7 @@ int libcpath_path_get_full_path(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_narrow_split_string_get_number_of_segments(
+	if( path_split_string != NULL && libcsplit_narrow_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
@@ -2127,7 +2127,7 @@ int libcpath_path_get_full_path(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_narrow_split_string_get_number_of_segments(
+	if( path_split_string != NULL && libcsplit_narrow_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
@@ -4916,7 +4916,7 @@ int libcpath_path_get_full_path_wide(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_wide_split_string_get_number_of_segments(
+	if( path_split_string != NULL && libcsplit_wide_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
@@ -5693,7 +5693,7 @@ int libcpath_path_get_full_path_wide(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_wide_split_string_get_number_of_segments(
+	if( path_split_string != NULL && libcsplit_wide_split_string_get_number_of_segments(
 	     path_split_string,
 	     &path_number_of_segments,
 	     error ) != 1 )
