@@ -1350,174 +1350,119 @@ int libcpath_path_get_full_path(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_narrow_split_string_get_number_of_segments(
-	     path_split_string,
-	     &path_number_of_segments,
-	     error ) != 1 )
+	if( path_split_string != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of path string segments.",
-		 function );
-
-		goto on_error;
-	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
-	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
+		if( libcsplit_narrow_split_string_get_number_of_segments(
 		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		     &path_number_of_segments,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 "%s: unable to retrieve number of path string segments.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment == NULL )
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing path string segment: %d.",
-			 function,
-			 path_segment_index );
-
-			goto on_error;
-		}
-		/* If the path is .. reverse the current path by one directory
-		 */
-		if( ( path_string_segment_size == 3 )
-		 && ( path_string_segment[ 0 ] == '.' )
-		 && ( path_string_segment[ 1 ] == '.' ) )
-		{
-			if( ( current_directory_split_string != NULL )
-			 && ( last_used_path_segment_index == -1 ) )
+			if( libcsplit_narrow_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     &current_directory_string_segment,
-				     &current_directory_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
-				}
-				if( current_directory_string_segment == NULL )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= current_directory_string_segment_size;
-
-				if( libcsplit_narrow_split_string_set_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				current_directory_segment_index--;
+				goto on_error;
 			}
-			else if( last_used_path_segment_index >= 0 )
+			if( path_string_segment == NULL )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     &last_used_path_string_segment,
-				     &last_used_path_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve last used path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
+				goto on_error;
+			}
+			/* If the path is .. reverse the current path by one directory
+			 */
+			if( ( path_string_segment_size == 3 )
+			 && ( path_string_segment[ 0 ] == '.' )
+			 && ( path_string_segment[ 1 ] == '.' ) )
+			{
+				if( ( current_directory_split_string != NULL )
+				 && ( last_used_path_segment_index == -1 ) )
+				{
+					if( libcsplit_narrow_split_string_get_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     &current_directory_string_segment,
+					     &current_directory_string_segment_size,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+						 "%s: unable to retrieve current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					if( current_directory_string_segment == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= current_directory_string_segment_size;
+
+					if( libcsplit_narrow_split_string_set_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					current_directory_segment_index--;
 				}
-				if( last_used_path_string_segment == NULL )
+				else if( last_used_path_segment_index >= 0 )
 				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing last used path string string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= last_used_path_string_segment_size;
-
-				if( libcsplit_narrow_split_string_set_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Find the previous path split value that contains a name
-				 */
-				while( last_used_path_segment_index > 0 )
-				{
-					last_used_path_segment_index--;
-
 					if( libcsplit_narrow_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -1535,83 +1480,141 @@ int libcpath_path_get_full_path(
 
 						goto on_error;
 					}
-					if( last_used_path_string_segment_size != 0 )
+					if( last_used_path_string_segment == NULL )
 					{
-						break;
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing last used path string string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= last_used_path_string_segment_size;
+
+					if( libcsplit_narrow_split_string_set_segment_by_index(
+					     path_split_string,
+					     last_used_path_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set path string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Find the previous path split value that contains a name
+					 */
+					while( last_used_path_segment_index > 0 )
+					{
+						last_used_path_segment_index--;
+
+						if( libcsplit_narrow_split_string_get_segment_by_index(
+						     path_split_string,
+						     last_used_path_segment_index,
+						     &last_used_path_string_segment,
+						     &last_used_path_string_segment_size,
+						     error ) != 1 )
+						{
+							libcerror_error_set(
+							 error,
+							 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+							 "%s: unable to retrieve last used path string segment: %d.",
+							 function,
+							 last_used_path_segment_index );
+
+							goto on_error;
+						}
+						if( last_used_path_string_segment_size != 0 )
+						{
+							break;
+						}
 					}
 				}
-			}
-			if( libcsplit_narrow_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
+				if( libcsplit_narrow_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-				goto on_error;
+					goto on_error;
+				}
 			}
-		}
-		/* If the path is . ignore the entry
-		 */
-		else if( ( path_string_segment_size == 2 )
-		      && ( path_string_segment[ 0 ] == '.' ) )
-		{
-			if( libcsplit_narrow_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		/* If the path is empty ignore the entry
-		 */
-		else if( path_string_segment_size <= 1 )
-		{
-			if( libcsplit_narrow_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		else
-		{
-			/* Add the size of the directory or file name and a directory separator
-			 * Note that the size includes the end of string character
+			/* If the path is . ignore the entry
 			 */
-			safe_full_path_size += path_string_segment_size;
+			else if( ( path_string_segment_size == 2 )
+			      && ( path_string_segment[ 0 ] == '.' ) )
+			{
+				if( libcsplit_narrow_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-			last_used_path_segment_index = path_segment_index;
+					goto on_error;
+				}
+			}
+			/* If the path is empty ignore the entry
+			 */
+			else if( path_string_segment_size <= 1 )
+			{
+				if( libcsplit_narrow_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+			}
+			else
+			{
+				/* Add the size of the directory or file name and a directory separator
+				 * Note that the size includes the end of string character
+				 */
+				safe_full_path_size += path_string_segment_size;
+
+				last_used_path_segment_index = path_segment_index;
+			}
 		}
 	}
 	/* Note that the last path separator serves as the end of string
@@ -1781,77 +1784,83 @@ int libcpath_path_get_full_path(
 			}
 		}
 	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
+	if( path_split_string != NULL )
 	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
-		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
+		{
+			if( libcsplit_narrow_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
+
+				goto on_error;
+			}
+			if( path_string_segment_size != 0 )
+			{
+				if( path_string_segment == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+					 "%s: missing path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				if( narrow_string_copy(
+				     &( ( *full_path )[ full_path_index ] ),
+				     path_string_segment,
+				     path_string_segment_size - 1 ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path split value: %d in full path.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				full_path_index += path_string_segment_size - 1;
+
+				( *full_path )[ full_path_index ] = '\\';
+
+				full_path_index += 1;
+			}
+		}
+	}
+	( *full_path )[ full_path_index - 1 ] = 0;
+
+	if( path_split_string != NULL )
+	{
+		if( libcsplit_narrow_split_string_free(
+		     &path_split_string,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free path split string.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment_size != 0 )
-		{
-			if( path_string_segment == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: missing path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			if( narrow_string_copy(
-			     &( ( *full_path )[ full_path_index ] ),
-			     path_string_segment,
-			     path_string_segment_size - 1 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path split value: %d in full path.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			full_path_index += path_string_segment_size - 1;
-
-			( *full_path )[ full_path_index ] = '\\';
-
-			full_path_index += 1;
-		}
-	}
-	( *full_path )[ full_path_index - 1 ] = 0;
-
-	if( libcsplit_narrow_split_string_free(
-	     &path_split_string,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free path split string.",
-		 function );
-
-		goto on_error;
 	}
 	if( current_directory_split_string != NULL )
 	{
@@ -2127,174 +2136,119 @@ int libcpath_path_get_full_path(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_narrow_split_string_get_number_of_segments(
-	     path_split_string,
-	     &path_number_of_segments,
-	     error ) != 1 )
+	if( path_split_string != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of path string segments.",
-		 function );
-
-		goto on_error;
-	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
-	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
+		if( libcsplit_narrow_split_string_get_number_of_segments(
 		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		     &path_number_of_segments,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 "%s: unable to retrieve number of path string segments.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment == NULL )
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing path string segment: %d.",
-			 function,
-			 path_segment_index );
-
-			goto on_error;
-		}
-		/* If the path is .. reverse the current path by one directory
-		 */
-		if( ( path_string_segment_size == 3 )
-		 && ( path_string_segment[ 0 ] == '.' )
-		 && ( path_string_segment[ 1 ] == '.' ) )
-		{
-			if( ( current_directory_split_string != NULL )
-			 && ( last_used_path_segment_index == -1 ) )
+			if( libcsplit_narrow_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     &current_directory_string_segment,
-				     &current_directory_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
-				}
-				if( current_directory_string_segment == NULL )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= current_directory_string_segment_size;
-
-				if( libcsplit_narrow_split_string_set_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				current_directory_segment_index--;
+				goto on_error;
 			}
-			else if( last_used_path_segment_index >= 0 )
+			if( path_string_segment == NULL )
 			{
-				if( libcsplit_narrow_split_string_get_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     &last_used_path_string_segment,
-				     &last_used_path_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve last used path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
+				goto on_error;
+			}
+			/* If the path is .. reverse the current path by one directory
+			 */
+			if( ( path_string_segment_size == 3 )
+			 && ( path_string_segment[ 0 ] == '.' )
+			 && ( path_string_segment[ 1 ] == '.' ) )
+			{
+				if( ( current_directory_split_string != NULL )
+				 && ( last_used_path_segment_index == -1 ) )
+				{
+					if( libcsplit_narrow_split_string_get_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     &current_directory_string_segment,
+					     &current_directory_string_segment_size,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+						 "%s: unable to retrieve current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					if( current_directory_string_segment == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= current_directory_string_segment_size;
+
+					if( libcsplit_narrow_split_string_set_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					current_directory_segment_index--;
 				}
-				if( last_used_path_string_segment == NULL )
+				else if( last_used_path_segment_index >= 0 )
 				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing last used path string string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= last_used_path_string_segment_size;
-
-				if( libcsplit_narrow_split_string_set_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Find the previous path split value that contains a name
-				 */
-				while( last_used_path_segment_index > 0 )
-				{
-					last_used_path_segment_index--;
-
 					if( libcsplit_narrow_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -2312,83 +2266,141 @@ int libcpath_path_get_full_path(
 
 						goto on_error;
 					}
-					if( last_used_path_string_segment_size != 0 )
+					if( last_used_path_string_segment == NULL )
 					{
-						break;
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing last used path string string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= last_used_path_string_segment_size;
+
+					if( libcsplit_narrow_split_string_set_segment_by_index(
+					     path_split_string,
+					     last_used_path_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set path string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Find the previous path split value that contains a name
+					 */
+					while( last_used_path_segment_index > 0 )
+					{
+						last_used_path_segment_index--;
+
+						if( libcsplit_narrow_split_string_get_segment_by_index(
+						     path_split_string,
+						     last_used_path_segment_index,
+						     &last_used_path_string_segment,
+						     &last_used_path_string_segment_size,
+						     error ) != 1 )
+						{
+							libcerror_error_set(
+							 error,
+							 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+							 "%s: unable to retrieve last used path string segment: %d.",
+							 function,
+							 last_used_path_segment_index );
+
+							goto on_error;
+						}
+						if( last_used_path_string_segment_size != 0 )
+						{
+							break;
+						}
 					}
 				}
-			}
-			if( libcsplit_narrow_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
+				if( libcsplit_narrow_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-				goto on_error;
+					goto on_error;
+				}
 			}
-		}
-		/* If the path is . ignore the entry
-		 */
-		else if( ( path_string_segment_size == 2 )
-		      && ( path_string_segment[ 0 ] == '.' ) )
-		{
-			if( libcsplit_narrow_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		/* If the path is empty ignore the entry
-		 */
-		else if( path_string_segment_size <= 1 )
-		{
-			if( libcsplit_narrow_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		else
-		{
-			/* Add the size of the directory or file name and a directory separator
-			 * Note that the size includes the end of string character
+			/* If the path is . ignore the entry
 			 */
-			safe_full_path_size += path_string_segment_size;
+			else if( ( path_string_segment_size == 2 )
+			      && ( path_string_segment[ 0 ] == '.' ) )
+			{
+				if( libcsplit_narrow_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-			last_used_path_segment_index = path_segment_index;
+					goto on_error;
+				}
+			}
+			/* If the path is empty ignore the entry
+			 */
+			else if( path_string_segment_size <= 1 )
+			{
+				if( libcsplit_narrow_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+			}
+			else
+			{
+				/* Add the size of the directory or file name and a directory separator
+				 * Note that the size includes the end of string character
+				 */
+				safe_full_path_size += path_string_segment_size;
+
+				last_used_path_segment_index = path_segment_index;
+			}
 		}
 	}
 	/* Note that the last path separator serves as the end of string
@@ -2495,77 +2507,83 @@ int libcpath_path_get_full_path(
 			}
 		}
 	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
+	if( path_split_string != NULL )
 	{
-		if( libcsplit_narrow_split_string_get_segment_by_index(
-		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
+		{
+			if( libcsplit_narrow_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
+
+				goto on_error;
+			}
+			if( path_string_segment_size != 0 )
+			{
+				if( path_string_segment == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+					 "%s: missing path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				if( narrow_string_copy(
+				     &( ( *full_path )[ full_path_index ] ),
+				     path_string_segment,
+				     path_string_segment_size - 1 ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path split value: %d in full path.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				full_path_index += path_string_segment_size - 1;
+
+				( *full_path )[ full_path_index ] = '/';
+
+				full_path_index += 1;
+			}
+		}
+	}
+	( *full_path )[ full_path_index - 1 ] = 0;
+
+	if( path_split_string != NULL )
+	{
+		if( libcsplit_narrow_split_string_free(
+		     &path_split_string,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free path split string.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment_size != 0 )
-		{
-			if( path_string_segment == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: missing path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			if( narrow_string_copy(
-			     &( ( *full_path )[ full_path_index ] ),
-			     path_string_segment,
-			     path_string_segment_size - 1 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path split value: %d in full path.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			full_path_index += path_string_segment_size - 1;
-
-			( *full_path )[ full_path_index ] = '/';
-
-			full_path_index += 1;
-		}
-	}
-	( *full_path )[ full_path_index - 1 ] = 0;
-
-	if( libcsplit_narrow_split_string_free(
-	     &path_split_string,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free path split string.",
-		 function );
-
-		goto on_error;
 	}
 	if( current_directory_split_string != NULL )
 	{
@@ -4916,174 +4934,119 @@ int libcpath_path_get_full_path_wide(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_wide_split_string_get_number_of_segments(
-	     path_split_string,
-	     &path_number_of_segments,
-	     error ) != 1 )
+	if( path_split_string != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of path string segments.",
-		 function );
-
-		goto on_error;
-	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
-	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
+		if( libcsplit_wide_split_string_get_number_of_segments(
 		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		     &path_number_of_segments,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 "%s: unable to retrieve number of path string segments.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment == NULL )
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing path string segment: %d.",
-			 function,
-			 path_segment_index );
-
-			goto on_error;
-		}
-		/* If the path is .. reverse the current path by one directory
-		 */
-		if( ( path_string_segment_size == 3 )
-		 && ( path_string_segment[ 0 ] == (wchar_t) '.' )
-		 && ( path_string_segment[ 1 ] == (wchar_t) '.' ) )
-		{
-			if( ( current_directory_split_string != NULL )
-			 && ( last_used_path_segment_index == -1 ) )
+			if( libcsplit_wide_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     &current_directory_string_segment,
-				     &current_directory_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
-				}
-				if( current_directory_string_segment == NULL )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= current_directory_string_segment_size;
-
-				if( libcsplit_wide_split_string_set_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				current_directory_segment_index--;
+				goto on_error;
 			}
-			else if( last_used_path_segment_index >= 0 )
+			if( path_string_segment == NULL )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     &last_used_path_string_segment,
-				     &last_used_path_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve last used path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
+				goto on_error;
+			}
+			/* If the path is .. reverse the current path by one directory
+			 */
+			if( ( path_string_segment_size == 3 )
+			 && ( path_string_segment[ 0 ] == (wchar_t) '.' )
+			 && ( path_string_segment[ 1 ] == (wchar_t) '.' ) )
+			{
+				if( ( current_directory_split_string != NULL )
+				 && ( last_used_path_segment_index == -1 ) )
+				{
+					if( libcsplit_wide_split_string_get_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     &current_directory_string_segment,
+					     &current_directory_string_segment_size,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+						 "%s: unable to retrieve current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					if( current_directory_string_segment == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= current_directory_string_segment_size;
+
+					if( libcsplit_wide_split_string_set_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					current_directory_segment_index--;
 				}
-				if( last_used_path_string_segment == NULL )
+				else if( last_used_path_segment_index >= 0 )
 				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing last used path string string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= last_used_path_string_segment_size;
-
-				if( libcsplit_wide_split_string_set_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Find the previous path split value that contains a name
-				 */
-				while( last_used_path_segment_index > 0 )
-				{
-					last_used_path_segment_index--;
-
 					if( libcsplit_wide_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -5101,83 +5064,141 @@ int libcpath_path_get_full_path_wide(
 
 						goto on_error;
 					}
-					if( last_used_path_string_segment_size != 0 )
+					if( last_used_path_string_segment == NULL )
 					{
-						break;
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing last used path string string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= last_used_path_string_segment_size;
+
+					if( libcsplit_wide_split_string_set_segment_by_index(
+					     path_split_string,
+					     last_used_path_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set path string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Find the previous path split value that contains a name
+					 */
+					while( last_used_path_segment_index > 0 )
+					{
+						last_used_path_segment_index--;
+
+						if( libcsplit_wide_split_string_get_segment_by_index(
+						     path_split_string,
+						     last_used_path_segment_index,
+						     &last_used_path_string_segment,
+						     &last_used_path_string_segment_size,
+						     error ) != 1 )
+						{
+							libcerror_error_set(
+							 error,
+							 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+							 "%s: unable to retrieve last used path string segment: %d.",
+							 function,
+							 last_used_path_segment_index );
+
+							goto on_error;
+						}
+						if( last_used_path_string_segment_size != 0 )
+						{
+							break;
+						}
 					}
 				}
-			}
-			if( libcsplit_wide_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
+				if( libcsplit_wide_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-				goto on_error;
+					goto on_error;
+				}
 			}
-		}
-		/* If the path is . ignore the entry
-		 */
-		else if( ( path_string_segment_size == 2 )
-		      && ( path_string_segment[ 0 ] == (wchar_t) '.' ) )
-		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		/* If the path is empty ignore the entry
-		 */
-		else if( path_string_segment_size <= 1 )
-		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		else
-		{
-			/* Add the size of the directory or file name and a directory separator
-			 * Note that the size includes the end of string character
+			/* If the path is . ignore the entry
 			 */
-			safe_full_path_size += path_string_segment_size;
+			else if( ( path_string_segment_size == 2 )
+			      && ( path_string_segment[ 0 ] == (wchar_t) '.' ) )
+			{
+				if( libcsplit_wide_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-			last_used_path_segment_index = path_segment_index;
+					goto on_error;
+				}
+			}
+			/* If the path is empty ignore the entry
+			 */
+			else if( path_string_segment_size <= 1 )
+			{
+				if( libcsplit_wide_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+			}
+			else
+			{
+				/* Add the size of the directory or file name and a directory separator
+				 * Note that the size includes the end of string character
+				 */
+				safe_full_path_size += path_string_segment_size;
+
+				last_used_path_segment_index = path_segment_index;
+			}
 		}
 	}
 	/* Note that the last path separator serves as the end of string
@@ -5347,77 +5368,83 @@ int libcpath_path_get_full_path_wide(
 			}
 		}
 	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
+	if( path_split_string != NULL )
 	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
-		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
+		{
+			if( libcsplit_wide_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
+
+				goto on_error;
+			}
+			if( path_string_segment_size != 0 )
+			{
+				if( path_string_segment == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+					 "%s: missing path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				if( wide_string_copy(
+				     &( ( *full_path )[ full_path_index ] ),
+				     path_string_segment,
+				     path_string_segment_size - 1 ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path split value: %d in full path.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				full_path_index += path_string_segment_size - 1;
+
+				( *full_path )[ full_path_index ] = (wchar_t) '\\';
+
+				full_path_index += 1;
+			}
+		}
+	}
+	( *full_path )[ full_path_index - 1 ] = 0;
+
+	if( path_split_string != NULL )
+	{
+		if( libcsplit_wide_split_string_free(
+		     &path_split_string,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free path split string.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment_size != 0 )
-		{
-			if( path_string_segment == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: missing path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			if( wide_string_copy(
-			     &( ( *full_path )[ full_path_index ] ),
-			     path_string_segment,
-			     path_string_segment_size - 1 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path split value: %d in full path.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			full_path_index += path_string_segment_size - 1;
-
-			( *full_path )[ full_path_index ] = (wchar_t) '\\';
-
-			full_path_index += 1;
-		}
-	}
-	( *full_path )[ full_path_index - 1 ] = 0;
-
-	if( libcsplit_wide_split_string_free(
-	     &path_split_string,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free path split string.",
-		 function );
-
-		goto on_error;
 	}
 	if( current_directory_split_string != NULL )
 	{
@@ -5693,174 +5720,119 @@ int libcpath_path_get_full_path_wide(
 		}
 		current_directory_segment_index = current_directory_number_of_segments - 1;
 	}
-	if( libcsplit_wide_split_string_get_number_of_segments(
-	     path_split_string,
-	     &path_number_of_segments,
-	     error ) != 1 )
+	if( path_split_string != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of path string segments.",
-		 function );
-
-		goto on_error;
-	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
-	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
+		if( libcsplit_wide_split_string_get_number_of_segments(
 		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		     &path_number_of_segments,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 "%s: unable to retrieve number of path string segments.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment == NULL )
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing path string segment: %d.",
-			 function,
-			 path_segment_index );
-
-			goto on_error;
-		}
-		/* If the path is .. reverse the current path by one directory
-		 */
-		if( ( path_string_segment_size == 3 )
-		 && ( path_string_segment[ 0 ] == (wchar_t) '.' )
-		 && ( path_string_segment[ 1 ] == (wchar_t) '.' ) )
-		{
-			if( ( current_directory_split_string != NULL )
-			 && ( last_used_path_segment_index == -1 ) )
+			if( libcsplit_wide_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     &current_directory_string_segment,
-				     &current_directory_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
-				}
-				if( current_directory_string_segment == NULL )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= current_directory_string_segment_size;
-
-				if( libcsplit_wide_split_string_set_segment_by_index(
-				     current_directory_split_string,
-				     current_directory_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set current working directory string segment: %d.",
-					 function,
-					 current_directory_segment_index );
-
-					goto on_error;
-				}
-				current_directory_segment_index--;
+				goto on_error;
 			}
-			else if( last_used_path_segment_index >= 0 )
+			if( path_string_segment == NULL )
 			{
-				if( libcsplit_wide_split_string_get_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     &last_used_path_string_segment,
-				     &last_used_path_string_segment_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve last used path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing path string segment: %d.",
+				 function,
+				 path_segment_index );
 
-					goto on_error;
+				goto on_error;
+			}
+			/* If the path is .. reverse the current path by one directory
+			 */
+			if( ( path_string_segment_size == 3 )
+			 && ( path_string_segment[ 0 ] == (wchar_t) '.' )
+			 && ( path_string_segment[ 1 ] == (wchar_t) '.' ) )
+			{
+				if( ( current_directory_split_string != NULL )
+				 && ( last_used_path_segment_index == -1 ) )
+				{
+					if( libcsplit_wide_split_string_get_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     &current_directory_string_segment,
+					     &current_directory_string_segment_size,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+						 "%s: unable to retrieve current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					if( current_directory_string_segment == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= current_directory_string_segment_size;
+
+					if( libcsplit_wide_split_string_set_segment_by_index(
+					     current_directory_split_string,
+					     current_directory_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set current working directory string segment: %d.",
+						 function,
+						 current_directory_segment_index );
+
+						goto on_error;
+					}
+					current_directory_segment_index--;
 				}
-				if( last_used_path_string_segment == NULL )
+				else if( last_used_path_segment_index >= 0 )
 				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-					 "%s: missing last used path string string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Remove the size of the parent directory name and a directory separator
-				 * Note that the size includes the end of string character
-				 */
-				safe_full_path_size -= last_used_path_string_segment_size;
-
-				if( libcsplit_wide_split_string_set_segment_by_index(
-				     path_split_string,
-				     last_used_path_segment_index,
-				     NULL,
-				     0,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-					 "%s: unable to set path string segment: %d.",
-					 function,
-					 last_used_path_segment_index );
-
-					goto on_error;
-				}
-				/* Find the previous path split value that contains a name
-				 */
-				while( last_used_path_segment_index > 0 )
-				{
-					last_used_path_segment_index--;
-
 					if( libcsplit_wide_split_string_get_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -5878,83 +5850,141 @@ int libcpath_path_get_full_path_wide(
 
 						goto on_error;
 					}
-					if( last_used_path_string_segment_size != 0 )
+					if( last_used_path_string_segment == NULL )
 					{
-						break;
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+						 "%s: missing last used path string string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Remove the size of the parent directory name and a directory separator
+					 * Note that the size includes the end of string character
+					 */
+					safe_full_path_size -= last_used_path_string_segment_size;
+
+					if( libcsplit_wide_split_string_set_segment_by_index(
+					     path_split_string,
+					     last_used_path_segment_index,
+					     NULL,
+					     0,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+						 "%s: unable to set path string segment: %d.",
+						 function,
+						 last_used_path_segment_index );
+
+						goto on_error;
+					}
+					/* Find the previous path split value that contains a name
+					 */
+					while( last_used_path_segment_index > 0 )
+					{
+						last_used_path_segment_index--;
+
+						if( libcsplit_wide_split_string_get_segment_by_index(
+						     path_split_string,
+						     last_used_path_segment_index,
+						     &last_used_path_string_segment,
+						     &last_used_path_string_segment_size,
+						     error ) != 1 )
+						{
+							libcerror_error_set(
+							 error,
+							 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+							 "%s: unable to retrieve last used path string segment: %d.",
+							 function,
+							 last_used_path_segment_index );
+
+							goto on_error;
+						}
+						if( last_used_path_string_segment_size != 0 )
+						{
+							break;
+						}
 					}
 				}
-			}
-			if( libcsplit_wide_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
+				if( libcsplit_wide_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-				goto on_error;
+					goto on_error;
+				}
 			}
-		}
-		/* If the path is . ignore the entry
-		 */
-		else if( ( path_string_segment_size == 2 )
-		      && ( path_string_segment[ 0 ] == (wchar_t) '.' ) )
-		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		/* If the path is empty ignore the entry
-		 */
-		else if( path_string_segment_size <= 1 )
-		{
-			if( libcsplit_wide_split_string_set_segment_by_index(
-			     path_split_string,
-			     path_segment_index,
-			     NULL,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-		}
-		else
-		{
-			/* Add the size of the directory or file name and a directory separator
-			 * Note that the size includes the end of string character
+			/* If the path is . ignore the entry
 			 */
-			safe_full_path_size += path_string_segment_size;
+			else if( ( path_string_segment_size == 2 )
+			      && ( path_string_segment[ 0 ] == (wchar_t) '.' ) )
+			{
+				if( libcsplit_wide_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
 
-			last_used_path_segment_index = path_segment_index;
+					goto on_error;
+				}
+			}
+			/* If the path is empty ignore the entry
+			 */
+			else if( path_string_segment_size <= 1 )
+			{
+				if( libcsplit_wide_split_string_set_segment_by_index(
+				     path_split_string,
+				     path_segment_index,
+				     NULL,
+				     0,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+			}
+			else
+			{
+				/* Add the size of the directory or file name and a directory separator
+				 * Note that the size includes the end of string character
+				 */
+				safe_full_path_size += path_string_segment_size;
+
+				last_used_path_segment_index = path_segment_index;
+			}
 		}
 	}
 	/* Note that the last path separator serves as the end of string
@@ -6061,77 +6091,83 @@ int libcpath_path_get_full_path_wide(
 			}
 		}
 	}
-	for( path_segment_index = 0;
-	     path_segment_index < path_number_of_segments;
-	     path_segment_index++ )
+	if( path_split_string != NULL )
 	{
-		if( libcsplit_wide_split_string_get_segment_by_index(
-		     path_split_string,
-		     path_segment_index,
-		     &path_string_segment,
-		     &path_string_segment_size,
+		for( path_segment_index = 0;
+		     path_segment_index < path_number_of_segments;
+		     path_segment_index++ )
+		{
+			if( libcsplit_wide_split_string_get_segment_by_index(
+			     path_split_string,
+			     path_segment_index,
+			     &path_string_segment,
+			     &path_string_segment_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve path string segment: %d.",
+				 function,
+				 path_segment_index );
+
+				goto on_error;
+			}
+			if( path_string_segment_size != 0 )
+			{
+				if( path_string_segment == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+					 "%s: missing path string segment: %d.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				if( wide_string_copy(
+				     &( ( *full_path )[ full_path_index ] ),
+				     path_string_segment,
+				     path_string_segment_size - 1 ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set path split value: %d in full path.",
+					 function,
+					 path_segment_index );
+
+					goto on_error;
+				}
+				full_path_index += path_string_segment_size - 1;
+
+				( *full_path )[ full_path_index ] = (wchar_t) '/';
+
+				full_path_index += 1;
+			}
+		}
+	}
+	( *full_path )[ full_path_index - 1 ] = 0;
+
+	if( path_split_string != NULL )
+	{
+		if( libcsplit_wide_split_string_free(
+		     &path_split_string,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve path string segment: %d.",
-			 function,
-			 path_segment_index );
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free path split string.",
+			 function );
 
 			goto on_error;
 		}
-		if( path_string_segment_size != 0 )
-		{
-			if( path_string_segment == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: missing path string segment: %d.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			if( wide_string_copy(
-			     &( ( *full_path )[ full_path_index ] ),
-			     path_string_segment,
-			     path_string_segment_size - 1 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set path split value: %d in full path.",
-				 function,
-				 path_segment_index );
-
-				goto on_error;
-			}
-			full_path_index += path_string_segment_size - 1;
-
-			( *full_path )[ full_path_index ] = (wchar_t) '/';
-
-			full_path_index += 1;
-		}
-	}
-	( *full_path )[ full_path_index - 1 ] = 0;
-
-	if( libcsplit_wide_split_string_free(
-	     &path_split_string,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free path split string.",
-		 function );
-
-		goto on_error;
 	}
 	if( current_directory_split_string != NULL )
 	{

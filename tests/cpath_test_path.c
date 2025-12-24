@@ -1826,7 +1826,6 @@ int cpath_test_path_get_full_path(
 		full_path = NULL;
 	}
 #if defined( WINAPI )
-/* TODO make changes to have test pass
 	for( path_index = 0;
 	     path_index < 2;
 	     path_index++ )
@@ -1863,8 +1862,8 @@ int cpath_test_path_get_full_path(
 
 		result = narrow_string_compare_no_case(
 		          full_path,
-		          expected_path,
-		          expected_path_length );
+		          path,
+		          path_length );
 
 		CPATH_TEST_ASSERT_EQUAL_INT(
 		 "result",
@@ -1884,7 +1883,6 @@ int cpath_test_path_get_full_path(
 
 		full_path = NULL;
 	}
-*/
 	expected_path = "\\\\?\\UNC\\172.0.0.1\\C$\\test.txt";
 
 	expected_path_length = narrow_string_length(
@@ -5106,7 +5104,6 @@ int cpath_test_path_get_full_path_wide(
 		full_path = NULL;
 	}
 #if defined( WINAPI )
-/* TODO make changes to have test pass
 	for( path_index = 0;
 	     path_index < 2;
 	     path_index++ )
@@ -5143,8 +5140,8 @@ int cpath_test_path_get_full_path_wide(
 
 		result = wide_string_compare_no_case(
 		          full_path,
-		          expected_path,
-		          expected_path_length );
+		          path,
+		          path_length );
 
 		CPATH_TEST_ASSERT_EQUAL_INT(
 		 "result",
@@ -5164,7 +5161,6 @@ int cpath_test_path_get_full_path_wide(
 
 		full_path = NULL;
 	}
-*/
 	expected_path = L"\\\\?\\UNC\\172.0.0.1\\C$\\test.txt";
 
 	expected_path_length = wide_string_length(
