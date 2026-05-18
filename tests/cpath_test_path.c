@@ -1615,6 +1615,12 @@ int cpath_test_path_get_full_path(
 	int result                              = 0;
 	int string_index                        = 0;
 
+#if defined( WINAPI )
+	int number_of_absolute_paths            = 6;
+#else
+	int number_of_absolute_paths            = 4;
+#endif
+
 	/* Initialize test
 	 */
 	result = libcpath_path_get_current_working_directory(
@@ -1649,7 +1655,7 @@ int cpath_test_path_get_full_path(
 	                        expected_path );
 
 	for( path_index = 0;
-	     path_index < 4;
+	     path_index < number_of_absolute_paths;
 	     path_index++ )
 	{
 		path = absolute_paths[ path_index ];
@@ -1683,10 +1689,22 @@ int cpath_test_path_get_full_path(
 		 error );
 
 #if defined( WINAPI )
-		result = narrow_string_compare_no_case(
-		          full_path,
-		          expected_path,
-		          expected_path_length );
+		/* Skip the drive letter in the comparison, given it is determined runtime */
+
+		if( ( full_path[ 0 ] != '\\' )
+		 || ( full_path[ 1 ] != '\\' )
+		 || ( full_path[ 2 ] != '?' )
+		 || ( full_path[ 3 ] != '\\' ) )
+		{
+			result = 1;
+		}
+		else
+		{
+			result = narrow_string_compare_no_case(
+			          &( full_path[ 5 ] ),
+			          &( expected_path[ 5 ] ),
+			          expected_path_length - 5 );
+		}
 #else
 		result = narrow_string_compare(
 		          full_path,
@@ -4893,6 +4911,12 @@ int cpath_test_path_get_full_path_wide(
 	int result                              = 0;
 	int string_index                        = 0;
 
+#if defined( WINAPI )
+	int number_of_absolute_paths            = 6;
+#else
+	int number_of_absolute_paths            = 4;
+#endif
+
 	/* Initialize test
 	 */
 	result = libcpath_path_get_current_working_directory_wide(
@@ -4927,7 +4951,7 @@ int cpath_test_path_get_full_path_wide(
 	                        expected_path );
 
 	for( path_index = 0;
-	     path_index < 4;
+	     path_index < number_of_absolute_paths;
 	     path_index++ )
 	{
 		path = absolute_paths[ path_index ];
@@ -4969,10 +4993,22 @@ int cpath_test_path_get_full_path_wide(
 		 full_path_length + 1 );
 
 #if defined( WINAPI )
-		result = wide_string_compare_no_case(
-		          full_path,
-		          expected_path,
-		          expected_path_length );
+		/* Skip the drive letter in the comparison, given it is determined runtime */
+
+		if( ( full_path[ 0 ] != (wchar_t) '\\' )
+		 || ( full_path[ 1 ] != (wchar_t) '\\' )
+		 || ( full_path[ 2 ] != (wchar_t) '?' )
+		 || ( full_path[ 3 ] != (wchar_t) '\\' ) )
+		{
+			result = 1;
+		}
+		else
+		{
+			result = wide_string_compare_no_case(
+			          &( full_path[ 5 ] ),
+			          &( expected_path[ 5 ] ),
+			          expected_path_length - 5 );
+		}
 #else
 		result = wide_string_compare(
 		          full_path,

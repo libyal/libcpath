@@ -1296,27 +1296,25 @@ int libcpath_path_get_full_path(
 
 		goto on_error;
 	}
-	/* The size of the full path consists of:
-	 * the size of the prefix (\\?\ or \\.\)
+	/* The full path prefix consists of "\\?\" or "\\.\"
 	 */
-	safe_full_path_size = 4;
+	full_path_prefix_length = 4;
 
-	/* If the path contains a volume name
-	 * the length of the volume name
-	 * a directory separator
-	 */
 	if( volume_name != NULL )
 	{
-		safe_full_path_size += volume_name_length + 1;
+		/* Add the volume name and a directory separator
+		 */
+		full_path_prefix_length += volume_name_length + 1;
 	}
-	/* If the path contains an UNC path
-	 * add the size of the UNC\ prefix
-	 */
 	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
-		safe_full_path_size += 4;
+		/* Add the UNC\ prefix
+		 */
+		full_path_prefix_length += 4;
 	}
+	safe_full_path_size = 0;
+
 	/* If the path is relative
 	 * add the size of the current working directory
 	 * a directory separator, if necessary
@@ -1440,8 +1438,14 @@ int libcpath_path_get_full_path(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					safe_full_path_size -= current_directory_string_segment_size;
-
+					if( current_directory_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= current_directory_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_narrow_split_string_set_segment_by_index(
 					     current_directory_split_string,
 					     current_directory_segment_index,
@@ -1495,8 +1499,14 @@ int libcpath_path_get_full_path(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					safe_full_path_size -= last_used_path_string_segment_size;
-
+					if( current_directory_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= last_used_path_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_narrow_split_string_set_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -1617,6 +1627,8 @@ int libcpath_path_get_full_path(
 			}
 		}
 	}
+	safe_full_path_size += full_path_prefix_length;
+
 	/* Note that the last path separator serves as the end of string
 	 */
 	full_path_index = 0;
@@ -1661,6 +1673,18 @@ int libcpath_path_get_full_path(
 		full_path_prefix        = "\\\\?\\";
 		full_path_prefix_length = 4;
 	}
+	if( ( safe_full_path_size < full_path_prefix_length )
+	 || ( full_path_index > ( safe_full_path_size - full_path_prefix_length ) ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid full path size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	if( narrow_string_copy(
 	     &( ( *full_path )[ full_path_index ] ),
 	     full_path_prefix,
@@ -1682,6 +1706,18 @@ int libcpath_path_get_full_path(
 	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
+		if( ( safe_full_path_size < 4 )
+		 || ( full_path_index > ( safe_full_path_size - 4 ) ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid full path size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 		if( narrow_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     "UNC\\",
@@ -1700,6 +1736,18 @@ int libcpath_path_get_full_path(
 	}
 	if( volume_name != NULL )
 	{
+		if( ( safe_full_path_size < volume_name_length )
+		 || ( full_path_index > ( safe_full_path_size - volume_name_length ) ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid full path size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 		if( narrow_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     volume_name,
@@ -1761,6 +1809,18 @@ int libcpath_path_get_full_path(
 
 					goto on_error;
 				}
+				if( ( safe_full_path_size < ( current_directory_string_segment_size - 1 ) )
+				 || ( full_path_index > ( safe_full_path_size - ( current_directory_string_segment_size - 1 ) ) ) )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid full path size value out of bounds.",
+					 function );
+
+					goto on_error;
+				}
 				if( narrow_string_copy(
 				     &( ( *full_path )[ full_path_index ] ),
 				     current_directory_string_segment,
@@ -1818,6 +1878,18 @@ int libcpath_path_get_full_path(
 					 "%s: missing path string segment: %d.",
 					 function,
 					 path_segment_index );
+
+					goto on_error;
+				}
+				if( ( safe_full_path_size < ( path_string_segment_size - 1 ) )
+				 || ( full_path_index > ( safe_full_path_size - ( path_string_segment_size - 1 ) ) ) )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid full path size value out of bounds.",
+					 function );
 
 					goto on_error;
 				}
@@ -4878,29 +4950,25 @@ int libcpath_path_get_full_path_wide(
 
 		goto on_error;
 	}
-	/* The size of the full path consists of:
-	 * the size of the prefix (\\?\ or \\.\)
-	 * the length of the volume name
-	 * a directory separator
+	/* The full path prefix consists of "\\?\" or "\\.\"
 	 */
-	safe_full_path_size = 4;
+	full_path_prefix_length = 4;
 
-	/* If the path contains a volume name
-	 * the length of the volume name
-	 * a directory separator
-	 */
 	if( volume_name != NULL )
 	{
-		safe_full_path_size += volume_name_length + 1;
+		/* Add the volume name and a directory separator
+		 */
+		full_path_prefix_length += volume_name_length + 1;
 	}
-	/* If the path contains an UNC path
-	 * add the size of the UNC\ prefix
-	 */
 	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
-		safe_full_path_size += 4;
+		/* Add the UNC\ prefix
+		 */
+		full_path_prefix_length += 4;
 	}
+	safe_full_path_size = 0;
+
 	/* If the path is relative
 	 * add the size of the current working directory
 	 * a directory separator, if necessary
@@ -5024,8 +5092,14 @@ int libcpath_path_get_full_path_wide(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					safe_full_path_size -= current_directory_string_segment_size;
-
+					if( current_directory_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= current_directory_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_wide_split_string_set_segment_by_index(
 					     current_directory_split_string,
 					     current_directory_segment_index,
@@ -5079,8 +5153,14 @@ int libcpath_path_get_full_path_wide(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					safe_full_path_size -= last_used_path_string_segment_size;
-
+					if( last_used_path_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= last_used_path_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_wide_split_string_set_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -5201,6 +5281,8 @@ int libcpath_path_get_full_path_wide(
 			}
 		}
 	}
+	safe_full_path_size += full_path_prefix_length;
+
 	/* Note that the last path separator serves as the end of string
 	 */
 	full_path_index = 0;
@@ -5245,6 +5327,18 @@ int libcpath_path_get_full_path_wide(
 		full_path_prefix        = L"\\\\?\\";
 		full_path_prefix_length = 4;
 	}
+	if( ( safe_full_path_size < full_path_prefix_length )
+	 || ( full_path_index > ( safe_full_path_size - full_path_prefix_length ) ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid full path size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	if( wide_string_copy(
 	     &( ( *full_path )[ full_path_index ] ),
 	     full_path_prefix,
@@ -5266,6 +5360,18 @@ int libcpath_path_get_full_path_wide(
 	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 || ( path_type == LIBCPATH_TYPE_UNC ) )
 	{
+		if( ( safe_full_path_size < 4 )
+		 || ( full_path_index > ( safe_full_path_size - 4 ) ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid full path size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 		if( wide_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     L"UNC\\",
@@ -5284,6 +5390,18 @@ int libcpath_path_get_full_path_wide(
 	}
 	if( volume_name != NULL )
 	{
+		if( ( safe_full_path_size < volume_name_length )
+		 || ( full_path_index > ( safe_full_path_size - volume_name_length ) ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid full path size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 		if( wide_string_copy(
 		     &( ( *full_path )[ full_path_index ] ),
 		     volume_name,
@@ -5345,6 +5463,18 @@ int libcpath_path_get_full_path_wide(
 
 					goto on_error;
 				}
+				if( ( safe_full_path_size < ( current_directory_string_segment_size - 1 ) )
+				 || ( full_path_index > ( safe_full_path_size - ( current_directory_string_segment_size - 1 ) ) ) )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid full path size value out of bounds.",
+					 function );
+
+					goto on_error;
+				}
 				if( wide_string_copy(
 				     &( ( *full_path )[ full_path_index ] ),
 				     current_directory_string_segment,
@@ -5402,6 +5532,18 @@ int libcpath_path_get_full_path_wide(
 					 "%s: missing path string segment: %d.",
 					 function,
 					 path_segment_index );
+
+					goto on_error;
+				}
+				if( ( safe_full_path_size < ( path_string_segment_size - 1 ) )
+				 || ( full_path_index > ( safe_full_path_size - ( path_string_segment_size - 1 ) ) ) )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid full path size value out of bounds.",
+					 function );
 
 					goto on_error;
 				}
