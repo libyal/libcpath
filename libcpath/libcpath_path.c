@@ -295,8 +295,10 @@ int libcpath_path_get_current_working_directory(
      libcerror_error_t **error )
 {
 	static char *function                     = "libcpath_path_get_current_working_directory";
-	DWORD safe_current_working_directory_size = 0;
+	char *safe_current_working_directory      = NULL;
 	DWORD error_code                          = 0;
+	DWORD result                              = 0;
+	DWORD safe_current_working_directory_size = 0;
 
 	if( current_working_directory == NULL )
 	{
@@ -362,12 +364,10 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
-	*current_working_directory_size = (size_t) safe_current_working_directory_size;
+	safe_current_working_directory = narrow_string_allocate(
+	                                  safe_current_working_directory_size );
 
-	*current_working_directory = narrow_string_allocate(
-	                              *current_working_directory_size );
-
-	if( *current_working_directory == NULL )
+	if( safe_current_working_directory == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -379,9 +379,9 @@ int libcpath_path_get_current_working_directory(
 		goto on_error;
 	}
 	if( memory_set(
-	     *current_working_directory,
+	     safe_current_working_directory,
 	     0,
-	     sizeof( char ) * *current_working_directory_size ) == NULL )
+	     sizeof( char ) * safe_current_working_directory_size ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -393,14 +393,18 @@ int libcpath_path_get_current_working_directory(
 		goto on_error;
 	}
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
-	if( libcpath_GetCurrentDirectoryA(
-	     safe_current_working_directory_size,
-	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+	result = libcpath_GetCurrentDirectoryA(
+	          safe_current_working_directory_size,
+	          safe_current_working_directory );
 #else
-	if( GetCurrentDirectoryA(
-	     safe_current_working_directory_size,
-	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+	result = GetCurrentDirectoryA(
+	          safe_current_working_directory_size,
+	          safe_current_working_directory );
 #endif
+	/* Note that safe_current_working_directory_size can be larger than result
+	 */
+	if( ( result == 0 )
+	 || ( result > safe_current_working_directory_size ) )
 	{
 		error_code = GetLastError();
 
@@ -414,18 +418,17 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
+	*current_working_directory      = safe_current_working_directory;
+	*current_working_directory_size = (size_t) safe_current_working_directory_size;
+
 	return( 1 );
 
 on_error:
-	if( *current_working_directory != NULL )
+	if( safe_current_working_directory != NULL )
 	{
 		memory_free(
-		 *current_working_directory );
-
-		*current_working_directory = NULL;
+		 safe_current_working_directory );
 	}
-	*current_working_directory_size = 0;
-
 	return( -1 );
 }
 
@@ -440,7 +443,9 @@ int libcpath_path_get_current_working_directory(
      size_t *current_working_directory_size,
      libcerror_error_t **error )
 {
-	static char *function = "libcpath_path_get_current_working_directory";
+	static char *function                      = "libcpath_path_get_current_working_directory";
+	char *safe_current_working_directory       = NULL;
+	size_t safe_current_working_directory_size = 0;
 
 	if( current_working_directory == NULL )
 	{
@@ -475,12 +480,12 @@ int libcpath_path_get_current_working_directory(
 
 		return( -1 );
 	}
-	*current_working_directory_size = (size_t) PATH_MAX;
+	safe_current_working_directory_size = PATH_MAX;
 
-	*current_working_directory = narrow_string_allocate(
-	                              *current_working_directory_size );
+	safe_current_working_directory = narrow_string_allocate(
+	                                  safe_current_working_directory_size );
 
-	if( *current_working_directory == NULL )
+	if( safe_current_working_directory == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -492,9 +497,9 @@ int libcpath_path_get_current_working_directory(
 		goto on_error;
 	}
 	if( memory_set(
-	     *current_working_directory,
+	     safe_current_working_directory,
 	     0,
-	     sizeof( char ) * *current_working_directory_size ) == NULL )
+	     sizeof( char ) * safe_current_working_directory_size ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -506,8 +511,8 @@ int libcpath_path_get_current_working_directory(
 		goto on_error;
 	}
 	if( getcwd(
-	     *current_working_directory,
-	     *current_working_directory_size ) == NULL )
+	     safe_current_working_directory,
+	     safe_current_working_directory_size ) == NULL )
 	{
 		libcerror_system_set_error(
 		 error,
@@ -519,24 +524,73 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
+	*current_working_directory      = safe_current_working_directory;
+	*current_working_directory_size = safe_current_working_directory_size;
+
 	return( 1 );
 
 on_error:
-	if( *current_working_directory != NULL )
+	if( safe_current_working_directory != NULL )
 	{
 		memory_free(
-		 *current_working_directory );
-
-		*current_working_directory = NULL;
+		 safe_current_working_directory );
 	}
-	*current_working_directory_size = 0;
-
 	return( -1 );
 }
 
 #else
 #error Missing get current working directory function
 #endif
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of GetFullPathNameA
+ * Returns the number of characters in the current directory string or 0 on error
+ */
+DWORD libcpath_GetFullPathNameA(
+       LPCSTR filename,
+       DWORD  buffer_size,
+       LPSTR  buffer,
+       LPSTR  *file_part )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	DWORD result           = 0;
+
+	library_handle = LoadLibrary(
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( 0 );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "GetFullPathNameA" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  filename,
+			  buffer_size,
+			  buffer,
+			  file_part );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcpath_CloseHandle(
+		 library_handle );
+
+		return( 0 );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
 
 #if defined( WINAPI )
 
@@ -562,24 +616,14 @@ int libcpath_path_get_path_type(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -681,24 +725,14 @@ int libcpath_path_get_volume_name(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -886,12 +920,35 @@ int libcpath_path_get_current_working_directory_by_volume(
      size_t *current_working_directory_size,
      libcerror_error_t **error )
 {
-	char *change_volume_name                     = NULL;
-	char *current_volume_working_directory       = NULL;
-	static char *function                        = "libcpath_path_get_current_working_directory_by_volume";
-	size_t current_volume_working_directory_size = 0;
-	int result                                   = 1;
+	static char *function                     = "libcpath_path_get_current_working_directory_by_volume";
+	char *safe_current_working_directory      = NULL;
+	DWORD error_code                          = 0;
+	DWORD result                              = 0;
+	DWORD safe_current_working_directory_size = 0;
 
+	if( volume_name == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume name.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( volume_name_length == 0 )
+	 || ( volume_name_length > (size_t) ( SSIZE_MAX - 1 ) ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid volume name length value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( current_working_directory == NULL )
 	{
 		libcerror_error_set(
@@ -899,6 +956,17 @@ int libcpath_path_get_current_working_directory_by_volume(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid current working directory.",
+		 function );
+
+		return( -1 );
+	}
+	if( *current_working_directory != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid current working directory value already set.",
 		 function );
 
 		return( -1 );
@@ -914,143 +982,110 @@ int libcpath_path_get_current_working_directory_by_volume(
 
 		return( -1 );
 	}
-	/* If the path contains a volume name switch to that
-	 * volume to determine the current directory
-	 */
-	if( volume_name != NULL )
-	{
-		if( volume_name_length > (size_t) ( SSIZE_MAX - 1 ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-			 "%s: invalid volume name length value exceeds maximum.",
-			 function );
-
-			goto on_error;
-		}
-		if( libcpath_path_get_current_working_directory(
-		     &current_volume_working_directory,
-		     &current_volume_working_directory_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve current volume working directory.",
-			 function );
-
-			goto on_error;
-		}
-		change_volume_name = narrow_string_allocate(
-		                      volume_name_length + 1 );
-
-		if( change_volume_name == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create change volume name.",
-			 function );
-
-			goto on_error;
-		}
-		if( narrow_string_copy(
-		     change_volume_name,
-		     volume_name,
-		     volume_name_length ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to set change volume name.",
-			 function );
-
-			goto on_error;
-		}
-		change_volume_name[ volume_name_length ] = 0;
-
-		if( libcpath_path_change_directory(
-		     change_volume_name,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to change current working directory.",
-			 function );
-
-			goto on_error;
-		}
-		memory_free(
-		 change_volume_name );
-
-		change_volume_name = NULL;
-	}
-	if( libcpath_path_get_current_working_directory(
-	     current_working_directory,
-	     current_working_directory_size,
-	     error ) != 1 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	safe_current_working_directory_size = libcpath_GetFullPathNameA(
+	                                       volume_name,
+	                                       0,
+	                                       NULL,
+	                                       NULL );
+#else
+	safe_current_working_directory_size = GetFullPathNameA(
+	                                       volume_name,
+	                                       0,
+	                                       NULL,
+	                                       NULL );
+#endif
+	if( safe_current_working_directory_size == 0 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve current directory.",
+		 "%s: unable to retrieve current working directory size.",
 		 function );
 
-		/* Make sure the current working directory has been changed
-		 * back to its original value
-		 */
-		result = -1;
+		goto on_error;
 	}
-	if( current_volume_working_directory != NULL )
+	if( (size_t) safe_current_working_directory_size > (size_t) SSIZE_MAX )
 	{
-		if( libcpath_path_change_directory(
-		     current_volume_working_directory,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to change current working directory.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid current working directory size value out of bounds.",
+		 function );
 
-			goto on_error;
-		}
-		memory_free(
-		 current_volume_working_directory );
-
-		current_volume_working_directory = NULL;
+		goto on_error;
 	}
-	return( result );
+	safe_current_working_directory = narrow_string_allocate(
+	                                  safe_current_working_directory_size );
+
+	if( safe_current_working_directory == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create current working directory.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     safe_current_working_directory,
+	     0,
+	     sizeof( char ) * safe_current_working_directory_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear current working directory.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	result = libcpath_GetFullPathNameA(
+	          volume_name,
+	          safe_current_working_directory_size,
+	          safe_current_working_directory,
+	          NULL );
+#else
+	result = GetFullPathNameA(
+	          volume_name,
+	          safe_current_working_directory_size,
+	          safe_current_working_directory,
+	          NULL );
+#endif
+	/* Note that safe_current_working_directory_size can be larger than result
+	 */
+	if( ( result == 0 )
+	 || ( result > safe_current_working_directory_size ) )
+	{
+		error_code = GetLastError();
+
+		libcerror_system_set_error(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 error_code,
+		 "%s: unable to retrieve current working directory.",
+		 function );
+
+		goto on_error;
+	}
+	*current_working_directory      = safe_current_working_directory;
+	*current_working_directory_size = (size_t) safe_current_working_directory_size;
+
+	return( 1 );
 
 on_error:
-	if( change_volume_name != NULL )
+	if( safe_current_working_directory != NULL )
 	{
 		memory_free(
-		 change_volume_name );
+		 safe_current_working_directory );
 	}
-	if( current_volume_working_directory != NULL )
-	{
-		memory_free(
-		 current_volume_working_directory );
-	}
-	if( *current_working_directory != NULL )
-	{
-		memory_free(
-		 *current_working_directory );
-
-		*current_working_directory = NULL;
-	}
-	*current_working_directory_size = 0;
-
 	return( -1 );
 }
 
@@ -1106,6 +1141,7 @@ int libcpath_path_get_full_path(
 	size_t full_path_prefix_length                                  = 0;
 	size_t last_used_path_string_segment_size                       = 0;
 	size_t path_directory_name_index                                = 0;
+	size_t path_string_segment_length                               = 0;
 	size_t path_string_segment_size                                 = 0;
 	size_t safe_full_path_size                                      = 0;
 	size_t volume_name_length                                       = 0;
@@ -1115,6 +1151,7 @@ int libcpath_path_get_full_path(
 	int last_used_path_segment_index                                = -1;
 	int path_number_of_segments                                     = 0;
 	int path_segment_index                                          = 0;
+	int result                                                      = 0;
 
 	if( path == NULL )
 	{
@@ -1127,24 +1164,14 @@ int libcpath_path_get_full_path(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -1222,41 +1249,72 @@ int libcpath_path_get_full_path(
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 && ( path_type != LIBCPATH_TYPE_UNC ) )
 	{
-		if( libcpath_path_get_current_working_directory_by_volume(
-		     volume_name,
-		     volume_name_length,
-		     &current_directory,
-		     &current_directory_size,
-		     error ) != 1 )
+		if( volume_name == NULL )
+		{
+			result = libcpath_path_get_current_working_directory(
+			          &current_directory,
+			          &current_directory_size,
+			          error );
+		}
+		else
+		{
+			result = libcpath_path_get_current_working_directory_by_volume(
+			          volume_name,
+			          volume_name_length,
+			          &current_directory,
+			          &current_directory_size,
+			          error );
+		}
+		if( result != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve current working directory by volume.",
+			 "%s: unable to retrieve current working directory.",
 			 function );
 
 			goto on_error;
 		}
-		/* Determine the volume name using the current working directory if necessary
+		if( volume_name == NULL )
+		{
+			/* Determine the volume name using the current working directory if necessary
+			 */
+			if( libcpath_path_get_volume_name(
+			     current_directory,
+			     current_directory_size - 1,
+			     &volume_name,
+			     &volume_name_length,
+			     &current_directory_name_index,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine volume name from current working directory.",
+				 function );
+
+				goto on_error;
+			}
+		}
+	}
+	/* The full path prefix consists of "\\?\" or "\\.\"
+	 */
+	full_path_prefix_length = 4;
+
+	if( volume_name != NULL )
+	{
+		/* Add the volume or device name
 		 */
-		if( libcpath_path_get_volume_name(
-		     current_directory,
-		     current_directory_size - 1,
-		     &volume_name,
-		     &volume_name_length,
-		     &current_directory_name_index,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine volume name from current working directory.",
-			 function );
-
-			goto on_error;
-		}
+		full_path_prefix_length += volume_name_length;
+	}
+	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
+	 || ( path_type == LIBCPATH_TYPE_UNC ) )
+	{
+		/* Add the "UNC\" prefix
+		 */
+		full_path_prefix_length += 4;
 	}
 	if( ( current_directory != NULL )
 	 && ( current_directory_name_index < current_directory_size ) )
@@ -1280,6 +1338,36 @@ int libcpath_path_get_full_path(
 
 			goto on_error;
 		}
+		if( libcsplit_narrow_split_string_get_number_of_segments(
+		     current_directory_split_string,
+		     &current_directory_number_of_segments,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of current working directory string segments.",
+			 function );
+
+			goto on_error;
+		}
+		current_directory_segment_index = current_directory_number_of_segments - 1;
+
+		if( path_type == LIBCPATH_TYPE_RELATIVE )
+		{
+			/* If the path is relative
+			 * add the size of the current working directory
+			 * a directory separator, if necessary
+			 */
+			safe_full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
+
+			if( ( current_directory_size >= 2 )
+			 && ( current_directory[ current_directory_size - 2 ] != '\\' ) )
+			{
+				safe_full_path_size += 1;
+			}
+		}
 	}
 	if( libcsplit_narrow_string_split(
 	     &( path[ path_directory_name_index ] ),
@@ -1297,61 +1385,7 @@ int libcpath_path_get_full_path(
 
 		goto on_error;
 	}
-	/* The full path prefix consists of "\\?\" or "\\.\"
-	 */
-	full_path_prefix_length = 4;
-
-	if( volume_name != NULL )
-	{
-		/* Add the volume name and a directory separator
-		 */
-		full_path_prefix_length += volume_name_length + 1;
-	}
-	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
-	 || ( path_type == LIBCPATH_TYPE_UNC ) )
-	{
-		/* Add the UNC\ prefix
-		 */
-		full_path_prefix_length += 4;
-	}
-	/* If the path is relative
-	 * add the size of the current working directory
-	 * a directory separator, if necessary
-	 */
-	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
-	 && ( current_directory_name_index < current_directory_size ) )
-	{
-		safe_full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
-
-		if( ( current_directory_size >= 2 )
-		 && ( current_directory[ current_directory_size - 2 ] != '\\' ) )
-		{
-			safe_full_path_size += 1;
-		}
-	}
-	if( current_directory_split_string != NULL )
-	{
-		if( libcsplit_narrow_split_string_get_number_of_segments(
-		     current_directory_split_string,
-		     &current_directory_number_of_segments,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of current working directory string segments.",
-			 function );
-
-			goto on_error;
-		}
-		current_directory_segment_index = current_directory_number_of_segments - 1;
-	}
-	if( path_split_string == NULL )
-	{
-		safe_full_path_size += 1;
-	}
-	else
+	if( path_split_string != NULL )
 	{
 		if( libcsplit_narrow_split_string_get_number_of_segments(
 		     path_split_string,
@@ -1608,11 +1642,12 @@ int libcpath_path_get_full_path(
 				last_used_path_segment_index = path_segment_index;
 			}
 		}
+		/* Use the size reserved of the last directory separator for
+		 * the directory separator after the path prefix.
+		 */
 	}
-	safe_full_path_size += full_path_prefix_length;
+	safe_full_path_size += full_path_prefix_length + 1;
 
-	/* Note that the last path separator serves as the end of string
-	 */
 	full_path_index = 0;
 
 	safe_full_path = narrow_string_allocate(
@@ -1789,21 +1824,24 @@ int libcpath_path_get_full_path(
 				/* Note that here we should have room for the segment string and
 				 * one additional character
 				 */
-				if( current_directory_string_segment_size < ( safe_full_path_size - full_path_index ) )
+				if( current_directory_string_segment_size > ( safe_full_path_size - full_path_index ) )
 				{
 					libcerror_error_set(
 					 error,
-					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
-					 "%s: invalid full path size value out of bounds.",
-					 function );
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid current working directory string segment: %d size value out of bounds.",
+					 function,
+					 current_directory_segment_index );
 
 					goto on_error;
 				}
+				path_string_segment_length = current_directory_string_segment_size - 1;
+
 				if( narrow_string_copy(
 				     &( safe_full_path[ full_path_index ] ),
 				     current_directory_string_segment,
-				     current_directory_string_segment_size - 1 ) == NULL )
+				     path_string_segment_length ) == NULL )
 				{
 					libcerror_error_set(
 					 error,
@@ -1815,7 +1853,7 @@ int libcpath_path_get_full_path(
 
 					goto on_error;
 				}
-				full_path_index += current_directory_string_segment_size - 1;
+				full_path_index += path_string_segment_length;
 
 				safe_full_path[ full_path_index ] = '\\';
 
@@ -1863,21 +1901,24 @@ int libcpath_path_get_full_path(
 				/* Note that here we should have room for the segment string and
 				 * one additional character
 				 */
-				if( path_string_segment_size < ( safe_full_path_size - full_path_index ) )
+				if( path_string_segment_size > ( safe_full_path_size - full_path_index ) )
 				{
 					libcerror_error_set(
 					 error,
-					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
-					 "%s: invalid full path size value out of bounds.",
-					 function );
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid current path string segment: %d size value out of bounds.",
+					 function,
+					 path_segment_index );
 
 					goto on_error;
 				}
+				path_string_segment_length = path_string_segment_size - 1;
+
 				if( narrow_string_copy(
 				     &( safe_full_path[ full_path_index ] ),
 				     path_string_segment,
-				     path_string_segment_size - 1 ) == NULL )
+				     path_string_segment_length ) == NULL )
 				{
 					libcerror_error_set(
 					 error,
@@ -1889,7 +1930,7 @@ int libcpath_path_get_full_path(
 
 					goto on_error;
 				}
-				full_path_index += path_string_segment_size - 1;
+				full_path_index += path_string_segment_length;
 
 				safe_full_path[ full_path_index ] = '\\';
 
@@ -2000,8 +2041,8 @@ int libcpath_path_get_full_path(
 	size_t current_directory_size                                   = 0;
 	size_t current_directory_string_segment_size                    = 0;
 	size_t full_path_index                                          = 0;
+	size_t full_path_prefix_length                                  = 0;
 	size_t last_used_path_string_segment_size                       = 0;
-	size_t path_segments_size                                       = 0;
 	size_t path_string_segment_length                               = 0;
 	size_t path_string_segment_size                                 = 0;
 	size_t safe_full_path_size                                      = 0;
@@ -2023,24 +2064,14 @@ int libcpath_path_get_full_path(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -2087,7 +2118,7 @@ int libcpath_path_get_full_path(
 		/* If the path is absolute
 		 * a directory separator
 		 */
-		safe_full_path_size = 1;
+		full_path_prefix_length = 1;
 	}
 	else
 	{
@@ -2295,8 +2326,14 @@ int libcpath_path_get_full_path(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					safe_full_path_size -= current_directory_string_segment_size;
-
+					if( current_directory_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= current_directory_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_narrow_split_string_set_segment_by_index(
 					     current_directory_split_string,
 					     current_directory_segment_index,
@@ -2350,9 +2387,14 @@ int libcpath_path_get_full_path(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					path_segments_size  -= last_used_path_string_segment_size;
-					safe_full_path_size -= last_used_path_string_segment_size;
-
+					if( last_used_path_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= last_used_path_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_narrow_split_string_set_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -2422,19 +2464,20 @@ int libcpath_path_get_full_path(
 				/* Add the size of the directory or file name and a directory separator
 				 * Note that the size includes the end of string character
 				 */
-				path_segments_size  += path_string_segment_size;
 				safe_full_path_size += path_string_segment_size;
 
 				last_used_path_segment_index = path_segment_index;
 			}
 		}
+		if( safe_full_path_size > 0 )
+		{
+			/* Remove the size reserved of the last directory separator
+			 */
+			safe_full_path_size -= 1;
+		}
 	}
-	if( path_segments_size == 0 )
-	{
-		safe_full_path_size += 1;
-	}
-	/* Note that the last path separator serves as the end of string
-	 */
+	safe_full_path_size += full_path_prefix_length + 1;
+
 	full_path_index = 0;
 
 	safe_full_path = narrow_string_allocate(
@@ -2914,24 +2957,14 @@ int libcpath_path_get_sanitized_filename(
 
 		return( -1 );
 	}
-	if( filename_length == 0 )
+	if( ( filename_length == 0 )
+	 || ( filename_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid filename length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( filename_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid filename length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid filename length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -3588,9 +3621,14 @@ int libcpath_path_make_directory(
 
 		return( -1 );
 	}
+#if defined( __MINGW32__ ) || defined( _MSC_VER )
+	if( mkdir(
+	     directory_name ) != 0 )
+#else
 	if( mkdir(
 	     directory_name,
 	     0755 ) != 0 )
+#endif
 	{
 		libcerror_system_set_error(
 		 error,
@@ -3884,8 +3922,10 @@ int libcpath_path_get_current_working_directory_wide(
      libcerror_error_t **error )
 {
 	static char *function                     = "libcpath_path_get_current_working_directory_wide";
-	DWORD safe_current_working_directory_size = 0;
+	wchar_t *safe_current_working_directory   = NULL;
 	DWORD error_code                          = 0;
+	DWORD result                              = 0;
+	DWORD safe_current_working_directory_size = 0;
 
 	if( current_working_directory == NULL )
 	{
@@ -3951,12 +3991,10 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
-	*current_working_directory_size = (size_t) safe_current_working_directory_size;
+	safe_current_working_directory = wide_string_allocate(
+	                                  safe_current_working_directory_size );
 
-	*current_working_directory = wide_string_allocate(
-	                              *current_working_directory_size );
-
-	if( *current_working_directory == NULL )
+	if( safe_current_working_directory == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -3968,9 +4006,9 @@ int libcpath_path_get_current_working_directory_wide(
 		goto on_error;
 	}
 	if( memory_set(
-	     *current_working_directory,
+	     safe_current_working_directory,
 	     0,
-	     sizeof( wchar_t ) * *current_working_directory_size ) == NULL )
+	     sizeof( wchar_t ) * safe_current_working_directory_size ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -3982,14 +4020,18 @@ int libcpath_path_get_current_working_directory_wide(
 		goto on_error;
 	}
 #if defined( WINAPI ) && ( WINVER <= 0x0500 )
-	if( libcpath_GetCurrentDirectoryW(
-	     safe_current_working_directory_size,
-	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+	result = libcpath_GetCurrentDirectoryW(
+	          safe_current_working_directory_size,
+	          safe_current_working_directory )
 #else
-	if( GetCurrentDirectoryW(
-	     safe_current_working_directory_size,
-	     *current_working_directory ) != ( safe_current_working_directory_size - 1 ) )
+	result = GetCurrentDirectoryW(
+	          safe_current_working_directory_size,
+	          safe_current_working_directory );
 #endif
+	/* Note that safe_current_working_directory_size can be larger than result
+	 */
+	if( ( result == 0 )
+	 || ( result > safe_current_working_directory_size ) )
 	{
 		error_code = GetLastError();
 
@@ -4003,18 +4045,17 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
+	*current_working_directory      = safe_current_working_directory;
+	*current_working_directory_size = (size_t) safe_current_working_directory_size;
+
 	return( 1 );
 
 on_error:
-	if( *current_working_directory != NULL )
+	if( safe_current_working_directory != NULL )
 	{
 		memory_free(
-		 *current_working_directory );
-
-		*current_working_directory = NULL;
+		 safe_current_working_directory );
 	}
-	*current_working_directory_size = 0;
-
 	return( -1 );
 }
 
@@ -4030,8 +4071,10 @@ int libcpath_path_get_current_working_directory_wide(
      libcerror_error_t **error )
 {
 	static char *function                          = "libcpath_path_get_current_working_directory_wide";
+	wchar_t *safe_current_working_directory        = NULL;
 	char *narrow_current_working_directory         = 0;
 	size_t narrow_current_working_directory_length = 0;
+	size_t safe_current_working_directory_size     = 0;
 
 	if( current_working_directory == NULL )
 	{
@@ -4103,7 +4146,7 @@ int libcpath_path_get_current_working_directory_wide(
 	if( libcpath_system_string_size_from_narrow_string(
 	     narrow_current_working_directory,
 	     narrow_current_working_directory_length + 1,
-	     current_working_directory_size,
+	     &safe_current_working_directory_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -4115,10 +4158,10 @@ int libcpath_path_get_current_working_directory_wide(
 
 		return( -1 );
 	}
-	*current_working_directory = wide_string_allocate(
-	                              *current_working_directory_size );
+	safe_current_working_directory = wide_string_allocate(
+	                                  safe_current_working_directory_size );
 
-	if( *current_working_directory == NULL )
+	if( safe_current_working_directory == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -4130,9 +4173,9 @@ int libcpath_path_get_current_working_directory_wide(
 		goto on_error;
 	}
 	if( memory_set(
-	     *current_working_directory,
+	     safe_current_working_directory,
 	     0,
-	     sizeof( wchar_t ) * *current_working_directory_size ) == NULL )
+	     sizeof( wchar_t ) * safe_current_working_directory_size ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -4146,8 +4189,8 @@ int libcpath_path_get_current_working_directory_wide(
 	if( libcpath_system_string_copy_to_wide_string(
 	     narrow_current_working_directory,
 	     narrow_current_working_directory_length + 1,
-	     *current_working_directory,
-	     *current_working_directory_size,
+	     safe_current_working_directory,
+	     safe_current_working_directory_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -4162,6 +4205,9 @@ int libcpath_path_get_current_working_directory_wide(
 	memory_free(
 	 narrow_current_working_directory );
 
+	*current_working_directory      = safe_current_working_directory;
+	*current_working_directory_size = safe_current_working_directory_size;
+
 	return( 1 );
 
 on_error:
@@ -4170,21 +4216,67 @@ on_error:
 		memory_free(
 		 narrow_current_working_directory );
 	}
-	if( *current_working_directory != NULL )
+	if( safe_current_working_directory != NULL )
 	{
 		memory_free(
-		 *current_working_directory );
-
-		*current_working_directory = NULL;
+		 safe_current_working_directory );
 	}
-	*current_working_directory_size = 0;
-
 	return( -1 );
 }
 
 #else
 #error Missing get current working directory function
 #endif
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+/* Cross Windows safe version of GetFullPathNameW
+ * Returns the number of characters in the current directory string or 0 on error
+ */
+DWORD libcpath_GetFullPathNameW(
+       LPCWSTR filename,
+       DWORD  buffer_size,
+       LPWSTR  buffer,
+       LPWSTR  *file_part )
+{
+	FARPROC function       = NULL;
+	HMODULE library_handle = NULL;
+	DWORD result           = 0;
+
+	library_handle = LoadLibrary(
+	                  _SYSTEM_STRING( "kernel32.dll" ) );
+
+	if( library_handle == NULL )
+	{
+		return( 0 );
+	}
+	function = GetProcAddress(
+		    library_handle,
+		    (LPCSTR) "GetFullPathNameW" );
+
+	if( function != NULL )
+	{
+		result = function(
+			  filename,
+			  buffer_size,
+			  buffer,
+			  file_part );
+	}
+	/* This call should be after using the function
+	 * in most cases kernel32.dll will still be available after free
+	 */
+	if( FreeLibrary(
+	     library_handle ) != TRUE )
+	{
+		libcpath_CloseHandle(
+		 library_handle );
+
+		return( 0 );
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
 
 #if defined( WINAPI )
 
@@ -4210,24 +4302,14 @@ int libcpath_path_get_path_type_wide(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -4329,24 +4411,14 @@ int libcpath_path_get_volume_name_wide(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -4534,12 +4606,35 @@ int libcpath_path_get_current_working_directory_by_volume_wide(
      size_t *current_working_directory_size,
      libcerror_error_t **error )
 {
-	wchar_t *change_volume_name                  = NULL;
-	wchar_t *current_volume_working_directory    = NULL;
-	static char *function                        = "libcpath_path_get_current_working_directory_by_volume_wide";
-	size_t current_volume_working_directory_size = 0;
-	int result                                   = 1;
+	static char *function                     = "libcpath_path_get_current_working_directory_by_volume_wide";
+	wchar_t *safe_current_working_directory   = NULL;
+	DWORD error_code                          = 0;
+	DWORD result                              = 0;
+	DWORD safe_current_working_directory_size = 0;
 
+	if( volume_name == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume name.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( volume_name_length == 0 )
+	 || ( volume_name_length > (size_t) ( SSIZE_MAX - 1 ) ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid volume name length value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( current_working_directory == NULL )
 	{
 		libcerror_error_set(
@@ -4547,6 +4642,17 @@ int libcpath_path_get_current_working_directory_by_volume_wide(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid current working directory.",
+		 function );
+
+		return( -1 );
+	}
+	if( *current_working_directory != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid current working directory value already set.",
 		 function );
 
 		return( -1 );
@@ -4562,143 +4668,110 @@ int libcpath_path_get_current_working_directory_by_volume_wide(
 
 		return( -1 );
 	}
-	/* If the path contains a volume name switch to that
-	 * volume to determine the current directory
-	 */
-	if( volume_name != NULL )
-	{
-		if( volume_name_length > (size_t) ( SSIZE_MAX - 1 ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-			 "%s: invalid volume name length value exceeds maximum.",
-			 function );
-
-			goto on_error;
-		}
-		if( libcpath_path_get_current_working_directory_wide(
-		     &current_volume_working_directory,
-		     &current_volume_working_directory_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve current volume working directory.",
-			 function );
-
-			goto on_error;
-		}
-		change_volume_name = wide_string_allocate(
-		                      volume_name_length + 1 );
-
-		if( change_volume_name == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create change volume name.",
-			 function );
-
-			goto on_error;
-		}
-		if( wide_string_copy(
-		     change_volume_name,
-		     volume_name,
-		     volume_name_length ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to set change volume name.",
-			 function );
-
-			goto on_error;
-		}
-		change_volume_name[ volume_name_length ] = 0;
-
-		if( libcpath_path_change_directory_wide(
-		     change_volume_name,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to change current working directory.",
-			 function );
-
-			goto on_error;
-		}
-		memory_free(
-		 change_volume_name );
-
-		change_volume_name = NULL;
-	}
-	if( libcpath_path_get_current_working_directory_wide(
-	     current_working_directory,
-	     current_working_directory_size,
-	     error ) != 1 )
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	safe_current_working_directory_size = libcpath_GetFullPathNameW(
+	                                       volume_name,
+	                                       0,
+	                                       NULL,
+	                                       NULL );
+#else
+	safe_current_working_directory_size = GetFullPathNameW(
+	                                       volume_name,
+	                                       0,
+	                                       NULL,
+	                                       NULL );
+#endif
+	if( safe_current_working_directory_size == 0 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve current directory.",
+		 "%s: unable to retrieve current working directory size.",
 		 function );
 
-		/* Make sure the current working directory has been changed
-		 * back to its original value
-		 */
-		result = -1;
+		goto on_error;
 	}
-	if( current_volume_working_directory != NULL )
+	if( (size_t) safe_current_working_directory_size > (size_t) SSIZE_MAX )
 	{
-		if( libcpath_path_change_directory_wide(
-		     current_volume_working_directory,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to change current working directory.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid current working directory size value out of bounds.",
+		 function );
 
-			goto on_error;
-		}
-		memory_free(
-		 current_volume_working_directory );
-
-		current_volume_working_directory = NULL;
+		goto on_error;
 	}
-	return( result );
+	safe_current_working_directory = wide_string_allocate(
+	                                  safe_current_working_directory_size );
+
+	if( safe_current_working_directory == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create current working directory.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     safe_current_working_directory,
+	     0,
+	     sizeof( wchar_t ) * safe_current_working_directory_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear current working directory.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+	result = libcpath_GetFullPathNameW(
+	          volume_name,
+	          safe_current_working_directory_size,
+	          safe_current_working_directory,
+	          NULL );
+#else
+	result = GetFullPathNameW(
+	          volume_name,
+	          safe_current_working_directory_size,
+	          safe_current_working_directory,
+	          NULL );
+#endif
+	/* Note that safe_current_working_directory_size can be larger than result
+	 */
+	if( ( result == 0 )
+	 || ( result > safe_current_working_directory_size ) )
+	{
+		error_code = GetLastError();
+
+		libcerror_system_set_error(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 error_code,
+		 "%s: unable to retrieve current working directory.",
+		 function );
+
+		goto on_error;
+	}
+	*current_working_directory      = safe_current_working_directory;
+	*current_working_directory_size = (size_t) safe_current_working_directory_size;
+
+	return( 1 );
 
 on_error:
-	if( change_volume_name != NULL )
+	if( safe_current_working_directory != NULL )
 	{
 		memory_free(
-		 change_volume_name );
+		 safe_current_working_directory );
 	}
-	if( current_volume_working_directory != NULL )
-	{
-		memory_free(
-		 current_volume_working_directory );
-	}
-	if( *current_working_directory != NULL )
-	{
-		memory_free(
-		 *current_working_directory );
-
-		*current_working_directory = NULL;
-	}
-	*current_working_directory_size = 0;
-
 	return( -1 );
 }
 
@@ -4749,6 +4822,7 @@ int libcpath_path_get_full_path_wide(
 	size_t full_path_prefix_length                                = 0;
 	size_t last_used_path_string_segment_size                     = 0;
 	size_t path_directory_name_index                              = 0;
+	size_t path_string_segment_length                             = 0;
 	size_t path_string_segment_size                               = 0;
 	size_t safe_full_path_size                                    = 0;
 	size_t volume_name_length                                     = 0;
@@ -4758,6 +4832,7 @@ int libcpath_path_get_full_path_wide(
 	int last_used_path_segment_index                              = -1;
 	int path_number_of_segments                                   = 0;
 	int path_segment_index                                        = 0;
+	int result                                                    = 0;
 
 	if( path == NULL )
 	{
@@ -4770,24 +4845,14 @@ int libcpath_path_get_full_path_wide(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -4865,41 +4930,72 @@ int libcpath_path_get_full_path_wide(
 	 && ( path_type != LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
 	 && ( path_type != LIBCPATH_TYPE_UNC ) )
 	{
-		if( libcpath_path_get_current_working_directory_by_volume_wide(
-		     volume_name,
-		     volume_name_length,
-		     &current_directory,
-		     &current_directory_size,
-		     error ) != 1 )
+		if( volume_name == NULL )
+		{
+			result = libcpath_path_get_current_working_directory_wide(
+			          &current_directory,
+			          &current_directory_size,
+			          error );
+		}
+		else
+		{
+			result = libcpath_path_get_current_working_directory_by_volume_wide(
+			          volume_name,
+			          volume_name_length,
+			          &current_directory,
+			          &current_directory_size,
+			          error );
+		}
+		if( result != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve current working directory by volume.",
+			 "%s: unable to retrieve current working directory.",
 			 function );
 
 			goto on_error;
 		}
-		/* Determine the volume name using the current working directory if necessary
+		if( volume_name == NULL )
+		{
+			/* Determine the volume name using the current working directory if necessary
+			 */
+			if( libcpath_path_get_volume_name_wide(
+			     current_directory,
+			     current_directory_size - 1,
+			     &volume_name,
+			     &volume_name_length,
+			     &current_directory_name_index,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine volume name from current working directory.",
+				 function );
+
+				goto on_error;
+			}
+		}
+	}
+	/* The full path prefix consists of "\\?\" or "\\.\"
+	 */
+	full_path_prefix_length = 4;
+
+	if( volume_name != NULL )
+	{
+		/* Add the volume or device name
 		 */
-		if( libcpath_path_get_volume_name_wide(
-		     current_directory,
-		     current_directory_size - 1,
-		     &volume_name,
-		     &volume_name_length,
-		     &current_directory_name_index,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine volume name from current working directory.",
-			 function );
-
-			goto on_error;
-		}
+		full_path_prefix_length += volume_name_length;
+	}
+	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
+	 || ( path_type == LIBCPATH_TYPE_UNC ) )
+	{
+		/* Add the "UNC\" prefix
+		 */
+		full_path_prefix_length += 4;
 	}
 	if( ( current_directory != NULL )
 	 && ( current_directory_name_index < current_directory_size ) )
@@ -4923,6 +5019,36 @@ int libcpath_path_get_full_path_wide(
 
 			goto on_error;
 		}
+		if( libcsplit_wide_split_string_get_number_of_segments(
+		     current_directory_split_string,
+		     &current_directory_number_of_segments,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of current working directory string segments.",
+			 function );
+
+			goto on_error;
+		}
+		current_directory_segment_index = current_directory_number_of_segments - 1;
+
+		if( path_type == LIBCPATH_TYPE_RELATIVE )
+		{
+			/* If the path is relative
+			 * add the size of the current working directory
+			 * a directory separator, if necessary
+			 */
+			safe_full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
+
+			if( ( current_directory_size >= 2 )
+			 && ( current_directory[ current_directory_size - 2 ] != (wchar_t) '\\' ) )
+			{
+				safe_full_path_size += 1;
+			}
+		}
 	}
 	if( libcsplit_wide_string_split(
 	     &( path[ path_directory_name_index ] ),
@@ -4940,61 +5066,7 @@ int libcpath_path_get_full_path_wide(
 
 		goto on_error;
 	}
-	/* The full path prefix consists of "\\?\" or "\\.\"
-	 */
-	full_path_prefix_length = 4;
-
-	if( volume_name != NULL )
-	{
-		/* Add the volume name and a directory separator
-		 */
-		full_path_prefix_length += volume_name_length + 1;
-	}
-	if( ( path_type == LIBCPATH_TYPE_EXTENDED_LENGTH_UNC )
-	 || ( path_type == LIBCPATH_TYPE_UNC ) )
-	{
-		/* Add the UNC\ prefix
-		 */
-		full_path_prefix_length += 4;
-	}
-	/* If the path is relative
-	 * add the size of the current working directory
-	 * a directory separator, if necessary
-	 */
-	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
-	 && ( current_directory_name_index < current_directory_size ) )
-	{
-		safe_full_path_size += ( current_directory_size - ( current_directory_name_index + 1 ) );
-
-		if( ( current_directory_size >= 2 )
-		 && ( current_directory[ current_directory_size - 2 ] != (wchar_t) '\\' ) )
-		{
-			safe_full_path_size += 1;
-		}
-	}
-	if( current_directory_split_string != NULL )
-	{
-		if( libcsplit_wide_split_string_get_number_of_segments(
-		     current_directory_split_string,
-		     &current_directory_number_of_segments,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of current working directory string segments.",
-			 function );
-
-			goto on_error;
-		}
-		current_directory_segment_index = current_directory_number_of_segments - 1;
-	}
-	if( path_split_string == NULL )
-	{
-		safe_full_path_size += 1;
-	}
-	else
+	if( path_split_string != NULL )
 	{
 		if( libcsplit_wide_split_string_get_number_of_segments(
 		     path_split_string,
@@ -5251,11 +5323,12 @@ int libcpath_path_get_full_path_wide(
 				last_used_path_segment_index = path_segment_index;
 			}
 		}
+		/* Use the size reserved of the last directory separator for
+		 * the directory separator after the path prefix.
+		 */
 	}
-	safe_full_path_size += full_path_prefix_length;
+	safe_full_path_size += full_path_prefix_length + 1;
 
-	/* Note that the last path separator serves as the end of string
-	 */
 	full_path_index = 0;
 
 	safe_full_path = wide_string_allocate(
@@ -5432,21 +5505,24 @@ int libcpath_path_get_full_path_wide(
 				/* Note that here we should have room for the segment string and
 				 * one additional character
 				 */
-				if( current_directory_string_segment_size < ( safe_full_path_size - full_path_index ) )
+				if( current_directory_string_segment_size > ( safe_full_path_size - full_path_index ) )
 				{
 					libcerror_error_set(
 					 error,
-					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
-					 "%s: invalid full path size value out of bounds.",
-					 function );
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid current working directory string segment: %d size value out of bounds.",
+					 function,
+					 current_directory_segment_index );
 
 					goto on_error;
 				}
+				path_string_segment_length = current_directory_string_segment_size - 1;
+
 				if( wide_string_copy(
 				     &( safe_full_path[ full_path_index ] ),
 				     current_directory_string_segment,
-				     current_directory_string_segment_size - 1 ) == NULL )
+				     path_string_segment_length ) == NULL )
 				{
 					libcerror_error_set(
 					 error,
@@ -5458,7 +5534,7 @@ int libcpath_path_get_full_path_wide(
 
 					goto on_error;
 				}
-				full_path_index += current_directory_string_segment_size - 1;
+				full_path_index += path_string_segment_length;
 
 				safe_full_path[ full_path_index ] = (wchar_t) '\\';
 
@@ -5506,21 +5582,24 @@ int libcpath_path_get_full_path_wide(
 				/* Note that here we should have room for the segment string and
 				 * one additional character
 				 */
-				if( path_string_segment_size < ( safe_full_path_size - full_path_index ) )
+				if( path_string_segment_size > ( safe_full_path_size - full_path_index ) )
 				{
 					libcerror_error_set(
 					 error,
-					 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-					 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
-					 "%s: invalid full path size value out of bounds.",
-					 function );
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid current path string segment: %d size value out of bounds.",
+					 function,
+					 path_segment_index );
 
 					goto on_error;
 				}
+				path_string_segment_length = path_string_segment_size - 1;
+
 				if( wide_string_copy(
 				     &( safe_full_path[ full_path_index ] ),
 				     path_string_segment,
-				     path_string_segment_size - 1 ) == NULL )
+				     path_string_segment_length ) == NULL )
 				{
 					libcerror_error_set(
 					 error,
@@ -5532,7 +5611,7 @@ int libcpath_path_get_full_path_wide(
 
 					goto on_error;
 				}
-				full_path_index += path_string_segment_size - 1;
+				full_path_index += path_string_segment_length;
 
 				safe_full_path[ full_path_index ] = (wchar_t) '\\';
 
@@ -5643,8 +5722,8 @@ int libcpath_path_get_full_path_wide(
 	size_t current_directory_size                                 = 0;
 	size_t current_directory_string_segment_size                  = 0;
 	size_t full_path_index                                        = 0;
+	size_t full_path_prefix_length                                = 0;
 	size_t last_used_path_string_segment_size                     = 0;
-	size_t path_segments_size                                     = 0;
 	size_t path_string_segment_length                             = 0;
 	size_t path_string_segment_size                               = 0;
 	size_t safe_full_path_size                                    = 0;
@@ -5666,24 +5745,14 @@ int libcpath_path_get_full_path_wide(
 
 		return( -1 );
 	}
-	if( path_length == 0 )
+	if( ( path_length == 0 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid path length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -5730,7 +5799,7 @@ int libcpath_path_get_full_path_wide(
 		/* If the path is absolute
 		 * a directory separator
 		 */
-		safe_full_path_size = 1;
+		full_path_prefix_length = 1;
 	}
 	else
 	{
@@ -5938,8 +6007,14 @@ int libcpath_path_get_full_path_wide(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					safe_full_path_size -= current_directory_string_segment_size;
-
+					if( current_directory_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= current_directory_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_wide_split_string_set_segment_by_index(
 					     current_directory_split_string,
 					     current_directory_segment_index,
@@ -5993,9 +6068,14 @@ int libcpath_path_get_full_path_wide(
 					/* Remove the size of the parent directory name and a directory separator
 					 * Note that the size includes the end of string character
 					 */
-					path_segments_size  -= last_used_path_string_segment_size;
-					safe_full_path_size -= last_used_path_string_segment_size;
-
+					if( last_used_path_string_segment_size < safe_full_path_size )
+					{
+						safe_full_path_size -= last_used_path_string_segment_size;
+					}
+					else
+					{
+						safe_full_path_size = 0;
+					}
 					if( libcsplit_wide_split_string_set_segment_by_index(
 					     path_split_string,
 					     last_used_path_segment_index,
@@ -6065,19 +6145,20 @@ int libcpath_path_get_full_path_wide(
 				/* Add the size of the directory or file name and a directory separator
 				 * Note that the size includes the end of string character
 				 */
-				path_segments_size  += path_string_segment_size;
 				safe_full_path_size += path_string_segment_size;
 
 				last_used_path_segment_index = path_segment_index;
 			}
 		}
+		if( safe_full_path_size > 0 )
+		{
+			/* Remove the size reserved of the last directory separator
+			 */
+			safe_full_path_size -= 1;
+		}
 	}
-	if( path_segments_size == 0 )
-	{
-		safe_full_path_size += 1;
-	}
-	/* Note that the last path separator serves as the end of string
-	 */
+	safe_full_path_size += full_path_prefix_length + 1;
+
 	full_path_index = 0;
 
 	safe_full_path = wide_string_allocate(
@@ -6557,24 +6638,14 @@ int libcpath_path_get_sanitized_filename_wide(
 
 		return( -1 );
 	}
-	if( filename_length == 0 )
+	if( ( filename_length == 0 )
+	 || ( filename_length > (size_t) ( SSIZE_MAX - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_ZERO_OR_LESS,
-		 "%s: invalid filename length is zero.",
-		 function );
-
-		return( -1 );
-	}
-	if( filename_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid filename length value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid filename length value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -7294,9 +7365,14 @@ int libcpath_path_make_directory_wide(
 
 		goto on_error;
 	}
+#if defined( __MINGW32__ ) || defined( _MSC_VER )
+	if( mkdir(
+	     narrow_directory_name ) != 0 )
+#else
 	if( mkdir(
 	     narrow_directory_name,
 	     0755 ) != 0 )
+#endif
 	{
 		libcerror_system_set_error(
 		 error,

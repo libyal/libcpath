@@ -65,6 +65,16 @@ int libcpath_path_get_current_working_directory(
      size_t *current_working_directory_size,
      libcerror_error_t **error );
 
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+DWORD libcpath_GetFullPathNameA(
+       LPCSTR filename,
+       DWORD  buffer_size,
+       LPSTR  buffer,
+       LPSTR  *file_part )
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
+
 #if defined( WINAPI )
 
 int libcpath_path_get_path_type(
@@ -177,6 +187,16 @@ int libcpath_path_get_current_working_directory_wide(
      wchar_t **current_working_directory,
      size_t *current_working_directory_size,
      libcerror_error_t **error );
+
+#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+
+DWORD libcpath_GetFullPathNameW(
+       LPCWSTR filename,
+       DWORD  buffer_size,
+       LPWSTR  buffer,
+       LPWSTR  *file_part )
+
+#endif /* defined( WINAPI ) && ( WINVER <= 0x0500 ) */
 
 #if defined( WINAPI )
 
