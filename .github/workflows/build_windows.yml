@@ -36,8 +36,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - configure_options: '--enable-winapi=no'
-        - configure_options: '--enable-winapi=yes'
+        - configure_options: ''
     steps:
     - name: Configure git
       run: git config --global core.autocrlf false
@@ -45,7 +44,7 @@ jobs:
     - name: Install Cygwin and build dependencies
       uses: cygwin/cygwin-install-action@v6
       with:
-        packages: autoconf, automake, gettext-devel, git, libtool, make, mingw-w64-x86_64-gcc, pkg-config
+        packages: autoconf, automake, binutils, gcc-core, gettext-devel, git, libtool, make, pkg-config
         platform: x86_64
         add-to-path: true
     - name: Build from source
@@ -65,12 +64,13 @@ jobs:
         CHERE_INVOKING: 1
       run: |
         tests/runtests.sh
-  build_mingw:
+  build_msys2_mingw:
     runs-on: windows-latest
     strategy:
       matrix:
         include:
-        - configure_options: ''
+        - configure_options: '--disable-winapi'
+        - configure_options: '--enable-winapi'
     steps:
     - uses: actions/checkout@v6
     - name: Set up MSYS2 with MinGW-w64
