@@ -1591,7 +1591,7 @@ on_error:
 int cpath_test_path_get_full_path(
      void )
 {
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	char *absolute_paths[] = {
 		"\\home\\user\\test.txt",
 		"c:\\home\\user\\test.txt",
@@ -1604,6 +1604,7 @@ int cpath_test_path_get_full_path(
 		"user\\test.txt",
 		"username\\..\\user\\test.txt",
 	};
+#if defined( WINAPI )
 	char *special_paths[] = {
 		"\\\\.\\PhysicalDrive0",
 		"\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}"
@@ -1612,6 +1613,7 @@ int cpath_test_path_get_full_path(
 		"\\\\172.0.0.1\\C$\\test.txt",
 		"\\\\?\\UNC\\172.0.0.1\\C$\\test.txt",
 	};
+#endif /* defined( WINAPI ) */
 #else
 	char *absolute_paths[] = {
 		"/home/user/test.txt",
@@ -1623,7 +1625,7 @@ int cpath_test_path_get_full_path(
 		"user/test.txt",
 		"username/../user/test.txt",
 	};
-#endif /* defined( WINAPI ) */
+#endif /* defined( WINAPI ) || defined( __MINGW32__ ) */
 
 	libcerror_error_t *error                = NULL;
 	char *current_working_directory         = NULL;
@@ -1641,7 +1643,7 @@ int cpath_test_path_get_full_path(
 	int result                              = 0;
 	int string_index                        = 0;
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	int number_of_absolute_paths            = 6;
 #else
 	int number_of_absolute_paths            = 4;
@@ -1674,6 +1676,8 @@ int cpath_test_path_get_full_path(
 	 */
 #if defined( WINAPI )
 	expected_path = "\\\\?\\C:\\home\\user\\test.txt";
+#elif defined( __MINGW32__ )
+	expected_path = "C:\\home\\user\\test.txt";
 #else
 	expected_path = "/home/user/test.txt";
 #endif
@@ -1714,9 +1718,8 @@ int cpath_test_path_get_full_path(
 		 "error",
 		 error );
 
-#if defined( WINAPI )
 		/* Skip the drive letter in the comparison, given it is determined runtime */
-
+#if defined( WINAPI )
 		if( ( full_path[ 0 ] != '\\' )
 		 || ( full_path[ 1 ] != '\\' )
 		 || ( full_path[ 2 ] != '?' )
@@ -1731,6 +1734,11 @@ int cpath_test_path_get_full_path(
 			          &( expected_path[ 5 ] ),
 			          expected_path_length - 5 );
 		}
+#elif defined( __MINGW32__ )
+		result = narrow_string_compare_no_case(
+		          &( full_path[ 2 ] ),
+		          &( expected_path[ 2 ] ),
+		          expected_path_length - 2 );
 #else
 		result = narrow_string_compare(
 		          full_path,
@@ -1756,7 +1764,7 @@ int cpath_test_path_get_full_path(
 
 		full_path = NULL;
 	}
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	expected_path = "\\user\\test.txt";
 #else
 	expected_path = "/user/test.txt";
@@ -1822,7 +1830,7 @@ int cpath_test_path_get_full_path(
 #else
 		string_index = 0;
 #endif
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 		result = narrow_string_compare_no_case(
 		          &( full_path[ string_index ] ),
 		          current_working_directory,
@@ -1839,7 +1847,7 @@ int cpath_test_path_get_full_path(
 		 result,
 		 0 );
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 		result = narrow_string_compare_no_case(
 		          &( full_path[ string_index + current_working_directory_length ] ),
 		          expected_path,
@@ -2333,7 +2341,7 @@ int cpath_test_path_get_sanitized_character(
 	 "error",
 	 error );
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	expected_sanitized_path = "^x00";
 #else
 	expected_sanitized_path = "\\x00";
@@ -2373,7 +2381,7 @@ int cpath_test_path_get_sanitized_character(
 	 "error",
 	 error );
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	expected_sanitized_path = "^^";
 #else
 	expected_sanitized_path = "\\\\";
@@ -2634,7 +2642,7 @@ int cpath_test_path_get_sanitized_filename(
 
 	/* Test libcpath_path_get_sanitized_filename with replacement characters
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_filename          = "t\x00sT!.t^|";
 	test_filename_length   = 9;
 	expected_filename      = "t^x00sT^x21.t^^^x7c";
@@ -2876,7 +2884,7 @@ int cpath_test_path_get_sanitized_path(
 	 */
 	/* Test libcpath_path_get_sanitized_path without replacement characters
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path          = "test\\test.txt";
 	test_path_length   = 13;
 	expected_path      = "test\\test.txt";
@@ -2931,7 +2939,7 @@ int cpath_test_path_get_sanitized_path(
 
 	/* Test libcpath_path_get_sanitized_path with replacement characters
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path          = "test\\t\x00sT!.t^|";
 	test_path_length   = 14;
 	expected_path      = "test\\t^x00sT^x21.t^^^x7c";
@@ -2986,7 +2994,7 @@ int cpath_test_path_get_sanitized_path(
 
 	/* Test error cases
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path        = "test\\test.txt";
 	test_path_length = 13;
 #else
@@ -3177,7 +3185,7 @@ int cpath_test_path_join(
 
 	/* Test regular cases
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path1    = "\\first\\second";
 	test_path2    = "third\\fourth";
 	test_path3    = "\\first\\second\\";
@@ -4908,7 +4916,7 @@ on_error:
 int cpath_test_path_get_full_path_wide(
      void )
 {
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	wchar_t *absolute_paths[] = {
 		L"\\home\\user\\test.txt",
 		L"c:\\home\\user\\test.txt",
@@ -4921,6 +4929,7 @@ int cpath_test_path_get_full_path_wide(
 		L"user\\test.txt",
 		L"username\\..\\user\\test.txt",
 	};
+#if defined( WINAPI )
 	wchar_t *special_paths[] = {
 		L"\\\\.\\PhysicalDrive0",
 		L"\\\\?\\Volume{4c1b02c4-d990-11dc-99ae-806e6f6e6963}"
@@ -4929,6 +4938,7 @@ int cpath_test_path_get_full_path_wide(
 		L"\\\\172.0.0.1\\C$\\test.txt",
 		L"\\\\?\\UNC\\172.0.0.1\\C$\\test.txt",
 	};
+#endif /* defined( WINAPI ) */
 #else
 	wchar_t *absolute_paths[] = {
 		L"/home/user/test.txt",
@@ -4940,7 +4950,7 @@ int cpath_test_path_get_full_path_wide(
 		L"user/test.txt",
 		L"username/../user/test.txt",
 	};
-#endif /* defined( WINAPI ) */
+#endif /* defined( WINAPI ) || defined( __MINGW32__ ) */
 
 	libcerror_error_t *error                = NULL;
 	wchar_t *current_working_directory      = NULL;
@@ -4958,7 +4968,7 @@ int cpath_test_path_get_full_path_wide(
 	int result                              = 0;
 	int string_index                        = 0;
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	int number_of_absolute_paths            = 6;
 #else
 	int number_of_absolute_paths            = 4;
@@ -4991,6 +5001,8 @@ int cpath_test_path_get_full_path_wide(
 	 */
 #if defined( WINAPI )
 	expected_path = L"\\\\?\\C:\\home\\user\\test.txt";
+#elif defined( __MINGW32__ )
+	expected_path = L"C:\\home\\user\\test.txt";
 #else
 	expected_path = L"/home/user/test.txt";
 #endif
@@ -5039,9 +5051,9 @@ int cpath_test_path_get_full_path_wide(
 		 full_path_size,
 		 full_path_length + 1 );
 
-#if defined( WINAPI )
 		/* Skip the drive letter in the comparison, given it is determined runtime */
 
+#if defined( WINAPI )
 		if( ( full_path[ 0 ] != (wchar_t) '\\' )
 		 || ( full_path[ 1 ] != (wchar_t) '\\' )
 		 || ( full_path[ 2 ] != (wchar_t) '?' )
@@ -5056,6 +5068,11 @@ int cpath_test_path_get_full_path_wide(
 			          &( expected_path[ 5 ] ),
 			          expected_path_length - 5 );
 		}
+#elif defined( __MINGW32__ )
+		result = wide_string_compare_no_case(
+		          &( full_path[ 2 ] ),
+		          &( expected_path[ 2 ] ),
+		          expected_path_length - 2 );
 #else
 		result = wide_string_compare(
 		          full_path,
@@ -5073,7 +5090,7 @@ int cpath_test_path_get_full_path_wide(
 
 		full_path = NULL;
 	}
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	expected_path = L"\\user\\test.txt";
 #else
 	expected_path = L"/user/test.txt";
@@ -5139,7 +5156,7 @@ int cpath_test_path_get_full_path_wide(
 #else
 		string_index = 0;
 #endif
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 		result = wide_string_compare_no_case(
 		          &( full_path[ string_index ] ),
 		          current_working_directory,
@@ -5156,7 +5173,7 @@ int cpath_test_path_get_full_path_wide(
 		 result,
 		 0 );
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 		result = wide_string_compare_no_case(
 		          &( full_path[ string_index + current_working_directory_length ] ),
 		          expected_path,
@@ -5650,7 +5667,7 @@ int cpath_test_path_get_sanitized_character_wide(
 	 "error",
 	 error );
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	expected_sanitized_path = L"^x00";
 #else
 	expected_sanitized_path = L"\\x00";
@@ -5690,7 +5707,7 @@ int cpath_test_path_get_sanitized_character_wide(
 	 "error",
 	 error );
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	expected_sanitized_path = L"^^";
 #else
 	expected_sanitized_path = L"\\\\";
@@ -5951,7 +5968,7 @@ int cpath_test_path_get_sanitized_filename_wide(
 
 	/* Test libcpath_path_get_sanitized_filename with replacement characters
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_filename          = L"t\x00sT!.t^|";
 	test_filename_length   = 9;
 	expected_filename      = L"t^x00sT^x21.t^^^x7c";
@@ -6193,7 +6210,7 @@ int cpath_test_path_get_sanitized_path_wide(
 	 */
 	/* Test libcpath_path_get_sanitized_path without replacement characters
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path          = L"test\\test.txt";
 	test_path_length   = 13;
 	expected_path      = L"test\\test.txt";
@@ -6248,7 +6265,7 @@ int cpath_test_path_get_sanitized_path_wide(
 
 	/* Test libcpath_path_get_sanitized_path with replacement characters
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path          = L"test\\t\x00sT!.t^|";
 	test_path_length   = 14;
 	expected_path      = L"test\\t^x00sT^x21.t^^^x7c";
@@ -6303,7 +6320,7 @@ int cpath_test_path_get_sanitized_path_wide(
 
 	/* Test error cases
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path        = L"test\\test.txt";
 	test_path_length = 13;
 #else
@@ -6494,7 +6511,7 @@ int cpath_test_path_join_wide(
 
 	/* Test regular cases
 	 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 	test_path1    = L"\\first\\second";
 	test_path2    = L"third\\fourth";
 	test_path3    = L"\\first\\second\\";

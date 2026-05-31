@@ -30,13 +30,11 @@
  */
 #define LIBCPATH_VERSION_STRING	"@VERSION@"
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 #define LIBCPATH_SEPARATOR	'\\'
-
 #else
 #define LIBCPATH_SEPARATOR	'/'
-
-#endif /* defined( WINAPI ) */
+#endif
 
 #endif  /* !defined( _LIBCPATH_DEFINITIONS_H ) */
 

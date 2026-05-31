@@ -41,23 +41,19 @@
  */
 #define LIBCPATH_VERSION_STRING			"@VERSION@"
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 #define LIBCPATH_SEPARATOR			'\\'
-
 #else
 #define LIBCPATH_SEPARATOR			'/'
-
-#endif /* defined( WINAPI ) */
+#endif
 
 #endif /* !defined( HAVE_LOCAL_LIBCPATH ) */
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 #define LIBCPATH_ESCAPE_CHARACTER		'^'
-
 #else
 #define LIBCPATH_ESCAPE_CHARACTER		'\\'
-
-#endif /* defined( WINAPI ) */
+#endif
 
 #if defined( WINAPI )
 enum LIBCPATH_TYPES

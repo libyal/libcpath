@@ -170,7 +170,7 @@ int libcpath_path_change_directory(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	if( libcpath_SetCurrentDirectoryA(
 	     directory_name ) == 0 )
 #else
@@ -333,7 +333,7 @@ int libcpath_path_get_current_working_directory(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	safe_current_working_directory_size = libcpath_GetCurrentDirectoryA(
 	                                       0,
 	                                       NULL );
@@ -392,7 +392,7 @@ int libcpath_path_get_current_working_directory(
 
 		goto on_error;
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	result = libcpath_GetCurrentDirectoryA(
 	          safe_current_working_directory_size,
 	          safe_current_working_directory );
@@ -982,7 +982,7 @@ int libcpath_path_get_current_working_directory_by_volume(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	safe_current_working_directory_size = libcpath_GetFullPathNameA(
 	                                       volume_name,
 	                                       0,
@@ -1045,7 +1045,7 @@ int libcpath_path_get_current_working_directory_by_volume(
 
 		goto on_error;
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	result = libcpath_GetFullPathNameA(
 	          volume_name,
 	          safe_current_working_directory_size,
@@ -1776,9 +1776,7 @@ int libcpath_path_get_full_path(
 		}
 		full_path_index += volume_name_length;
 
-		safe_full_path[ full_path_index ] = '\\';
-
-		full_path_index += 1;
+		safe_full_path[ full_path_index++ ] = '\\';
 	}
 	/* If the path is relative
 	 * add the current working directory elements
@@ -1855,9 +1853,7 @@ int libcpath_path_get_full_path(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = '\\';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = '\\';
 			}
 		}
 	}
@@ -1932,9 +1928,7 @@ int libcpath_path_get_full_path(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = '\\';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = '\\';
 			}
 		}
 	}
@@ -2037,12 +2031,14 @@ int libcpath_path_get_full_path(
 	char *path_string_segment                                       = NULL;
 	char *safe_full_path                                            = NULL;
 	static char *function                                           = "libcpath_path_get_full_path";
+	size_t current_directory_index                                  = 0;
 	size_t current_directory_length                                 = 0;
 	size_t current_directory_size                                   = 0;
 	size_t current_directory_string_segment_size                    = 0;
 	size_t full_path_index                                          = 0;
 	size_t full_path_prefix_length                                  = 0;
 	size_t last_used_path_string_segment_size                       = 0;
+	size_t path_index                                               = 0;
 	size_t path_string_segment_length                               = 0;
 	size_t path_string_segment_size                                 = 0;
 	size_t safe_full_path_size                                      = 0;
@@ -2064,8 +2060,13 @@ int libcpath_path_get_full_path(
 
 		return( -1 );
 	}
-	if( ( path_length == 0 )
+#if defined( __MINGW32__ )
+	if( ( path_length < 2 )
 	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
+#else
+	if( ( path_length < 1 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
+#endif
 	{
 		libcerror_error_set(
 		 error,
@@ -2111,16 +2112,26 @@ int libcpath_path_get_full_path(
 	}
 	/* Determine the full path size
 	 */
-	if( path[ 0 ] == '/' )
+#if defined( __MINGW32__ )
+	if( path[ 1 ] == ':' )
+	{
+		path_index = 2;
+	}
+	current_directory_index = 2;
+#endif
+	full_path_prefix_length = current_directory_index;
+
+	if( path[ path_index ] == LIBCPATH_SEPARATOR )
 	{
 		path_type = LIBCPATH_TYPE_ABSOLUTE;
 
 		/* If the path is absolute
 		 * a directory separator
 		 */
-		full_path_prefix_length = 1;
+		full_path_prefix_length += 1;
 	}
-	else
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
+	 || ( path_index != current_directory_index ) )
 	{
 		if( libcpath_path_get_current_working_directory(
 		     &current_directory,
@@ -2152,10 +2163,25 @@ int libcpath_path_get_full_path(
 		current_directory_length = narrow_string_length(
 		                            current_directory );
 
+		if( current_directory_index > current_directory_length )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid current working directory length value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		current_directory_length -= current_directory_index;
+	}
+	if( path_type == LIBCPATH_TYPE_RELATIVE )
+	{
 		if( libcsplit_narrow_string_split(
-		     current_directory,
+		     &( current_directory[ current_directory_index ] ),
 		     current_directory_length + 1,
-		     '/',
+		     LIBCPATH_SEPARATOR,
 		     &current_directory_split_string,
 		     error ) != 1 )
 		{
@@ -2191,15 +2217,26 @@ int libcpath_path_get_full_path(
 		safe_full_path_size = current_directory_length;
 
 		if( ( current_directory_length >= 1 )
-		 && ( current_directory[ current_directory_length - 1 ] != '/' ) )
+		 && ( current_directory[ current_directory_length - 1 ] != LIBCPATH_SEPARATOR ) )
 		{
 			safe_full_path_size++;
 		}
 	}
+	if( path_index > path_length )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	if( libcsplit_narrow_string_split(
-	     path,
-	     path_length + 1,
-	     '/',
+	     &( path[ path_index ] ),
+	     ( path_length - path_index ) + 1,
+	     LIBCPATH_SEPARATOR,
 	     &path_split_string,
 	     error ) != 1 )
 	{
@@ -2478,8 +2515,6 @@ int libcpath_path_get_full_path(
 	}
 	safe_full_path_size += full_path_prefix_length + 1;
 
-	full_path_index = 0;
-
 	safe_full_path = narrow_string_allocate(
 	                  safe_full_path_size );
 
@@ -2508,11 +2543,22 @@ int libcpath_path_get_full_path(
 
 		goto on_error;
 	}
+	full_path_index = 0;
+
+#if defined( __MINGW32__ )
+	if( path_index == 2 )
+	{
+		safe_full_path[ full_path_index++ ] = path[ 0 ];
+	}
+	else
+	{
+		safe_full_path[ full_path_index++ ] = current_directory[ 0 ];
+	}
+	safe_full_path[ full_path_index++ ] = ':';
+#endif
 	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
-		safe_full_path[ full_path_index ] = '/';
-
-		full_path_index += 1;
+		safe_full_path[ full_path_index++ ] = LIBCPATH_SEPARATOR;
 	}
 	/* If the path is relative
 	 * add the current working directory elements
@@ -2588,9 +2634,7 @@ int libcpath_path_get_full_path(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = '/';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = LIBCPATH_SEPARATOR;
 			}
 		}
 	}
@@ -2665,9 +2709,7 @@ int libcpath_path_get_full_path(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = '/';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = LIBCPATH_SEPARATOR;
 			}
 		}
 	}
@@ -3573,7 +3615,7 @@ int libcpath_path_make_directory(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	if( libcpath_CreateDirectoryA(
 	     directory_name,
 	     NULL ) == 0 )
@@ -3723,7 +3765,7 @@ int libcpath_path_change_directory_wide(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	if( libcpath_SetCurrentDirectoryW(
 	     directory_name ) == 0 )
 #else
@@ -3960,7 +4002,7 @@ int libcpath_path_get_current_working_directory_wide(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	safe_current_working_directory_size = libcpath_GetCurrentDirectoryW(
 	                                       0,
 	                                       NULL );
@@ -4019,7 +4061,7 @@ int libcpath_path_get_current_working_directory_wide(
 
 		goto on_error;
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	result = libcpath_GetCurrentDirectoryW(
 	          safe_current_working_directory_size,
 	          safe_current_working_directory )
@@ -4668,7 +4710,7 @@ int libcpath_path_get_current_working_directory_by_volume_wide(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	safe_current_working_directory_size = libcpath_GetFullPathNameW(
 	                                       volume_name,
 	                                       0,
@@ -4731,7 +4773,7 @@ int libcpath_path_get_current_working_directory_by_volume_wide(
 
 		goto on_error;
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	result = libcpath_GetFullPathNameW(
 	          volume_name,
 	          safe_current_working_directory_size,
@@ -5457,9 +5499,7 @@ int libcpath_path_get_full_path_wide(
 		}
 		full_path_index += volume_name_length;
 
-		safe_full_path[ full_path_index ] = (wchar_t) '\\';
-
-		full_path_index += 1;
+		safe_full_path[ full_path_index++ ] = (wchar_t) '\\';
 	}
 	/* If the path is relative
 	 * add the current working directory elements
@@ -5536,9 +5576,7 @@ int libcpath_path_get_full_path_wide(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = (wchar_t) '\\';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = (wchar_t) '\\';
 			}
 		}
 	}
@@ -5613,9 +5651,7 @@ int libcpath_path_get_full_path_wide(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = (wchar_t) '\\';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = (wchar_t) '\\';
 			}
 		}
 	}
@@ -5718,12 +5754,14 @@ int libcpath_path_get_full_path_wide(
 	wchar_t *path_string_segment                                  = NULL;
 	wchar_t *safe_full_path                                       = NULL;
 	static char *function                                         = "libcpath_path_get_full_path_wide";
+	size_t current_directory_index                                  = 0;
 	size_t current_directory_length                               = 0;
 	size_t current_directory_size                                 = 0;
 	size_t current_directory_string_segment_size                  = 0;
 	size_t full_path_index                                        = 0;
 	size_t full_path_prefix_length                                = 0;
 	size_t last_used_path_string_segment_size                     = 0;
+	size_t path_index                                             = 0;
 	size_t path_string_segment_length                             = 0;
 	size_t path_string_segment_size                               = 0;
 	size_t safe_full_path_size                                    = 0;
@@ -5745,8 +5783,13 @@ int libcpath_path_get_full_path_wide(
 
 		return( -1 );
 	}
-	if( ( path_length == 0 )
+#if defined( __MINGW32__ )
+	if( ( path_length < 2 )
 	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
+#else
+	if( ( path_length < 1 )
+	 || ( path_length > (size_t) ( SSIZE_MAX - 1 ) ) )
+#endif
 	{
 		libcerror_error_set(
 		 error,
@@ -5792,16 +5835,26 @@ int libcpath_path_get_full_path_wide(
 	}
 	/* Determine the full path size
 	 */
-	if( path[ 0 ] == (wchar_t) '/' )
+#if defined( __MINGW32__ )
+	if( path[ 1 ] == (wchar_t) ':' )
+	{
+		path_index = 2;
+	}
+	current_directory_index = 2;
+#endif
+	full_path_prefix_length = current_directory_index;
+
+	if( path[ path_index ] == LIBCPATH_SEPARATOR )
 	{
 		path_type = LIBCPATH_TYPE_ABSOLUTE;
 
 		/* If the path is absolute
 		 * a directory separator
 		 */
-		full_path_prefix_length = 1;
+		full_path_prefix_length += 1;
 	}
-	else
+	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
+	 || ( path_index != current_directory_index ) )
 	{
 		if( libcpath_path_get_current_working_directory_wide(
 		     &current_directory,
@@ -5833,10 +5886,25 @@ int libcpath_path_get_full_path_wide(
 		current_directory_length = wide_string_length(
 		                            current_directory );
 
+		if( current_directory_index > current_directory_length )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid current working directory length value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		current_directory_length -= current_directory_index;
+	}
+	if( path_type == LIBCPATH_TYPE_RELATIVE )
+	{
 		if( libcsplit_wide_string_split(
-		     current_directory,
+		     &( current_directory[ current_directory_index ] ),
 		     current_directory_length + 1,
-		     (wchar_t) '/',
+		     (wchar_t) LIBCPATH_SEPARATOR,
 		     &current_directory_split_string,
 		     error ) != 1 )
 		{
@@ -5872,15 +5940,26 @@ int libcpath_path_get_full_path_wide(
 		safe_full_path_size = current_directory_length;
 
 		if( ( current_directory_length >= 1 )
-		 && ( current_directory[ current_directory_length - 1 ] != (wchar_t) '/' ) )
+		 && ( current_directory[ current_directory_length - 1 ] != (wchar_t) LIBCPATH_SEPARATOR ) )
 		{
 			safe_full_path_size++;
 		}
 	}
+	if( path_index > path_length )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid path length value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	if( libcsplit_wide_string_split(
-	     path,
-	     path_length + 1,
-	     (wchar_t) '/',
+	     &( path[ path_index ] ),
+	     ( path_length - path_index ) + 1,
+	     (wchar_t) LIBCPATH_SEPARATOR,
 	     &path_split_string,
 	     error ) != 1 )
 	{
@@ -6159,8 +6238,6 @@ int libcpath_path_get_full_path_wide(
 	}
 	safe_full_path_size += full_path_prefix_length + 1;
 
-	full_path_index = 0;
-
 	safe_full_path = wide_string_allocate(
 	                  safe_full_path_size );
 
@@ -6189,11 +6266,22 @@ int libcpath_path_get_full_path_wide(
 
 		goto on_error;
 	}
+	full_path_index = 0;
+
+#if defined( __MINGW32__ )
+	if( path_index == 2 )
+	{
+		safe_full_path[ full_path_index++ ] = path[ 0 ];
+	}
+	else
+	{
+		safe_full_path[ full_path_index++ ] = current_directory[ 0 ];
+	}
+	safe_full_path[ full_path_index++ ] = (wchar_t) ':';
+#endif
 	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
-		safe_full_path[ full_path_index ] = (wchar_t) '/';
-
-		full_path_index += 1;
+		safe_full_path[ full_path_index++ ] = (wchar_t) LIBCPATH_SEPARATOR;
 	}
 	/* If the path is relative
 	 * add the current working directory elements
@@ -6269,9 +6357,7 @@ int libcpath_path_get_full_path_wide(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = (wchar_t) '/';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = (wchar_t) LIBCPATH_SEPARATOR;
 			}
 		}
 	}
@@ -6346,9 +6432,7 @@ int libcpath_path_get_full_path_wide(
 				}
 				full_path_index += path_string_segment_length;
 
-				safe_full_path[ full_path_index ] = (wchar_t) '/';
-
-				full_path_index += 1;
+				safe_full_path[ full_path_index++ ] = (wchar_t) LIBCPATH_SEPARATOR;
 			}
 		}
 	}
@@ -7254,7 +7338,7 @@ int libcpath_path_make_directory_wide(
 
 		return( -1 );
 	}
-#if defined( WINAPI ) && ( WINVER <= 0x0500 )
+#if WINVER <= 0x0500
 	if( libcpath_CreateDirectoryW(
 	     directory_name,
 	     NULL ) == 0 )
