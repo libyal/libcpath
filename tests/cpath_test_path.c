@@ -234,11 +234,11 @@ int cpath_test_path_change_directory(
 
 	/* Test regular cases
 	 */
-	result = libcpath_path_change_directory(
-	          ".",
-	          &error );
-
 #if defined( WINAPI ) && defined( __CYGWIN__)
+
+	libcpath_path_change_directory(
+	 ".",
+	 &error );
 
 	/* Note that on Cygwin SetCurrentDirectoryA can return path too long.
 	 */
@@ -248,6 +248,10 @@ int cpath_test_path_change_directory(
 		 &error );
 	}
 #else
+	result = libcpath_path_change_directory(
+	          ".",
+	          &error );
+
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -2380,6 +2384,11 @@ int cpath_test_path_get_sanitized_character(
 	          expected_sanitized_path,
 	          2 );
 
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
 	sanitized_path_index = 0;
 
 	result = libcpath_path_get_sanitized_character(
@@ -2408,6 +2417,11 @@ int cpath_test_path_get_sanitized_character(
 	          sanitized_path,
 	          "A",
 	          1 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
 
 	/* Test error cases
 	 */
@@ -2675,10 +2689,8 @@ int cpath_test_path_get_sanitized_filename(
 
 	/* Test error cases
 	 */
-	test_filename          = "test.txt";
-	test_filename_length   = 8;
-	expected_filename      = "test.txt";
-	expected_filename_size = 9;
+	test_filename        = "test.txt";
+	test_filename_length = 8;
 
 	result = libcpath_path_get_sanitized_filename(
 	          NULL,
@@ -2975,15 +2987,11 @@ int cpath_test_path_get_sanitized_path(
 	/* Test error cases
 	 */
 #if defined( WINAPI )
-	test_path          = "test\\test.txt";
-	test_path_length   = 13;
-	expected_path      = "test\\test.txt";
-	expected_path_size = 14;
+	test_path        = "test\\test.txt";
+	test_path_length = 13;
 #else
-	test_path          = "test/test.txt";
-	test_path_length   = 13;
-	expected_path      = "test/test.txt";
-	expected_path_size = 14;
+	test_path        = "test/test.txt";
+	test_path_length = 13;
 #endif
 
 	result = libcpath_path_get_sanitized_path(
@@ -3607,11 +3615,11 @@ int cpath_test_path_change_directory_wide(
 
 	/* Test regular cases
 	 */
-	result = libcpath_path_change_directory_wide(
-	          L".",
-	          &error );
-
 #if defined( WINAPI ) && defined( __CYGWIN__)
+
+	libcpath_path_change_directory_wide(
+	 L".",
+	 &error );
 
 	/* Note that on Cygwin SetCurrentDirectoryW can return path too long.
 	 */
@@ -3621,6 +3629,10 @@ int cpath_test_path_change_directory_wide(
 		 &error );
 	}
 #else
+	result = libcpath_path_change_directory_wide(
+	          L".",
+	          &error );
+
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -5689,6 +5701,11 @@ int cpath_test_path_get_sanitized_character_wide(
 	          expected_sanitized_path,
 	          2 );
 
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
 	sanitized_path_index = 0;
 
 	result = libcpath_path_get_sanitized_character_wide(
@@ -5717,6 +5734,11 @@ int cpath_test_path_get_sanitized_character_wide(
 	          sanitized_path,
 	          L"A",
 	          1 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
 
 	/* Test error cases
 	 */
@@ -5984,10 +6006,8 @@ int cpath_test_path_get_sanitized_filename_wide(
 
 	/* Test error cases
 	 */
-	test_filename          = L"test.txt";
-	test_filename_length   = 8;
-	expected_filename      = L"test.txt";
-	expected_filename_size = 9;
+	test_filename        = L"test.txt";
+	test_filename_length = 8;
 
 	result = libcpath_path_get_sanitized_filename_wide(
 	          NULL,
@@ -6284,15 +6304,11 @@ int cpath_test_path_get_sanitized_path_wide(
 	/* Test error cases
 	 */
 #if defined( WINAPI )
-	test_path          = L"test\\test.txt";
-	test_path_length   = 13;
-	expected_path      = L"test\\test.txt";
-	expected_path_size = 14;
+	test_path        = L"test\\test.txt";
+	test_path_length = 13;
 #else
-	test_path          = L"test/test.txt";
-	test_path_length   = 13;
-	expected_path      = L"test/test.txt";
-	expected_path_size = 14;
+	test_path        = L"test/test.txt";
+	test_path_length = 13;
 #endif
 
 	result = libcpath_path_get_sanitized_path_wide(
