@@ -2117,7 +2117,7 @@ int libcpath_path_get_full_path(
 	{
 		path_index = 2;
 	}
-	current_directory_index = 2;
+	current_directory_index = 3;
 #endif
 	full_path_prefix_length = current_directory_index;
 
@@ -2125,10 +2125,12 @@ int libcpath_path_get_full_path(
 	{
 		path_type = LIBCPATH_TYPE_ABSOLUTE;
 
+#if !defined( __MINGW32__ )
 		/* If the path is absolute
 		 * a directory separator
 		 */
 		full_path_prefix_length += 1;
+#endif
 	}
 	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
 	 || ( path_index != current_directory_index ) )
@@ -2555,11 +2557,13 @@ int libcpath_path_get_full_path(
 		safe_full_path[ full_path_index++ ] = current_directory[ 0 ];
 	}
 	safe_full_path[ full_path_index++ ] = ':';
-#endif
+	safe_full_path[ full_path_index++ ] = LIBCPATH_SEPARATOR;
+#else
 	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
 		safe_full_path[ full_path_index++ ] = LIBCPATH_SEPARATOR;
 	}
+#endif
 	/* If the path is relative
 	 * add the current working directory elements
 	 */
@@ -5754,7 +5758,7 @@ int libcpath_path_get_full_path_wide(
 	wchar_t *path_string_segment                                  = NULL;
 	wchar_t *safe_full_path                                       = NULL;
 	static char *function                                         = "libcpath_path_get_full_path_wide";
-	size_t current_directory_index                                  = 0;
+	size_t current_directory_index                                = 0;
 	size_t current_directory_length                               = 0;
 	size_t current_directory_size                                 = 0;
 	size_t current_directory_string_segment_size                  = 0;
@@ -5840,7 +5844,7 @@ int libcpath_path_get_full_path_wide(
 	{
 		path_index = 2;
 	}
-	current_directory_index = 2;
+	current_directory_index = 3;
 #endif
 	full_path_prefix_length = current_directory_index;
 
@@ -5848,10 +5852,12 @@ int libcpath_path_get_full_path_wide(
 	{
 		path_type = LIBCPATH_TYPE_ABSOLUTE;
 
+#if !defined( __MINGW32__ )
 		/* If the path is absolute
 		 * a directory separator
 		 */
 		full_path_prefix_length += 1;
+#endif
 	}
 	if( ( path_type == LIBCPATH_TYPE_RELATIVE )
 	 || ( path_index != current_directory_index ) )
@@ -6278,11 +6284,13 @@ int libcpath_path_get_full_path_wide(
 		safe_full_path[ full_path_index++ ] = current_directory[ 0 ];
 	}
 	safe_full_path[ full_path_index++ ] = (wchar_t) ':';
-#endif
+	safe_full_path[ full_path_index++ ] = (wchar_t) LIBCPATH_SEPARATOR;
+#else
 	if( path_type == LIBCPATH_TYPE_ABSOLUTE )
 	{
 		safe_full_path[ full_path_index++ ] = (wchar_t) LIBCPATH_SEPARATOR;
 	}
+#endif
 	/* If the path is relative
 	 * add the current working directory elements
 	 */

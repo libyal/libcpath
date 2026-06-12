@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20251129
+# Version: 20260604
 
 # Generic auto-generated build files
 *~
@@ -127,11 +127,19 @@ stamp-h[1-9]
 /libcpath.spec
 /libcpath/libcpath.rc
 /libcpath/libcpath_definitions.h
+/tests/*.dir
 /tests/*.exe
+/tests/*.log
+/tests/*.tmp
+/tests/atconfig
+/tests/atlocal
 /tests/cpath_test_error
 /tests/cpath_test_path
 /tests/cpath_test_support
 /tests/cpath_test_system_string
+/tests/package.m4
+/tests/test_library
+/tests/test_manpages
 /tests/tmp*
 
 # Local library dependencies specific files
