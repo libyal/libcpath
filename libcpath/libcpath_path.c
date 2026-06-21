@@ -595,7 +595,7 @@ DWORD libcpath_GetFullPathNameA(
 #if defined( WINAPI )
 
 /* Determines the path type
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_path_type(
      const char *path,
@@ -699,7 +699,7 @@ int libcpath_path_get_path_type(
 }
 
 /* Determines the volume name
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_volume_name(
      const char *path,
@@ -1114,7 +1114,7 @@ on_error:
  * Volume device path:		\\.\C:
  * Volume file system path:	\\.\C:\
  *
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_full_path(
      const char *path,
@@ -2014,7 +2014,7 @@ on_error:
  * /../home/user/file.txt
  * user/../user/file.txt
  *
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_full_path(
      const char *path,
@@ -2508,7 +2508,12 @@ int libcpath_path_get_full_path(
 				last_used_path_segment_index = path_segment_index;
 			}
 		}
+#if defined( __MINGW32__ )
+		if( ( safe_full_path_size > 0 )
+		 && ( path_number_of_segments > 1 ) )
+#else
 		if( safe_full_path_size > 0 )
+#endif
 		{
 			/* Remove the size reserved of the last directory separator
 			 */
@@ -4327,7 +4332,7 @@ DWORD libcpath_GetFullPathNameW(
 #if defined( WINAPI )
 
 /* Determines the path type
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_path_type_wide(
      const wchar_t *path,
@@ -4431,7 +4436,7 @@ int libcpath_path_get_path_type_wide(
 }
 
 /* Determines the volume name
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_volume_name_wide(
      const wchar_t *path,
@@ -4841,7 +4846,7 @@ on_error:
  * Volume 'relative' path:	C:directory\file.txt
  * UNC path:			\\server\share\directory\file.txt
  *
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_full_path_wide(
      const wchar_t *path,
@@ -5741,7 +5746,7 @@ on_error:
  * /../home/user/file.txt
  * user/../user/file.txt
  *
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libcpath_path_get_full_path_wide(
      const wchar_t *path,
@@ -6235,7 +6240,12 @@ int libcpath_path_get_full_path_wide(
 				last_used_path_segment_index = path_segment_index;
 			}
 		}
+#if defined( __MINGW32__ )
+		if( ( safe_full_path_size > 0 )
+		 && ( path_number_of_segments > 1 ) )
+#else
 		if( safe_full_path_size > 0 )
+#endif
 		{
 			/* Remove the size reserved of the last directory separator
 			 */
