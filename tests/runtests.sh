@@ -1,21 +1,22 @@
 #!/bin/sh
 # Script to run tests
 #
-# Version: 20260609
+# Version: 20260714
 
-if test -f ${PWD}/libcpath/.libs/libcpath.1.dylib && test -f ./pycpath/.libs/pycpath.so
+if [ -f "${PWD}/libcpath/.libs/libcpath.1.dylib" ] && [ -f ./pycpath/.libs/pycpath.so ]
 then
-	install_name_tool -change /usr/local/lib/libcpath.1.dylib ${PWD}/libcpath/.libs/libcpath.1.dylib ./pycpath/.libs/pycpath.so
+    install_name_tool -change /usr/local/lib/libcpath.1.dylib "${PWD}/libcpath/.libs/libcpath.1.dylib" ./pycpath/.libs/pycpath.so
 fi
 
 make check-build > /dev/null
 
+# shellcheck disable=SC2068
 make check $@
 RESULT=$?
 
-if test ${RESULT} -ne 0
+if [ ${RESULT} -ne 0 ]
 then
-	find . -name \*.log -path \*.dir/\*/\*.log -print -exec cat {} \;
+    find . -name \*.log -path \*.dir/\*/\*.log -print -exec cat {} \;
 fi
 exit ${RESULT}
 
