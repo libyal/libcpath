@@ -3894,7 +3894,7 @@ int libcpath_path_change_directory_wide(
 		 "%s: unable to change directory.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	memory_free(
 	 narrow_directory_name );

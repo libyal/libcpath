@@ -31,8 +31,10 @@
 #endif
 
 #include "cpath_test_libcerror.h"
+#include "cpath_test_libclocale.h"
 #include "cpath_test_libcpath.h"
 #include "cpath_test_macros.h"
+#include "cpath_test_memory.h"
 #include "cpath_test_unused.h"
 
 #include "../libcpath/libcpath_system_string.h"
@@ -162,6 +164,40 @@ int cpath_test_system_string_copy_to_narrow_string(
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_system_string_copy_to_narrow_string with memcpy failing
+	 */
+	cpath_test_memcpy_attempts_before_fail = 0;
+
+	result = libcpath_system_string_copy_to_narrow_string(
+	          _SYSTEM_STRING( "test string" ),
+	          12,
+	          narrow_string,
+	          32,
+	          &error );
+
+	if( cpath_test_memcpy_attempts_before_fail != -1 )
+	{
+		cpath_test_memcpy_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
 
 	/* Test error cases
 	 */
@@ -397,6 +433,40 @@ int cpath_test_system_string_copy_from_narrow_string(
 	 "error",
 	 error );
 
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_system_string_copy_from_narrow_string with memcpy failing
+	 */
+	cpath_test_memcpy_attempts_before_fail = 0;
+
+	result = libcpath_system_string_copy_from_narrow_string(
+	          system_string,
+	          32,
+	          "test string",
+	          12,
+	          &error );
+
+	if( cpath_test_memcpy_attempts_before_fail != -1 )
+	{
+		cpath_test_memcpy_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
+
 	/* Test error cases
 	 */
 	result = libcpath_system_string_copy_from_narrow_string(
@@ -517,6 +587,7 @@ int cpath_test_system_string_size_to_wide_string(
 {
 	libcerror_error_t *error = NULL;
 	size_t wide_string_size  = 0;
+	int codepage             = 0;
 	int result               = 0;
 
 	result = libcpath_system_string_size_to_wide_string(
@@ -534,6 +605,67 @@ int cpath_test_system_string_size_to_wide_string(
 	 "wide_string_size",
 	 wide_string_size,
 	 (size_t) 12 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test with an alternate codepage
+	 */
+	result = libclocale_codepage_get(
+	          &codepage,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          ( codepage == 0 ) ? LIBCLOCALE_CODEPAGE_WINDOWS_1252 : 0,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_system_string_size_to_wide_string(
+	          _SYSTEM_STRING( "test string" ),
+	          12,
+	          &wide_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "wide_string_size",
+	 wide_string_size,
+	 (size_t) 12 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          codepage,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -615,6 +747,7 @@ int cpath_test_system_string_copy_to_wide_string(
 	wchar_t wide_string[ 32 ];
 
 	libcerror_error_t *error = NULL;
+	int codepage             = 0;
 	int result               = 0;
 
 	result = libcpath_system_string_copy_to_wide_string(
@@ -622,6 +755,63 @@ int cpath_test_system_string_copy_to_wide_string(
 	          12,
 	          wide_string,
 	          32,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test with an alternate codepage
+	 */
+	result = libclocale_codepage_get(
+	          &codepage,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          ( codepage == 0 ) ? LIBCLOCALE_CODEPAGE_WINDOWS_1252 : 0,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_system_string_copy_to_wide_string(
+	          _SYSTEM_STRING( "test string" ),
+	          12,
+	          wide_string,
+	          32,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          codepage,
 	          &error );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
@@ -751,6 +941,7 @@ int cpath_test_system_string_size_from_wide_string(
 {
 	libcerror_error_t *error  = NULL;
 	size_t system_string_size = 0;
+	int codepage              = 0;
 	int result                = 0;
 
 	result = libcpath_system_string_size_from_wide_string(
@@ -768,6 +959,67 @@ int cpath_test_system_string_size_from_wide_string(
 	 "system_string_size",
 	 system_string_size,
 	 (size_t) 12 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test with an alternate codepage
+	 */
+	result = libclocale_codepage_get(
+	          &codepage,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          ( codepage == 0 ) ? LIBCLOCALE_CODEPAGE_WINDOWS_1252 : 0,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_system_string_size_from_wide_string(
+	          L"test string",
+	          12,
+	          &system_string_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "system_string_size",
+	 system_string_size,
+	 (size_t) 12 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          codepage,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	CPATH_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -849,6 +1101,7 @@ int cpath_test_system_string_copy_from_wide_string(
 	system_character_t system_string[ 32 ];
 
 	libcerror_error_t *error = NULL;
+	int codepage             = 0;
 	int result               = 0;
 
 	result = libcpath_system_string_copy_from_wide_string(
@@ -856,6 +1109,63 @@ int cpath_test_system_string_copy_from_wide_string(
 	          32,
 	          L"test string",
 	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test with an alternate codepage
+	 */
+	result = libclocale_codepage_get(
+	          &codepage,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          ( codepage == 0 ) ? LIBCLOCALE_CODEPAGE_WINDOWS_1252 : 0,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_system_string_copy_from_wide_string(
+	          system_string,
+	          32,
+	          L"test string",
+	          12,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libclocale_codepage_set(
+	          codepage,
 	          &error );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(

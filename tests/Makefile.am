@@ -53,13 +53,16 @@ cpath_test_support_LDADD = \
 
 cpath_test_system_string_SOURCES = \
 	cpath_test_libcerror.h \
+	cpath_test_libclocale.h \
 	cpath_test_libcpath.h \
 	cpath_test_macros.h \
+	cpath_test_memory.c cpath_test_memory.h \
 	cpath_test_system_string.c \
 	cpath_test_unused.h
 
 cpath_test_system_string_LDADD = \
 	../libcpath/libcpath.la \
+	@LIBCLOCALE_LIBADD@ \
 	@LIBCERROR_LIBADD@
 
 AUTOM4TE = autom4te

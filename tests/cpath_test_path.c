@@ -36,6 +36,11 @@
 
 #include <errno.h>
 
+#if !defined( WINAPI ) && defined( HAVE_MKDIR )
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 #if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ )
 #define __USE_GNU
 #include <dlfcn.h>
@@ -242,7 +247,7 @@ int cpath_test_path_change_directory(
 
 	/* Note that on Cygwin SetCurrentDirectoryA can return path too long.
 	 */
-	if( *error != NULL )
+	if( error != NULL )
 	{
 		libcerror_error_free(
 		 &error );
@@ -1601,6 +1606,7 @@ int cpath_test_path_get_full_path(
 		"c:\\..\\home\\username\\..\\user\\test.txt",
 	};
 	char *relative_paths[] = {
+		".\\user\\test.txt",
 		"user\\test.txt",
 		"username\\..\\user\\test.txt",
 	};
@@ -1622,11 +1628,15 @@ int cpath_test_path_get_full_path(
 		"/../home/username/../user/test.txt",
 	};
 	char *relative_paths[] = {
+		"./user/test.txt",
 		"user/test.txt",
 		"username/../user/test.txt",
 	};
 #endif /* defined( WINAPI ) || defined( __MINGW32__ ) */
 
+#if defined( HAVE_CPATH_TEST_FUNCTION_HOOK )
+	char long_parent_path[ 12288 ]         = "";
+#endif
 	libcerror_error_t *error                = NULL;
 	char *current_working_directory         = NULL;
 	char *expected_path                     = NULL;
@@ -1638,7 +1648,13 @@ int cpath_test_path_get_full_path(
 	size_t expected_path_length             = 0;
 	size_t full_path_length                 = 0;
 	size_t full_path_size                   = 0;
+#if !defined( WINAPI )
+	size_t last_path_segment_index          = 0;
+#endif
 	size_t path_length                      = 0;
+#if defined( HAVE_CPATH_TEST_FUNCTION_HOOK )
+	int long_parent_path_index              = 0;
+#endif
 	int path_index                          = 0;
 	int result                              = 0;
 	int string_index                        = 0;
@@ -1779,7 +1795,7 @@ int cpath_test_path_get_full_path(
 #endif
 
 	for( path_index = 0;
-	     path_index < 2;
+	     path_index < 3;
 	     path_index++ )
 	{
 		path = relative_paths[ path_index ];
@@ -1999,6 +2015,100 @@ int cpath_test_path_get_full_path(
 	}
 #endif /* defined( WINAPI ) */
 
+#if !defined( WINAPI )
+	/* Test a relative path with a parent segment which removes
+	 * the last path segment of the current working directory
+	 */
+#if defined( __MINGW32__ )
+	expected_path = "\\user\\test.txt";
+#else
+	expected_path = "/user/test.txt";
+#endif
+	expected_path_length = narrow_string_length(
+	                        expected_path );
+
+	for( last_path_segment_index = current_working_directory_length;
+	     ( last_path_segment_index > 0 )
+	 && ( current_working_directory[ last_path_segment_index - 1 ] != LIBCPATH_SEPARATOR );
+	     last_path_segment_index-- )
+	{
+		/* Find the last directory separator in the current working directory
+		 */
+	}
+
+#if defined( __MINGW32__ )
+	path = "..\\user\\test.txt";
+#else
+	path = "../user/test.txt";
+#endif
+	path_length = narrow_string_length(
+	               path );
+
+	result = libcpath_path_get_full_path(
+	          path,
+	          path_length,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "full_path",
+	 full_path );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "full_path_size",
+	 full_path_size,
+	 (size_t) ( last_path_segment_index + expected_path_length ) );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#if defined( __MINGW32__ )
+	result = narrow_string_compare_no_case(
+	          full_path,
+	          current_working_directory,
+	          (size_t) ( last_path_segment_index - 1 ) );
+#else
+	result = narrow_string_compare(
+	          full_path,
+	          current_working_directory,
+	          (size_t) ( last_path_segment_index - 1 ) );
+#endif
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+#if defined( __MINGW32__ )
+	result = narrow_string_compare_no_case(
+	          &( full_path[ last_path_segment_index - 1 ] ),
+	          expected_path,
+	          expected_path_length );
+#else
+	result = narrow_string_compare(
+	          &( full_path[ last_path_segment_index - 1 ] ),
+	          expected_path,
+	          expected_path_length );
+#endif
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 full_path );
+
+	full_path = NULL;
+#endif /* !defined( WINAPI ) */
+
 	/* Test error cases
 	 */
 	result = libcpath_path_get_full_path(
@@ -2121,6 +2231,71 @@ int cpath_test_path_get_full_path(
 
 #if defined( HAVE_CPATH_TEST_FUNCTION_HOOK )
 
+	/* Test a path with a sequence of parent segments that
+	 * cannot be fully resolved within the current working directory
+	 */
+	result = libcpath_path_get_full_path(
+	          "a/../..",
+	          7,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "full_path",
+	 full_path );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcpath_error_free(
+	 &error );
+
+	/* Test a path with more parent segments than could possibly
+	 * exist in the current working directory, which is bounded by
+	 * the maximum path length of PATH_MAX
+	 */
+	for( path_index = 0; path_index < 4096; path_index++ )
+	{
+		long_parent_path[ long_parent_path_index++ ] = '.';
+		long_parent_path[ long_parent_path_index++ ] = '.';
+
+		if( ( path_index + 1 ) < 4096 )
+		{
+			long_parent_path[ long_parent_path_index++ ] = '/';
+		}
+	}
+	long_parent_path[ long_parent_path_index ] = 0;
+
+	path = long_parent_path;
+
+	path_length = (size_t) long_parent_path_index;
+
+	result = libcpath_path_get_full_path(
+	          path,
+	          path_length,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 	/* Test libcpath_path_change_directory with getcwd failing
 	 */
 	cpath_test_getcwd_attempts_before_fail = 0;
@@ -2155,6 +2330,424 @@ int cpath_test_path_get_full_path(
 		 &error );
 	}
 #endif /* defined( HAVE_CPATH_TEST_FUNCTION_HOOK ) */
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_get_full_path with the path split failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 5;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with the full path allocation failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 9;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with clearing the full path failing
+	 */
+	cpath_test_memset_attempts_before_fail = 7;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_memset_attempts_before_fail != -1 )
+	{
+		cpath_test_memset_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with the current working directory segment copy failing
+	 */
+	cpath_test_memcpy_attempts_before_fail = 2;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_memcpy_attempts_before_fail != -1 )
+	{
+		cpath_test_memcpy_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with the last path segment copy failing
+	 * The position of the first path segment copy depends on the depth of
+	 * the current working directory, therefore the number of memcpy calls
+	 * made by a successful call is determined first and the last memcpy
+	 * call, i.e. the copy of the last path segment, is made to fail.
+	 */
+	cpath_test_memcpy_attempts_before_fail = 1024;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_memcpy_attempts_before_fail != -1 )
+	{
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+
+		/* The counter was decreased for every successful memcpy call
+		 * i.e. the next (last) memcpy call will fail
+		 */
+		cpath_test_memcpy_attempts_before_fail = 1023 - cpath_test_memcpy_attempts_before_fail;
+
+		result = libcpath_path_get_full_path(
+		          "test.txt",
+		          8,
+		          &full_path,
+		          &full_path_size,
+		          &error );
+
+		if( cpath_test_memcpy_attempts_before_fail != -1 )
+		{
+			cpath_test_memcpy_attempts_before_fail = -1;
+
+			if( full_path != NULL )
+			{
+				memory_free(
+				 full_path );
+
+				full_path = NULL;
+			}
+		}
+		else
+		{
+			CPATH_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
+
+			CPATH_TEST_ASSERT_IS_NULL(
+			 "full_path",
+			 full_path );
+
+			CPATH_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
+
+			libcerror_error_free(
+			 &error );
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with the second malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 1;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with the third malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 2;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with the fourth malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 3;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path with memset failing
+	 */
+	cpath_test_memset_attempts_before_fail = 0;
+
+	result = libcpath_path_get_full_path(
+	          "test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_memset_attempts_before_fail != -1 )
+	{
+		cpath_test_memset_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
 
 	/* Clean up
 	 */
@@ -2431,6 +3024,46 @@ int cpath_test_path_get_sanitized_character(
 	 result,
 	 0 );
 
+	sanitized_path_index = 0;
+
+	result = libcpath_path_get_sanitized_character(
+	          (char) 0xb1,
+	          4,
+	          sanitized_path,
+	          32,
+	          &sanitized_path_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_index",
+	 sanitized_path_index,
+	 (size_t) 4 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#if defined( WINAPI ) || defined( __MINGW32__ )
+	expected_sanitized_path = "^xb1";
+#else
+	expected_sanitized_path = "\\xb1";
+#endif
+
+	result = narrow_string_compare(
+	          sanitized_path,
+	          expected_sanitized_path,
+	          4 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
 	/* Test error cases
 	 */
 	sanitized_path_index = 0;
@@ -2562,6 +3195,33 @@ int cpath_test_path_get_sanitized_character(
 	libcerror_error_free(
 	 &error );
 
+	sanitized_path_index = 33;
+
+	result = libcpath_path_get_sanitized_character(
+	          'A',
+	          1,
+	          sanitized_path,
+	          32,
+	          &sanitized_path_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_index",
+	 sanitized_path_index,
+	 (size_t) 33 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 	return( 1 );
 
 on_error:
@@ -2652,6 +3312,61 @@ int cpath_test_path_get_sanitized_filename(
 	test_filename_length   = 9;
 	expected_filename      = "t\\x00sT\\x21.t\\\\\\x7c";
 	expected_filename_size = 20;
+#endif
+
+	result = libcpath_path_get_sanitized_filename(
+	          test_filename,
+	          test_filename_length,
+	          &sanitized_filename,
+	          &sanitized_filename_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "sanitized_filename",
+	 sanitized_filename );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_filename_size",
+	 sanitized_filename_size,
+	 expected_filename_size );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = narrow_string_compare(
+	          sanitized_filename,
+	          expected_filename,
+	          expected_filename_size );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 sanitized_filename );
+
+	sanitized_filename      = NULL;
+	sanitized_filename_size = 0;
+
+	/* Test libcpath_path_get_sanitized_filename with directory separators
+	 */
+#if defined( WINAPI ) || defined( __MINGW32__ )
+	test_filename          = "a\\b.txt";
+	test_filename_length   = 7;
+	expected_filename      = "a^x5cb.txt";
+	expected_filename_size = 11;
+#else
+	test_filename          = "a/b.txt";
+	test_filename_length   = 7;
+	expected_filename      = "a\\x2fb.txt";
+	expected_filename_size = 11;
 #endif
 
 	result = libcpath_path_get_sanitized_filename(
@@ -3466,6 +4181,154 @@ int cpath_test_path_join(
 	libcerror_error_free(
 	 &error );
 
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_join with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          test_path1,
+	          13,
+	          test_path2,
+	          12,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( path != NULL )
+		{
+			memory_free(
+			 path );
+
+			path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "path",
+		 path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "path_size",
+		 path_size,
+		 (size_t) 0 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_join with memcpy failing
+	 */
+	cpath_test_memcpy_attempts_before_fail = 0;
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          test_path1,
+	          13,
+	          test_path2,
+	          12,
+	          &error );
+
+	if( cpath_test_memcpy_attempts_before_fail != -1 )
+	{
+		cpath_test_memcpy_attempts_before_fail = -1;
+
+		if( path != NULL )
+		{
+			memory_free(
+			 path );
+
+			path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "path",
+		 path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "path_size",
+		 path_size,
+		 (size_t) 0 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_join with the second memcpy failing
+	 */
+	cpath_test_memcpy_attempts_before_fail = 1;
+
+	result = libcpath_path_join(
+	          &path,
+	          &path_size,
+	          test_path1,
+	          13,
+	          test_path2,
+	          12,
+	          &error );
+
+	if( cpath_test_memcpy_attempts_before_fail != -1 )
+	{
+		cpath_test_memcpy_attempts_before_fail = -1;
+
+		if( path != NULL )
+		{
+			memory_free(
+			 path );
+
+			path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "path",
+		 path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "path_size",
+		 path_size,
+		 (size_t) 0 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
+
 	return( 1 );
 
 on_error:
@@ -3534,12 +4397,88 @@ int cpath_test_path_make_directory(
 
 	/* Test regular cases
 	 */
+#if defined( WINAPI ) || defined( HAVE_MKDIR )
+
+	result = libcpath_path_make_directory(
+	          "cpath_test_dir",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#if !( defined( WINAPI ) && defined( __CYGWIN__ ) )
+
+	result = libcpath_path_change_directory(
+	          "cpath_test_dir",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_path_change_directory(
+	          "..",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#endif /* !( defined( WINAPI ) && defined( __CYGWIN__ ) ) */
+
+#if defined( WINAPI )
+	RemoveDirectoryA(
+	 "cpath_test_dir" );
+#else
+	rmdir(
+	 "cpath_test_dir" );
+#endif
+
+#endif /* defined( WINAPI ) || defined( HAVE_MKDIR ) */
 
 	/* Test error cases
 	 */
 	result = libcpath_path_make_directory(
 	          NULL,
 	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( WINAPI ) || defined( __MINGW32__ )
+	result = libcpath_path_make_directory(
+	          "cpath_test_dir\\cpath_test_dir2",
+	          &error );
+#else
+	result = libcpath_path_make_directory(
+	          "cpath_test_dir/cpath_test_dir2",
+	          &error );
+#endif
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -3631,7 +4570,7 @@ int cpath_test_path_change_directory_wide(
 
 	/* Note that on Cygwin SetCurrentDirectoryW can return path too long.
 	 */
-	if( *error != NULL )
+	if( error != NULL )
 	{
 		libcerror_error_free(
 		 &error );
@@ -3670,6 +4609,79 @@ int cpath_test_path_change_directory_wide(
 
 	libcerror_error_free(
 	 &error );
+
+#if SIZEOF_WCHAR_T == 4
+
+	/* Test error cases with an invalid UTF-32 code point (isolated surrogate)
+	 */
+	result = libcpath_path_change_directory_wide(
+	          L"\xd800",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#endif /* SIZEOF_WCHAR_T == 4 */
+
+#if !defined( WINAPI )
+
+	/* Test error cases with a non-existing directory
+	 */
+	result = libcpath_path_change_directory_wide(
+	          L"cpath_test_nonexistent_dir",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+	/* Test libcpath_path_change_directory_wide with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_change_directory_wide(
+	          L"cpath_test_dir",
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
+
+#endif /* !defined( WINAPI ) */
 
 	return( 1 );
 
@@ -3818,6 +4830,53 @@ int cpath_test_path_get_current_working_directory_wide(
 	libcerror_error_free(
 	 &error );
 
+#if !defined( WINAPI ) && !defined( __MINGW32__ ) && defined( HAVE_MKDIR ) && defined( HAVE_MKDIR_MODE )
+
+	/* Test error case with a current working directory name
+	 * that contains invalid UTF-8 bytes
+	 * Note the trailing byte 0x80 is an invalid UTF-8 sequence
+	 * which cannot be converted to a wide character string
+	 */
+	if( mkdir(
+	     "cpath_test_utf8_invalid_\x80",
+	     0755 ) == 0 )
+	{
+		if( chdir(
+		     "cpath_test_utf8_invalid_\x80" ) == 0 )
+		{
+			result = libcpath_path_get_current_working_directory_wide(
+			          &current_working_directory,
+			          &current_working_directory_size,
+			          &error );
+
+			if( chdir(
+			     ".." ) != 0 )
+			{
+				goto on_error;
+			}
+			rmdir(
+			 "cpath_test_utf8_invalid_\x80" );
+
+			CPATH_TEST_ASSERT_EQUAL_INT(
+			 "result",
+			 result,
+			 -1 );
+
+			CPATH_TEST_ASSERT_IS_NOT_NULL(
+			 "error",
+			 error );
+
+			libcerror_error_free(
+			 &error );
+		}
+		else
+		{
+			rmdir(
+			 "cpath_test_utf8_invalid_\x80" );
+		}
+	}
+#endif /* !defined( WINAPI ) && !defined( __MINGW32__ ) && defined( HAVE_MKDIR ) && defined( HAVE_MKDIR_MODE ) */
+
 #if defined( HAVE_CPATH_TEST_MEMORY )
 
 	/* Test libcpath_path_get_current_working_directory_wide with malloc failing
@@ -3871,6 +4930,45 @@ int cpath_test_path_get_current_working_directory_wide(
 	if( cpath_test_memset_attempts_before_fail != -1 )
 	{
 		cpath_test_memset_attempts_before_fail = -1;
+
+		if( current_working_directory != NULL )
+		{
+			memory_free(
+			 current_working_directory );
+
+			current_working_directory = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "current_working_directory",
+		 current_working_directory );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_current_working_directory_wide with the second malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 1;
+
+	result = libcpath_path_get_current_working_directory_wide(
+	          &current_working_directory,
+	          &current_working_directory_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
 
 		if( current_working_directory != NULL )
 		{
@@ -4926,6 +6024,7 @@ int cpath_test_path_get_full_path_wide(
 		L"c:\\..\\home\\username\\..\\user\\test.txt",
 	};
 	wchar_t *relative_paths[] = {
+		L".\\user\\test.txt",
 		L"user\\test.txt",
 		L"username\\..\\user\\test.txt",
 	};
@@ -4947,11 +6046,15 @@ int cpath_test_path_get_full_path_wide(
 		L"/../home/username/../user/test.txt",
 	};
 	wchar_t *relative_paths[] = {
+		L"./user/test.txt",
 		L"user/test.txt",
 		L"username/../user/test.txt",
 	};
 #endif /* defined( WINAPI ) || defined( __MINGW32__ ) */
 
+#if defined( HAVE_CPATH_TEST_FUNCTION_HOOK )
+	wchar_t long_parent_path[ 12288 ]       = L"";
+#endif
 	libcerror_error_t *error                = NULL;
 	wchar_t *current_working_directory      = NULL;
 	wchar_t *expected_path                  = NULL;
@@ -4963,7 +6066,13 @@ int cpath_test_path_get_full_path_wide(
 	size_t expected_path_length             = 0;
 	size_t full_path_length                 = 0;
 	size_t full_path_size                   = 0;
+#if !defined( WINAPI )
+	size_t last_path_segment_index          = 0;
+#endif
 	size_t path_length                      = 0;
+#if defined( HAVE_CPATH_TEST_FUNCTION_HOOK )
+	int long_parent_path_index              = 0;
+#endif
 	int path_index                          = 0;
 	int result                              = 0;
 	int string_index                        = 0;
@@ -5105,7 +6214,7 @@ int cpath_test_path_get_full_path_wide(
 #endif
 
 	for( path_index = 0;
-	     path_index < 2;
+	     path_index < 3;
 	     path_index++ )
 	{
 		path = relative_paths[ path_index ];
@@ -5325,6 +6434,100 @@ int cpath_test_path_get_full_path_wide(
 	}
 #endif /* defined( WINAPI ) */
 
+#if !defined( WINAPI )
+	/* Test a relative path with a parent segment which removes
+	 * the last path segment of the current working directory
+	 */
+#if defined( __MINGW32__ )
+	expected_path = L"\\user\\test.txt";
+#else
+	expected_path = L"/user/test.txt";
+#endif
+	expected_path_length = wide_string_length(
+	                        expected_path );
+
+	for( last_path_segment_index = current_working_directory_length;
+	     ( last_path_segment_index > 0 )
+	 && ( current_working_directory[ last_path_segment_index - 1 ] != (wchar_t) LIBCPATH_SEPARATOR );
+	     last_path_segment_index-- )
+	{
+		/* Find the last directory separator in the current working directory
+		 */
+	}
+
+#if defined( __MINGW32__ )
+	path = L"..\\user\\test.txt";
+#else
+	path = L"../user/test.txt";
+#endif
+	path_length = wide_string_length(
+	               path );
+
+	result = libcpath_path_get_full_path_wide(
+	          path,
+	          path_length,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "full_path",
+	 full_path );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "full_path_size",
+	 full_path_size,
+	 (size_t) ( last_path_segment_index + expected_path_length ) );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#if defined( __MINGW32__ )
+	result = wide_string_compare_no_case(
+	          full_path,
+	          current_working_directory,
+	          (size_t) ( last_path_segment_index - 1 ) );
+#else
+	result = wide_string_compare(
+	          full_path,
+	          current_working_directory,
+	          (size_t) ( last_path_segment_index - 1 ) );
+#endif
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+#if defined( __MINGW32__ )
+	result = wide_string_compare_no_case(
+	          &( full_path[ last_path_segment_index - 1 ] ),
+	          expected_path,
+	          expected_path_length );
+#else
+	result = wide_string_compare(
+	          &( full_path[ last_path_segment_index - 1 ] ),
+	          expected_path,
+	          expected_path_length );
+#endif
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 full_path );
+
+	full_path = NULL;
+#endif /* !defined( WINAPI ) */
+
 	/* Test error cases
 	 */
 	result = libcpath_path_get_full_path_wide(
@@ -5447,6 +6650,71 @@ int cpath_test_path_get_full_path_wide(
 
 #if defined( HAVE_CPATH_TEST_FUNCTION_HOOK )
 
+	/* Test a path with a sequence of parent segments that
+	 * cannot be fully resolved within the current working directory
+	 */
+	result = libcpath_path_get_full_path_wide(
+	          L"a/../..",
+	          7,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "full_path",
+	 full_path );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcpath_error_free(
+	 &error );
+
+	/* Test a path with more parent segments than could possibly
+	 * exist in the current working directory, which is bounded by
+	 * the maximum path length of PATH_MAX
+	 */
+	for( path_index = 0; path_index < 4096; path_index++ )
+	{
+		long_parent_path[ long_parent_path_index++ ] = L'.';
+		long_parent_path[ long_parent_path_index++ ] = L'.';
+
+		if( ( path_index + 1 ) < 4096 )
+		{
+			long_parent_path[ long_parent_path_index++ ] = L'/';
+		}
+	}
+	long_parent_path[ long_parent_path_index ] = 0;
+
+	path = long_parent_path;
+
+	path_length = (size_t) long_parent_path_index;
+
+	result = libcpath_path_get_full_path_wide(
+	          path,
+	          path_length,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 	/* Test libcpath_path_change_directory with getcwd failing
 	 */
 	cpath_test_getcwd_attempts_before_fail = 0;
@@ -5481,6 +6749,297 @@ int cpath_test_path_get_full_path_wide(
 		 &error );
 	}
 #endif /* defined( HAVE_CPATH_TEST_FUNCTION_HOOK ) */
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_get_full_path_wide with the path split failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 6;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path_wide with the full path allocation failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 10;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path_wide with clearing the full path failing
+	 */
+	cpath_test_memset_attempts_before_fail = 7;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_memset_attempts_before_fail != -1 )
+	{
+		cpath_test_memset_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path_wide with the second malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 1;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path_wide with the third malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 2;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path_wide with the fourth malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 3;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libcpath_path_get_full_path_wide with memset failing
+	 */
+	cpath_test_memset_attempts_before_fail = 0;
+
+	result = libcpath_path_get_full_path_wide(
+	          L"test.txt",
+	          8,
+	          &full_path,
+	          &full_path_size,
+	          &error );
+
+	if( cpath_test_memset_attempts_before_fail != -1 )
+	{
+		cpath_test_memset_attempts_before_fail = -1;
+
+		if( full_path != NULL )
+		{
+			memory_free(
+			 full_path );
+
+			full_path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "full_path",
+		 full_path );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
 
 	/* Clean up
 	 */
@@ -5673,7 +7232,7 @@ int cpath_test_path_get_sanitized_character_wide(
 	expected_sanitized_path = L"\\x00";
 #endif
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          sanitized_path,
 	          expected_sanitized_path,
 	          4 );
@@ -5713,7 +7272,7 @@ int cpath_test_path_get_sanitized_character_wide(
 	expected_sanitized_path = L"\\\\";
 #endif
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          sanitized_path,
 	          expected_sanitized_path,
 	          2 );
@@ -5747,10 +7306,50 @@ int cpath_test_path_get_sanitized_character_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          sanitized_path,
 	          L"A",
 	          1 );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	sanitized_path_index = 0;
+
+	result = libcpath_path_get_sanitized_character_wide(
+	          (wchar_t) 0xb1,
+	          4,
+	          sanitized_path,
+	          32,
+	          &sanitized_path_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_index",
+	 sanitized_path_index,
+	 (size_t) 4 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#if defined( WINAPI ) || defined( __MINGW32__ )
+	expected_sanitized_path = L"^xb1";
+#else
+	expected_sanitized_path = L"\\xb1";
+#endif
+
+	result = wide_string_compare(
+	          sanitized_path,
+	          expected_sanitized_path,
+	          4 );
 
 	CPATH_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -5888,6 +7487,33 @@ int cpath_test_path_get_sanitized_character_wide(
 	libcerror_error_free(
 	 &error );
 
+	sanitized_path_index = 33;
+
+	result = libcpath_path_get_sanitized_character_wide(
+	          (wchar_t) 'A',
+	          1,
+	          sanitized_path,
+	          32,
+	          &sanitized_path_index,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_path_index",
+	 sanitized_path_index,
+	 (size_t) 33 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 	return( 1 );
 
 on_error:
@@ -5950,7 +7576,7 @@ int cpath_test_path_get_sanitized_filename_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          sanitized_filename,
 	          expected_filename,
 	          expected_filename_size );
@@ -6005,7 +7631,62 @@ int cpath_test_path_get_sanitized_filename_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
+	          sanitized_filename,
+	          expected_filename,
+	          expected_filename_size );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	memory_free(
+	 sanitized_filename );
+
+	sanitized_filename      = NULL;
+	sanitized_filename_size = 0;
+
+	/* Test libcpath_path_get_sanitized_filename_wide with directory separators
+	 */
+#if defined( WINAPI ) || defined( __MINGW32__ )
+	test_filename          = L"a\\b.txt";
+	test_filename_length   = 7;
+	expected_filename      = L"a^x5cb.txt";
+	expected_filename_size = 11;
+#else
+	test_filename          = L"a/b.txt";
+	test_filename_length   = 7;
+	expected_filename      = L"a\\x2fb.txt";
+	expected_filename_size = 11;
+#endif
+
+	result = libcpath_path_get_sanitized_filename_wide(
+	          test_filename,
+	          test_filename_length,
+	          &sanitized_filename,
+	          &sanitized_filename_size,
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "sanitized_filename",
+	 sanitized_filename );
+
+	CPATH_TEST_ASSERT_EQUAL_SIZE(
+	 "sanitized_filename_size",
+	 sanitized_filename_size,
+	 expected_filename_size );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = wide_string_compare(
 	          sanitized_filename,
 	          expected_filename,
 	          expected_filename_size );
@@ -6247,7 +7928,7 @@ int cpath_test_path_get_sanitized_path_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          sanitized_path,
 	          expected_path,
 	          expected_path_size );
@@ -6302,7 +7983,7 @@ int cpath_test_path_get_sanitized_path_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          sanitized_path,
 	          expected_path,
 	          expected_path_size );
@@ -6543,7 +8224,7 @@ int cpath_test_path_join_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          path,
 	          expected_path,
 	          26 );
@@ -6581,7 +8262,7 @@ int cpath_test_path_join_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          path,
 	          expected_path,
 	          26 );
@@ -6619,7 +8300,7 @@ int cpath_test_path_join_wide(
 	 "error",
 	 error );
 
-	result = narrow_string_compare(
+	result = wide_string_compare(
 	          path,
 	          expected_path,
 	          26 );
@@ -6792,6 +8473,58 @@ int cpath_test_path_join_wide(
 	libcerror_error_free(
 	 &error );
 
+#if defined( HAVE_CPATH_TEST_MEMORY )
+
+	/* Test libcpath_path_join_wide with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_join_wide(
+	          &path,
+	          &path_size,
+	          test_path1,
+	          13,
+	          test_path2,
+	          12,
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+
+		if( path != NULL )
+		{
+			memory_free(
+			 path );
+
+			path = NULL;
+		}
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NULL(
+		 "path",
+		 path );
+
+		CPATH_TEST_ASSERT_EQUAL_SIZE(
+		 "path_size",
+		 path_size,
+		 (size_t) 0 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
+
 	return( 1 );
 
 on_error:
@@ -6860,6 +8593,60 @@ int cpath_test_path_make_directory_wide(
 
 	/* Test regular cases
 	 */
+#if defined( WINAPI ) || defined( HAVE_MKDIR )
+
+	result = libcpath_path_make_directory_wide(
+	          L"cpath_test_dir",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#if !( defined( WINAPI ) && defined( __CYGWIN__ ) )
+
+	result = libcpath_path_change_directory_wide(
+	          L"cpath_test_dir",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libcpath_path_change_directory_wide(
+	          L"..",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	CPATH_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#endif /* !( defined( WINAPI ) && defined( __CYGWIN__ ) ) */
+
+#if defined( WINAPI )
+	RemoveDirectoryW(
+	 L"cpath_test_dir" );
+#else
+	rmdir(
+	 "cpath_test_dir" );
+#endif
+
+#endif /* defined( WINAPI ) || defined( HAVE_MKDIR ) */
 
 	/* Test error cases
 	 */
@@ -6878,6 +8665,77 @@ int cpath_test_path_make_directory_wide(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( WINAPI ) || defined( __MINGW32__ )
+	result = libcpath_path_make_directory_wide(
+	          L"cpath_test_dir\\cpath_test_dir2",
+	          &error );
+#else
+	result = libcpath_path_make_directory_wide(
+	          L"cpath_test_dir/cpath_test_dir2",
+	          &error );
+#endif
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if !defined( WINAPI )
+
+	result = libcpath_path_make_directory_wide(
+	          L"\xd800",
+	          &error );
+
+	CPATH_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	CPATH_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( HAVE_CPATH_TEST_MEMORY )
+	/* Test libcpath_path_make_directory_wide with malloc failing
+	 */
+	cpath_test_malloc_attempts_before_fail = 0;
+
+	result = libcpath_path_make_directory_wide(
+	          L"cpath_test_dir",
+	          &error );
+
+	if( cpath_test_malloc_attempts_before_fail != -1 )
+	{
+		cpath_test_malloc_attempts_before_fail = -1;
+	}
+	else
+	{
+		CPATH_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		CPATH_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_CPATH_TEST_MEMORY ) */
+
+#endif /* !defined( WINAPI ) */
 
 	return( 1 );
 
